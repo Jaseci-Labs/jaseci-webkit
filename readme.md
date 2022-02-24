@@ -76,7 +76,6 @@ The generated navbar might look like this:
 #### Utils
 
 - renderComponentTree
-  The `renderComponentTree` functions accepts an array of `JaseciComponent` and converts it to a string of custom html elements.
+  - The `renderComponentTree` functions accepts an array of `JaseciComponent` and converts it to a string of custom html elements.
 - renderComponent
-  `renderComponent` accepts a single `Jaseci Component` component and generates and converts it to a custom html element
--
+  - `renderComponent` accepts a single `Jaseci Component` component and generates and converts it to a custom html element
