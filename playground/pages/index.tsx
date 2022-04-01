@@ -65,17 +65,17 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
         <script
           type="module"
-          src="http://localhost:3333/build/components.esm.js"
+          src={`${process.env.NEXT_PUBLIC_WEBKIT_URL}/components.esm.js`}
           async
         ></script>
         <script
           noModule
-          src="http://localhost:3333/build/components.js"
+          src={`${process.env.NEXT_PUBLIC_WEBKIT_URL}/components.js`}
           async
         ></script>
         <link
           rel="stylesheet"
-          href="http://localhost:3333/build/components.css"
+          href={`${process.env.NEXT_PUBLIC_WEBKIT_URL}/components.css`}
         />
       </Head>
 
