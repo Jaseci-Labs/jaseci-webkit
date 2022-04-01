@@ -8,8 +8,8 @@ import {
   Title,
 } from "@mantine/core";
 import React, { ChangeEvent, useState } from "react";
-import { jaseciComps } from "../data/jsc-comps";
-import { jaseciEvents } from "../data/jsc-events";
+import { jaseciComps } from "../../data/jsc-comps";
+import { jaseciEvents } from "../../data/jsc-events";
 
 const AddComponentModal = ({ opened, setOpened, onInsertComponent }) => {
   const [component, setComponent] = useState<{
