@@ -1,13 +1,16 @@
 import {
   Button,
   Group,
+  InputWrapper,
   Modal,
   Select,
   Space,
+  Text,
   TextInput,
   Title,
 } from "@mantine/core";
-import React, { ChangeEvent, useState } from "react";
+import { Prism } from "@mantine/prism";
+import React, { ChangeEvent, useCallback, useState } from "react";
 import { jaseciComps } from "../../data/jsc-comps";
 import { jaseciEvents } from "../../data/jsc-events";
 
@@ -22,8 +25,9 @@ const AddComponentModal = ({ opened, setOpened, onInsertComponent }) => {
 
   const setComponentType = (componentType: string) => {
     setComponent((currentComp) => ({
-      ...currentComp,
       component: componentType,
+      events: {},
+      props: {},
     }));
   };
 
@@ -37,6 +41,30 @@ const AddComponentModal = ({ opened, setOpened, onInsertComponent }) => {
     }));
   };
 
+  const onAddEvent = useCallback(() => {
+    if (newEvent.name) {
+      setComponent((currentComponentValue) => {
+        const updatedComp = {
+          ...currentComponentValue,
+          events: {
+            [newEvent.name]: [
+              Array.isArray(currentComponentValue?.events?.[newEvent.name]) && [
+                ...currentComponentValue?.events?.[newEvent.name],
+              ],
+              { ...newEvent.data },
+            ]
+              .flat()
+              .filter((item) => item !== false && item !== true),
+          },
+        };
+
+        return updatedComp;
+      });
+
+      setNewEvent({ name: "", data: {} });
+    }
+  }, [newEvent]);
+
   return (
     <div>
       <Modal
@@ -48,15 +76,25 @@ const AddComponentModal = ({ opened, setOpened, onInsertComponent }) => {
         size="lg"
         radius="md"
       >
-        <Group>
-          {Object.keys(jaseciComps).map((componentType, index) => (
-            <Button onClick={() => setComponentType(componentType)} key={index}>
-              {componentType}
-            </Button>
-          ))}
-        </Group>
+        <InputWrapper label="Choose Component Type">
+          <Group>
+            {Object.keys(jaseciComps).map((componentType) => (
+              <Button
+                variant="outline"
+                onClick={() => setComponentType(componentType)}
+                key={componentType}
+              >
+                {componentType}
+              </Button>
+            ))}
+          </Group>
+        </InputWrapper>
+        <Space h="md"></Space>
+        <Text>Preview:</Text>
+        <Prism language="json" sx={{ maxHeight: "200px", overflow: "auto" }}>
+          {JSON.stringify(component, null, 2)}
+        </Prism>
 
-        {JSON.stringify(component)}
         {JSON.stringify(newEvent)}
 
         {component?.component && (
@@ -93,13 +131,21 @@ const AddComponentModal = ({ opened, setOpened, onInsertComponent }) => {
               ]}
             />
 
-            {jaseciEvents[newEvent.name]?.fields?.map((field, index) => (
-              <>
+            {jaseciEvents[newEvent.name]?.fields?.map((field) => (
+              <div key={field.name}>
                 {field.type === "input" && (
                   <TextInput
                     name={field.name}
                     label={field.label}
-                    key={index}
+                    onChange={(e) => {
+                      setNewEvent((currentNewEventValue) => ({
+                        ...currentNewEventValue,
+                        data: {
+                          ...currentNewEventValue?.data,
+                          [e.target?.name]: e.target?.value,
+                        },
+                      }));
+                    }}
                   ></TextInput>
                 )}
 
@@ -113,21 +159,29 @@ const AddComponentModal = ({ opened, setOpened, onInsertComponent }) => {
                     // getCreateLabel={(query) =>
                     //   `+ Use JavaScript Function '${query}'`
                     // }
-                    key={index}
+                    onChange={(value) => {
+                      setNewEvent((currentNewEventValue) => ({
+                        ...currentNewEventValue,
+                        data: {
+                          ...currentNewEventValue?.data,
+                          [field.name]: value,
+                        },
+                      }));
+                    }}
                   ></Select>
                 )}
-              </>
+              </div>
             ))}
 
             <Space h="md"></Space>
-            <Button variant="outline">Add Event</Button>
+            <Button variant="outline" onClick={onAddEvent}>
+              Add Event
+            </Button>
           </div>
         )}
 
         <Space h="lg"></Space>
-        <Button onClick={() => onInsertComponent(component)} color="indigo">
-          Insert
-        </Button>
+        <Button onClick={() => onInsertComponent(component)}>Insert</Button>
       </Modal>
     </div>
   );

@@ -1,8 +1,9 @@
-import { Button, Group, InputWrapper, Space, Title } from "@mantine/core";
+import { Box, Button, Divider, Grid, Group, Space, Title } from "@mantine/core";
 import Editor from "@monaco-editor/react";
 import "jsoneditor-react/es/editor.min.css";
 import Head from "next/head";
 import { useRef, useState } from "react";
+import { RiAddCircleFill, RiPlayCircleFill, RiToolsFill } from "react-icons/ri";
 import styles from "../styles/Home.module.css";
 import AddComponentModal from "./components/AddComponentModal";
 
@@ -80,38 +81,70 @@ export default function Home() {
       </Head>
 
       <main>
-        <Title order={3}>Editor</Title>
-        <Space h="md"></Space>
+        <Grid sx={{ padding: 10 }}>
+          <Grid.Col span={6}>
+            <Divider></Divider>
+            <Space h="md"></Space>
+            <Group>
+              <Title order={3}>Editor</Title>
+              <Button
+                onClick={formatCode}
+                variant="outline"
+                leftIcon={<RiToolsFill />}
+                size="xs"
+              >
+                Format
+              </Button>
 
-        <Group>
-          <Button onClick={formatCode}>Format</Button>
-        </Group>
-        <InputWrapper label="Enter Code">
-          <Editor
-            height="300px"
-            defaultLanguage="json"
-            theme="vs-dark"
-            options={{ formatOnType: true, formatOnPaste: true }}
-            defaultValue="// some comment"
-            value={value}
-            onChange={setValue}
-            beforeMount={handleEditorWillMount}
-            onMount={handleEditorDidMount}
-          />
-        </InputWrapper>
+              <Button
+                size="xs"
+                leftIcon={<RiAddCircleFill></RiAddCircleFill>}
+                onClick={() => setShowAddComponentModal(true)}
+                variant="outline"
+              >
+                Add Component
+              </Button>
 
-        <Space h="md"></Space>
-        <Group>
-          <Button onClick={runCode}>Run</Button>
-          <Button onClick={() => setShowAddComponentModal(true)}>
-            Add Component
-          </Button>
-        </Group>
-        <Space h="lg"></Space>
+              <Button
+                size="xs"
+                onClick={runCode}
+                leftIcon={<RiPlayCircleFill />}
+              >
+                Run
+              </Button>
+            </Group>
+            <Space h="md"></Space>
+            <Divider></Divider>
+            <Space h="md"></Space>
 
-        <Title order={3}>Preview</Title>
-        <Space h="md"></Space>
-        <jsc-app ref={jscAppRef}></jsc-app>
+            <Editor
+              height="400px"
+              defaultLanguage="json"
+              theme="vs-dark"
+              options={{ formatOnType: true, formatOnPaste: true }}
+              defaultValue=""
+              value={value}
+              onChange={setValue}
+              beforeMount={handleEditorWillMount}
+              onMount={handleEditorDidMount}
+            />
+          </Grid.Col>
+
+          <Grid.Col span={6}>
+            <div>
+              <Divider></Divider>
+              <Space h="md"></Space>
+              <Title order={3}>Preview</Title>
+              <Space h="md"></Space>
+              <Divider></Divider>
+              <Space h="md"></Space>
+
+              <Box sx={{ background: "#fff", minHeight: "400px" }}>
+                <jsc-app ref={jscAppRef}></jsc-app>
+              </Box>
+            </div>
+          </Grid.Col>
+        </Grid>
       </main>
       <AddComponentModal
         opened={showAddComponentModal}

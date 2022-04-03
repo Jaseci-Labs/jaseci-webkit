@@ -5,23 +5,24 @@ const actions = [
   { value: "append", label: "Append" },
 ];
 
+const basicEventFields = [
+  {
+    type: "select",
+    name: "fn",
+    label: "Action",
+    data: [...actions],
+    createable: true,
+  },
+];
+
 export const jaseciEvents = {
   onEnter: {
-    fields: [],
+    fields: [...basicEventFields],
   },
   onKeyPress: {
-    fields: [
-      { type: "input", name: "key", label: "Key" },
-      {
-        type: "select",
-        name: "fn",
-        label: "Action",
-        data: [...actions],
-        createable: true,
-      },
-    ],
+    fields: [{ type: "input", name: "key", label: "Key" }, ...basicEventFields],
   },
   onClick: {
-    fields: [],
+    fields: [...basicEventFields],
   },
 };
