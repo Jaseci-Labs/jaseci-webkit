@@ -1,5 +1,9 @@
-const actions = [
-  { value: "alert", label: "Alert" },
+export const actions = [
+  {
+    value: "alert",
+    label: "Alert",
+    args: [{ type: "input", label: "Message", name: "message" }],
+  },
   { value: "update", label: "Update" },
   { value: "add", label: "Add" },
   { value: "append", label: "Append" },

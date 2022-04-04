@@ -2,7 +2,7 @@ import { Box, Button, Divider, Grid, Group, Space, Title } from "@mantine/core";
 import Editor from "@monaco-editor/react";
 import "jsoneditor-react/es/editor.min.css";
 import Head from "next/head";
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { RiAddCircleFill, RiPlayCircleFill, RiToolsFill } from "react-icons/ri";
 import styles from "../styles/Home.module.css";
 import AddComponentModal from "./components/AddComponentModal";
@@ -11,6 +11,7 @@ export default function Home() {
   const jscAppRef = useRef<any>();
   const [value, setValue] = useState("");
   const [showAddComponentModal, setShowAddComponentModal] = useState(false);
+  const runButtonRef = useRef<HTMLButtonElement>(null);
 
   const monacoRef = useRef(null);
 
@@ -23,12 +24,25 @@ export default function Home() {
   function handleEditorDidMount(editor, monaco) {
     // here is another way to get monaco instance
     // you can also store it in `useRef` for further usage
+    editor.addAction({
+      id: "run-code",
+      label: "Run Code",
+      precondition: null,
+      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyR],
+      keybindingContext: null,
+      run: function () {
+        runButtonRef?.current?.click();
+      },
+    });
+
     monacoRef.current = editor;
   }
 
-  const runCode = () => {
-    jscAppRef?.current?.setMarkup(JSON.parse(value));
-  };
+  const runCode = useCallback(() => {
+    if (value && jscAppRef?.current) {
+      jscAppRef?.current?.setMarkup(JSON.parse(value));
+    }
+  }, [jscAppRef, value]);
 
   const formatCode = () => {
     if (monacoRef?.current) {
@@ -109,6 +123,7 @@ export default function Home() {
                 size="xs"
                 onClick={runCode}
                 leftIcon={<RiPlayCircleFill />}
+                ref={runButtonRef}
               >
                 Run
               </Button>

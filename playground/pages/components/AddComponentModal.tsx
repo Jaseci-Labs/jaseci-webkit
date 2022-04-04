@@ -12,7 +12,7 @@ import {
 import { Prism } from "@mantine/prism";
 import React, { ChangeEvent, useCallback, useState } from "react";
 import { jaseciComps } from "../../data/jsc-comps";
-import { jaseciEvents } from "../../data/jsc-events";
+import { actions, jaseciEvents } from "../../data/jsc-events";
 
 const AddComponentModal = ({ opened, setOpened, onInsertComponent }) => {
   const [component, setComponent] = useState<{
@@ -21,7 +21,7 @@ const AddComponentModal = ({ opened, setOpened, onInsertComponent }) => {
     events: {};
   }>({ component: "", props: {}, events: {} });
 
-  const [newEvent, setNewEvent] = useState({ name: "", data: {} });
+  const [newEvent, setNewEvent] = useState({ name: "", data: {}, args: [] });
 
   const setComponentType = (componentType: string) => {
     setComponent((currentComp) => ({
@@ -64,6 +64,19 @@ const AddComponentModal = ({ opened, setOpened, onInsertComponent }) => {
       setNewEvent({ name: "", data: {} });
     }
   }, [newEvent]);
+
+  const setNewEventArgs = (index: number, value: number | string) => {
+    setNewEvent((currentNewEventValue) => {
+      const args = [...currentNewEventValue?.args];
+      args[index] = value;
+
+      return {
+        ...currentNewEventValue,
+        data: { ...currentNewEventValue.data, args },
+        args,
+      };
+    });
+  };
 
   return (
     <div>
@@ -138,6 +151,7 @@ const AddComponentModal = ({ opened, setOpened, onInsertComponent }) => {
                     name={field.name}
                     label={field.label}
                     onChange={(e) => {
+                      alert(e?.target?.value);
                       setNewEvent((currentNewEventValue) => ({
                         ...currentNewEventValue,
                         data: {
@@ -172,6 +186,25 @@ const AddComponentModal = ({ opened, setOpened, onInsertComponent }) => {
                 )}
               </div>
             ))}
+
+            {newEvent?.data?.["fn"] && (
+              <>
+                {actions
+                  .filter((action) => action.value === newEvent?.data?.["fn"])
+                  .pop()
+                  .args?.map((arg, index) => (
+                    <div key={arg.name}>
+                      <TextInput
+                        label={arg.label}
+                        onChange={(e) =>
+                          setNewEventArgs(index, e.target?.value)
+                        }
+                        name={arg.name}
+                      ></TextInput>
+                    </div>
+                  ))}
+              </>
+            )}
 
             <Space h="md"></Space>
             <Button variant="outline" onClick={onAddEvent}>
