@@ -61,7 +61,7 @@ const AddComponentModal = ({ opened, setOpened, onInsertComponent }) => {
         return updatedComp;
       });
 
-      setNewEvent({ name: "", data: {} });
+      setNewEvent({ name: "", data: {}, args: [] });
     }
   }, [newEvent]);
 
