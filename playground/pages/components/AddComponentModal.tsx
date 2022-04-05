@@ -10,7 +10,7 @@ import {
   Title,
 } from "@mantine/core";
 import { Prism } from "@mantine/prism";
-import React, { ChangeEvent, useCallback, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { jaseciComps } from "../../data/jsc-comps";
 import { actions, jaseciEvents } from "../../data/jsc-events";
 
@@ -31,12 +31,12 @@ const AddComponentModal = ({ opened, setOpened, onInsertComponent }) => {
     }));
   };
 
-  const setProperty = (e: ChangeEvent<HTMLInputElement>) => {
+  const setProperty = (name: string, value: string) => {
     setComponent((currentComp) => ({
       ...currentComp,
       props: {
         ...currentComp?.props,
-        [e.target?.name]: e?.target?.value,
+        [name]: value,
       },
     }));
   };
@@ -115,12 +115,30 @@ const AddComponentModal = ({ opened, setOpened, onInsertComponent }) => {
             <Title order={3}>Properties</Title>
             {jaseciComps[component?.component].props?.map(
               (prop: any, index: number) => (
-                <TextInput
-                  key={index}
-                  name={prop.name}
-                  label={prop.label}
-                  onChange={setProperty}
-                ></TextInput>
+                <div key={prop.name}>
+                  {prop.type === "input" && (
+                    <>
+                      <TextInput
+                        key={index}
+                        name={prop.name}
+                        label={prop.label}
+                        onChange={(e) => setProperty(prop.name, e.target.value)}
+                      ></TextInput>
+                    </>
+                  )}
+
+                  {prop.type === "select" && (
+                    <>
+                      <Select
+                        name={prop.name}
+                        label={prop.label}
+                        data={prop.data}
+                        searchable
+                        onChange={(value) => setProperty(prop.name, value)}
+                      ></Select>
+                    </>
+                  )}
+                </div>
               )
             )}
 

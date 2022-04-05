@@ -1,0 +1,125 @@
+[
+    {
+        "component": "Container",
+        "props": {
+            "name": "mainContainer"
+        },
+        "slots": {
+            "children": [
+                {
+                    "name": "headerContainer",
+                    "component": "Container",
+                    "css": {
+                        "height": "60px",
+                        "background": "#30A46C",
+                        "padding": "0 20px"
+                    },
+                    "slots": {
+                        "children": [
+                            {
+                                "component": "Text",
+                                "props": {
+                                    "value": "Chatbot Example"
+                                },
+                                "css": {
+                                    "color": "#E9F9EE",
+                                    "fontWeight": "bold",
+                                    "fontSize": "1.05rem"
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "component": "Container",
+                    "name": "msgs",
+                    "css": {
+                        "background": "#DDF3E4",
+                        "height": "250px",
+                        "padding": "20px"
+                    }
+                },
+                {
+                    "component": "Row",
+                    "name": "footerContainer",
+                    "css": {
+                        "height": "60px",
+                        "background": "#30A46C",
+                        "padding": "0 20px",
+                        "gap": "10px"
+                    },
+                    "props": {
+                        "items": "center"
+                    },
+                    "slots": {
+                        "children": [
+                            {
+                                "component": "Inputbox",
+                                "name": "messageInputbox",
+                                "props": {
+                                    "placeholder": "Enter your message...",
+                                    "fullwidth": "true"
+                                },
+                                "css": {
+                                    "background": "#CCEBD6",
+                                    "color": "#18794E"
+                                },
+                                "events": {
+                                    "onEnter": [
+                                        {
+                                            "fn": "append",
+                                            "args": [
+                                                "msgs",
+                                                {
+                                                    "component": "Container",
+                                                    "slots": {
+                                                        "children": [
+                                                            {
+                                                                "component": "Container",
+                                                                "css": {
+                                                                    "background": "#30A46C",
+                                                                    "color": "#E9F9EE",
+                                                                    "padding": "0 10px",
+                                                                    "borderRadius": "5px",
+                                                                    "display": "inline-block"
+                                                                },
+                                                                "slots": {
+                                                                    "children": [
+                                                                        {
+                                                                            "component": "Text",
+                                                                            "props": {
+                                                                                "value": "var(messageInputbox.value)"
+                                                                            }
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            }
+                                                        ]
+                                                    }
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "fn": "update",
+                                            "args": [
+                                                "messageInputbox.value",
+                                                ""
+                                            ]
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "component": "Button",
+                                "props": {
+                                    "label": "Send"
+                                },
+                                "events": {}
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    }
+]

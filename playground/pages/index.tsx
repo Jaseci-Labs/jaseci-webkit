@@ -3,14 +3,21 @@ import Editor from "@monaco-editor/react";
 import "jsoneditor-react/es/editor.min.css";
 import Head from "next/head";
 import { useCallback, useRef, useState } from "react";
-import { RiAddCircleFill, RiPlayCircleFill, RiToolsFill } from "react-icons/ri";
+import {
+  RiAddCircleFill,
+  RiEyeFill,
+  RiPlayCircleFill,
+  RiToolsFill,
+} from "react-icons/ri";
 import styles from "../styles/Home.module.css";
 import AddComponentModal from "./components/AddComponentModal";
+import ExamplesModal from "./components/ExamplesModal";
 
 export default function Home() {
   const jscAppRef = useRef<any>();
   const [value, setValue] = useState("");
   const [showAddComponentModal, setShowAddComponentModal] = useState(false);
+  const [showExamplesModal, setShowExamplesModal] = useState(false);
   const runButtonRef = useRef<HTMLButtonElement>(null);
 
   const monacoRef = useRef(null);
@@ -48,6 +55,12 @@ export default function Home() {
     if (monacoRef?.current) {
       monacoRef?.current.getAction("editor.action.formatDocument").run();
     }
+  };
+
+  const onRunExample = (exampleJSON) => {
+    setValue(JSON.stringify(exampleJSON));
+    formatCode();
+    runCode();
   };
 
   const onInsertComponent = (component: any) => {
@@ -121,6 +134,15 @@ export default function Home() {
 
               <Button
                 size="xs"
+                leftIcon={<RiEyeFill></RiEyeFill>}
+                onClick={() => setShowExamplesModal(true)}
+                variant="outline"
+              >
+                Examples
+              </Button>
+
+              <Button
+                size="xs"
                 onClick={runCode}
                 leftIcon={<RiPlayCircleFill />}
                 ref={runButtonRef}
@@ -154,7 +176,7 @@ export default function Home() {
               <Divider></Divider>
               <Space h="md"></Space>
 
-              <Box sx={{ background: "#fff", minHeight: "400px" }}>
+              <Box sx={{ minHeight: "400px" }}>
                 <jsc-app ref={jscAppRef}></jsc-app>
               </Box>
             </div>
@@ -166,6 +188,11 @@ export default function Home() {
         setOpened={setShowAddComponentModal}
         onInsertComponent={onInsertComponent}
       ></AddComponentModal>
+      <ExamplesModal
+        opened={showExamplesModal}
+        setOpened={setShowExamplesModal}
+        onRunExample={onRunExample}
+      ></ExamplesModal>
     </div>
   );
 }
