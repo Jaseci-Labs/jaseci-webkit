@@ -30,9 +30,9 @@ In the code above we asked for a Navbar component with a single link element, we
 
 Names are unique values we attach to a component that will allow us to reference it in the future to get the value of its properties.
 
-### Slots
+### Sections
 
-Slots allow us to place components within another component. It also allows us to place components at specific locations within another component. In our example above, with the navbar component, links is a slot specific to the navbar component that allows us to add _Link_ components within the navbar. Some components have slots and some do not, so be sure to review the slots for each component to know when and where you can place components within another.
+Sections allow us to place components within another component. It also allows us to place components at specific locations within another component. In our example above, with the navbar component, links is a slot specific to the navbar component that allows us to add _Link_ components within the navbar. Some components have sections and some do not, so be sure to review the sections for each component to know when and where you can place components within another.
 
 ### Events
 
