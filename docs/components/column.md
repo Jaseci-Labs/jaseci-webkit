@@ -14,7 +14,7 @@ A `Column` is a layout component that allows you to align `children` components 
 {
 	"component": "Column",
 	"events": {},
-	"slots": {
+	"sections": {
 		"children": []
 	},
 	"props": {
@@ -26,7 +26,7 @@ A `Column` is a layout component that allows you to align `children` components 
 
 The above will align the children elements in a column that's aligned to the right of the x-axis and center-aligned on the y-axis.
 
-#### Slots
+#### Sections
 
 - children
 

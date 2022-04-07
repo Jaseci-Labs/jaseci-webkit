@@ -2,13 +2,13 @@
 
 Each component in jaseci webkit is rendered within a `jsc-app`. After setting up your code, and assuming your `jsc-app` component is placed somewhere in your html tree, the next step is to create the markup. We won't be using HTML to create the structure of our webpage, however, in this case, we will use our `jsc-app` component to generate the markup using JSON.
 
-Creating a component is simple: at the bare minimum we need to create an object with a _component_, _props_, and _slots_ properties. Here's an example of how we can render a Navbar component.
+Creating a component is simple: at the bare minimum we need to create an object with a _component_, _props_, and _sections_ properties. Here's an example of how we can render a Navbar component.
 
 ```JSON
 	[
 		{
 			"component": "Navbar",
-			"slots": {
+			"sections": {
 				"links": [
 					{
 						"component": 'NavLink',
@@ -24,7 +24,7 @@ Creating a component is simple: at the bare minimum we need to create an object 
 	]
 ```
 
-In the code above we asked for a Navbar component with a single link element, we set the label of our navbar to 'Jaseci' and the background to 'red'. We also asked for a link within the navbar and for it to be rendered withing the _links_ slots.
+In the code above we asked for a Navbar component with a single link element, we set the label of our navbar to 'Jaseci' and the background to 'red'. We also asked for a link within the navbar and for it to be rendered within the _links_ section.
 
 ### Names
 
@@ -32,7 +32,7 @@ Names are unique values we attach to a component that will allow us to reference
 
 ### Sections
 
-Sections allow us to place components within another component. It also allows us to place components at specific locations within another component. In our example above, with the navbar component, links is a slot specific to the navbar component that allows us to add _Link_ components within the navbar. Some components have sections and some do not, so be sure to review the sections for each component to know when and where you can place components within another.
+Sections allow us to place components within another component. It also allows us to place components at specific locations within another component. In our example above, with the navbar component, links is a section specific to the navbar component that allows us to add _Link_ components within the navbar. Some components have sections and some do not, so be sure to review the available sections for each component to know when and where you can place components within another.
 
 ### Events
 
@@ -47,7 +47,7 @@ Taking the code from our example above, let's modify it, we'll start by adding a
 		{
 			"name": "nav",
 			"component": "Navbar",
-			"slots": {
+			"sections": {
 				"links": [
 					{
 						"component": 'NavLink',
@@ -163,6 +163,60 @@ Also consider the following code.
 
 In the first code above, we ask for an alert dialog to display after the `update` action is finished. But what about the second code, doesn't it work the same? In this case, yes, but also no. Taking a closer lock at the `update` action of the first code, it has a `cond`, this condition will also prevent the `onCompleted` action from running if the `update` function did not run. The second code will give us an alert dialog even if the update function did not run.
 
+### Operations
+
+Operations are "custom actions" that we can create that will allow us to reuse a particular sequence of actions across components. Each operation has a name and can optionally accept a number of arguments.
+
+Take a look at the following example:
+
+```JSON
+[
+    {
+        "component": "Container",
+        "name": "container1",
+        "operations": {
+            "sayHi": {
+                "args": [
+                    "message"
+                ],
+                "run": [
+                    {
+                        "fn": "alert",
+                        "args": [
+                            "arg(message) cool!"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "component": "Button",
+        "events": {
+            "onClick": [
+                {
+                    "fn": "runOperation",
+                    "operation": "container1.sayHi",
+                    "args": [
+                        "Hello world!"
+                    ]
+                }
+            ]
+        },
+        "props": {
+            "name": "btn1",
+            "label": "Say Hello"
+        }
+    }
+]
+```
+
+In the example above, we defined an operation within the `container1` component then we called this operation in the `btn1` component. Each operation is called using the `callOperation` action. The `callOperation` action requires the `operation` property to be defined with a valid operation as its value. An operation is referenced using the format `[Component Name].[Operation Name]` which translates to `container1.sayHi` in this case.
+
+#### Operation Args
+
+When defining an operation we can set the `args` property to a list of strings. This can be used to accept args to your operation. Each arg can be used in the actions within an operation and will be replaced by the values passed in the args of the `callOperation` action. In the example above, `arg(message)` is replaced with 'Hello world!' and the message alerted is 'Hello world! cool'.
+
 ### Property References
 
 Property references allow us to get the value of the property of a component. This allows us to move across components. For example, let's say you have an `Inputbox` component and you want to `alert` the value of the input box whenever the user presses the `Enter` button. How would we do that? Let's explore.
@@ -174,7 +228,7 @@ Let's start by taking a look at the following code:
 		{
 			"name": "inputbox1",
 			"component": "Inputbox",
-			"slots": []
+			"sections": []
 			"events": {
 				"onEnter": [
 					{

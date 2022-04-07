@@ -14,7 +14,7 @@ A `Row` is a layout component that allows you to align `children` components hor
 {
 	"component": "Row",
 	"events": {},
-	"slots": {
+	"sections": {
 		"children": []
 	},
 	"props": {
@@ -26,7 +26,7 @@ A `Row` is a layout component that allows you to align `children` components hor
 
 The above will align the children elements in a row that's center-aligned on the x-axis and aligned at the top of the y-axis.
 
-#### Slots
+#### Sections
 
 - children
 

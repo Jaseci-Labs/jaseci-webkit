@@ -32,7 +32,7 @@ Here's an example of how we can render a Navbar component:
 [
   {
     "component":"Navbar",
-    "slots":{
+    "sections":{
       "links":[
         {
           "component":"NavLink",
@@ -67,7 +67,7 @@ The above code will generate the following markup.
 ```
 
 - `component` is used to determine which html element to generate.
-- `slots` are array of components to be rendered as a child of `component`, each slot has a name to determine where it will be rendered
+- `sections` are array of components to be rendered as a child of `component`, each slot has a name to determine where it will be rendered
 - `props` are attributes that will be attached to the generated element
 
 The generated navbar might look like this:

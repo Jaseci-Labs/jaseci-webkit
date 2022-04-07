@@ -1,7 +1,7 @@
 [
     {
         "component": "Container",
-        "slots": {
+        "sections": {
             "children": [
                 {
                     "component": "Text",
@@ -16,7 +16,7 @@
                 },
                 {
                     "component": "Row",
-                    "slots": {
+                    "sections": {
                         "children": [
                             {
                                 "component": "Text",

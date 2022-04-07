@@ -2,6 +2,7 @@ import { Button, Divider, Group, Modal, Space, Title } from "@mantine/core";
 import React from "react";
 import chatbox from "../../examples/chatbox.json";
 import counter from "../../examples/counter.json";
+import operationsBasic from "../../examples/operations-basic.json";
 
 const ExamplesModal = ({ opened, setOpened, onRunExample }) => {
   return (
@@ -33,6 +34,19 @@ const ExamplesModal = ({ opened, setOpened, onRunExample }) => {
         <Group>
           <Title order={5}>Counter Example</Title>
           <Button size="xs" onClick={() => onRunExample(counter)}>
+            Play Example
+          </Button>
+        </Group>
+        <Space h="md"></Space>
+        <Divider></Divider>
+
+        <Space h="xl"></Space>
+
+        <Divider></Divider>
+        <Space h="md"></Space>
+        <Group>
+          <Title order={5}>Operations Example</Title>
+          <Button size="xs" onClick={() => onRunExample(operationsBasic)}>
             Play Example
           </Button>
         </Group>

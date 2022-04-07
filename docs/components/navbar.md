@@ -19,7 +19,7 @@ A `Navbar` component will render a horizontal navigation header component ; a`js
 
 The above will create a Navbar component with a label of 'Jaseci'.
 
-#### Slots
+#### Sections
 
 - links - a list of elements to render on the right side of the navbar
 
