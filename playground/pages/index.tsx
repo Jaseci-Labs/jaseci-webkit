@@ -35,7 +35,9 @@ export default function Home() {
       id: "run-code",
       label: "Run Code",
       precondition: null,
-      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyR],
+      keybindings: [
+        monaco.KeyMod.Shift | monaco.KeyMod.Alt | monaco.KeyCode.KeyR,
+      ],
       keybindingContext: null,
       run: function () {
         runButtonRef?.current?.click();
