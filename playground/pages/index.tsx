@@ -76,13 +76,18 @@ export default function Home() {
       setValue((value) => value + ",");
     }
 
-    setValue((value) => {
-      let newValue = "\n" + value + JSON.stringify(component) + "\n]";
-
-      return newValue;
+    monacoRef.current.trigger("keyboard", "type", {
+      text: JSON.stringify(component) + "\n",
     });
 
+    // setValue((value) => {
+    //   let newValue = "\n" + value + JSON.stringify(component) + "\n]";
+
+    //   return newValue;
+    // });
+
     formatCode();
+    setShowAddComponentModal(false);
   };
 
   return (
