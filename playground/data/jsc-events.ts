@@ -20,7 +20,7 @@ const basicEventFields = [
 ];
 
 export const jaseciEvents = {
-  onEnter: {
+  onEnterKeyPress: {
     fields: [...basicEventFields],
   },
   onKeyPress: {

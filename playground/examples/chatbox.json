@@ -40,7 +40,9 @@
                     },
                     "operations": {
                         "sendMessage": {
-                            "args": [],
+                            "args": [
+                                "message"
+                            ],
                             "run": [
                                 {
                                     "cond": [
@@ -68,7 +70,7 @@
                                                                 {
                                                                     "component": "Text",
                                                                     "props": {
-                                                                        "value": "var(messageInputbox.value)"
+                                                                        "value": "arg(message)"
                                                                     }
                                                                 }
                                                             ]
@@ -116,11 +118,13 @@
                                     "color": "#687076"
                                 },
                                 "events": {
-                                    "onEnter": [
+                                    "onEnterKeyPress": [
                                         {
                                             "fn": "runOperation",
                                             "operation": "msgs.sendMessage",
-                                            "args": []
+                                            "args": [
+                                                "var(messageInputbox.value)"
+                                            ]
                                         }
                                     ]
                                 }
@@ -135,7 +139,9 @@
                                         {
                                             "fn": "runOperation",
                                             "operation": "msgs.sendMessage",
-                                            "args": []
+                                            "args": [
+                                                "var(messageInputbox.value)"
+                                            ]
                                         }
                                     ]
                                 }
