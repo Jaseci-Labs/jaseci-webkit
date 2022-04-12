@@ -25,4 +25,4 @@ The above will create a Navbar component with a label of 'Jaseci'.
 
 #### Props
 
-- label
+- label - adds a text logo to the nav

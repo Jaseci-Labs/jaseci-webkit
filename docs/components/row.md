@@ -32,5 +32,7 @@ The above will align the children elements in a row that's center-aligned on the
 
 #### Props
 
-- justify
-- items
+- justify - positions children along the x-axis
+  - Acceptable values are `start` | `end` | `center` | `around` | `evenly`
+- items - positions children along the y-axis
+  - Acceptable values = `start` | `end` | `center`

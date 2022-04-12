@@ -3,9 +3,11 @@ title: Jaseci Inputbox
 ---
 
 #### Summary
+
 An `Inputbox` component will render a container, `jsc-inputbox`, that will a render an `input` element within it's DOM.
 
 <u>Example:</u>
+
 ```JSON
 {
 	"component": "Inputbox",
@@ -24,6 +26,7 @@ An `Inputbox` component will render a container, `jsc-inputbox`, that will a ren
 The code above will render an input with a placeholder of "Enter your name", it will span the full width of its parent and have its value set to 'Jaseci'.
 
 #### Props
-- placeholder
-- fullwidth
-- value
+
+- placeholder - sets the input placeholder
+- fullwidth - will make the input take up 100% of its parent container.
+- value - sets the value of the input

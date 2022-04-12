@@ -13,11 +13,12 @@ A `Text` component is a that renders elements in various typographic-styles.
 {
 	"component": "Text",
 	"props": {
-		"variant": "heading-1"
+		"variant": "simple"
 	}
 }
 ```
 
 #### Props
 
-- variant
+- variant - sets the text style
+  - Acceptable values are - `simple` | `title`
