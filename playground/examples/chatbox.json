@@ -45,6 +45,16 @@
                             ],
                             "run": [
                                 {
+                                    "fn": "callEndpoint",
+                                    "endpoint": "http://localhost:3334/message",
+                                    "args": [
+                                        "POST",
+                                        {
+                                            "message": "arg(message)"
+                                        }
+                                    ]
+                                },
+                                {
                                     "cond": [
                                         "var(messageInputbox.value)::#gt::1"
                                     ],
@@ -86,6 +96,50 @@
                                     "args": [
                                         "messageInputbox.value",
                                         ""
+                                    ]
+                                }
+                            ]
+                        },
+                        "sendResponse": {
+                            "args": [
+                                "response"
+                            ],
+                            "run": [
+                                {
+                                    "fn": "append",
+                                    "args": [
+                                        "msgs",
+                                        {
+                                            "component": "Row",
+                                            "props": {
+                                                "justify": "end"
+                                            },
+                                            "sections": {
+                                                "children": [
+                                                    {
+                                                        "component": "Container",
+                                                        "css": {
+                                                            "background": "#0081F1",
+                                                            "color": "#F1F3F5",
+                                                            "padding": "0px 8px",
+                                                            "borderRadius": "5px",
+                                                            "fontSize": "0.8rem",
+                                                            "display": "inline-block"
+                                                        },
+                                                        "sections": {
+                                                            "children": [
+                                                                {
+                                                                    "component": "Text",
+                                                                    "props": {
+                                                                        "value": "You sent: arg(response). There's no valid response as yet for this query."
+                                                                    }
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
+                                                ]
+                                            }
+                                        }
                                     ]
                                 }
                             ]
