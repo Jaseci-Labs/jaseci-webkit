@@ -44,18 +44,23 @@ const AddComponentModal = ({ opened, setOpened, onInsertComponent }) => {
   const onAddEvent = useCallback(() => {
     if (newEvent.name) {
       setComponent((currentComponentValue) => {
+        let events = currentComponentValue?.events ? {...currentComponentValue.events} : {};
+
+        events = {
+          ...events,
+          [newEvent.name]: [
+            Array.isArray(currentComponentValue?.events?.[newEvent.name]) && [
+              ...currentComponentValue?.events?.[newEvent.name],
+            ],
+            { ...newEvent.data },
+          ]
+            .flat()
+            .filter((item) => Object.keys(item).length > 0)
+        }
+
         const updatedComp = {
           ...currentComponentValue,
-          events: {
-            [newEvent.name]: [
-              Array.isArray(currentComponentValue?.events?.[newEvent.name]) && [
-                ...currentComponentValue?.events?.[newEvent.name],
-              ],
-              { ...newEvent.data },
-            ]
-              .flat()
-              .filter((item) => item !== false && item !== true),
-          },
+          events
         };
 
         return updatedComp;
