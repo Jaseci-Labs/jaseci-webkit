@@ -1,0 +1,39 @@
+[
+    {
+        "component": "Container",
+        "name": "container1",
+        "operations": {
+            "sayHi": {
+                "args": [
+                    "message"
+                ],
+                "run": [
+                    {
+                        "fn": "alert",
+                        "args": [
+                            "arg(message) cool!"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    {
+        "component": "Button",
+        "events": {
+            "onClick": [
+                {
+                    "fn": "runOperation",
+                    "operation": "container1.sayHi",
+                    "args": [
+                        "Hello world!"
+                    ]
+                }
+            ]
+        },
+        "props": {
+            "name": "btn1",
+            "label": "Say Hello"
+        }
+    }
+]

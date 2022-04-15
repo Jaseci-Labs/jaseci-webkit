@@ -1,0 +1,71 @@
+[
+    {
+        "component": "Container",
+        "sections": {
+            "children": [
+                {
+                    "component": "Text",
+                    "props": {
+                        "value": "Counter"
+                    },
+                    "css": {
+                        "fontWeight": "bold",
+                        "fontSize": "1.2em",
+                        "textDecoration": "underline"
+                    }
+                },
+                {
+                    "component": "Row",
+                    "sections": {
+                        "children": [
+                            {
+                                "component": "Text",
+                                "props": {
+                                    "value": "Current value: "
+                                },
+                                "css": {
+                                    "marginRight": "5px"
+                                }
+                            },
+                            {
+                                "name": "counterText",
+                                "component": "Text",
+                                "props": {
+                                    "value": "0"
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "counterButton",
+                    "component": "Button",
+                    "props": {
+                        "label": "Count"
+                    },
+                    "events": {
+                        "onClick": [
+                            {
+                                "fn": "add",
+                                "args": [
+                                    "var(counterText.value)",
+                                    1
+                                ],
+                                "cond": [
+                                    "var(counterText.value)::#neq::10"
+                                ],
+                                "onCompleted": {
+                                    "fn": "update",
+                                    "args": [
+                                        "counterText.value",
+                                        "var(result)"
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    }
+]
