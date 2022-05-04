@@ -1,0 +1,70 @@
+import { Button, Group, Modal, Stack, TextInput } from "@mantine/core";
+import React from "react";
+import type { ActionFunction, LoaderFunction } from "remix";
+import { Form, json, redirect, useLoaderData, useNavigate } from "remix";
+import invariant from "tiny-invariant";
+import { getProjectById, updateProject } from "~/models/project.server";
+import { requireUserId } from "~/session.server";
+
+const EditProjectPage = () => {
+  const loaderData = useLoaderData<LoaderData>();
+  const navigate = useNavigate();
+
+  return (
+    <Modal
+      opened
+      onClose={() => {
+        navigate("..");
+      }}
+      title="Edit Project"
+    >
+      <Form method="post">
+        <Stack>
+          <TextInput
+            name="title"
+            label="Name"
+            defaultValue={loaderData.project?.title || ""}
+          ></TextInput>
+
+          <Group position="right">
+            <Button type="submit">Save</Button>
+          </Group>
+        </Stack>
+      </Form>
+    </Modal>
+  );
+};
+
+export const action: ActionFunction = async ({ request, params }) => {
+  const { projectId } = params;
+  if (!projectId) throw redirect("/projects");
+  const userId = await requireUserId(request);
+  const formData = await request.formData();
+
+  const title = (formData.get("title") as string) || undefined;
+  const published = (formData.get("published") as string) || undefined;
+
+  console.log({ published });
+
+  await updateProject({
+    projectId,
+    userId,
+    input: { title, published: published === "true" },
+  });
+
+  return redirect("/projects");
+};
+
+type LoaderData = {
+  project: Awaited<ReturnType<typeof getProjectById>>;
+};
+
+export const loader: LoaderFunction = async ({ request, params }) => {
+  const { projectId } = params;
+  invariant(typeof projectId === "string", "projectId must be a string");
+  const project = await getProjectById({ projectId });
+
+  return json<LoaderData>({ project });
+};
+
+export default EditProjectPage;

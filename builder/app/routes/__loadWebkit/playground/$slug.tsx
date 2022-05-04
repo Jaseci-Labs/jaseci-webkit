@@ -1,12 +1,22 @@
 import { Box, Button, Grid, Text, Title } from "@mantine/core";
 import type { Monaco } from "@monaco-editor/react";
 import Editor from "@monaco-editor/react";
-import { useCallback, useRef, useState } from "react";
-import type { ActionFunction, LinksFunction, LoaderFunction } from "remix";
-import { Form, json, useLoaderData } from "remix";
+import { parse } from "comment-json";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { ActionFunction, LoaderFunction } from "remix";
+import {
+  Form,
+  json,
+  Link,
+  useLoaderData,
+  useParams,
+  useSubmit,
+  useTransition,
+} from "remix";
 import {
   Braces,
   DeviceFloppy,
+  ExternalLink,
   Eye,
   EyeOff,
   InfoSquare,
@@ -16,14 +26,9 @@ import {
 import AddComponentModal from "~/components/playground/AddComponentModal";
 import ExamplesModal from "~/components/playground/ExamplesModal";
 import { PlaygroundHeader } from "~/components/PlaygroundHeader";
+import { schemas } from "~/data/schema";
 import { getProject, saveProject } from "~/models/project.server";
 import { requireUserId } from "~/session.server";
-
-export const links: LinksFunction = () => {
-  return [
-    { href: "http://localhost:3333/build/components.css", rel: "stylesheet" },
-  ];
-};
 
 export const loader: LoaderFunction = async ({ params }) => {
   const project = await getProject({ slug: params.slug as string });
@@ -33,11 +38,11 @@ export const loader: LoaderFunction = async ({ params }) => {
 
 export const action: ActionFunction = async ({ request, params }) => {
   const formData = await request.formData();
-  const intent = formData.get("intent");
+  const action = formData.get("_action");
   const content = formData.get("content");
   const slug = params.slug;
 
-  if (intent === "saveProject" && slug) {
+  if (action === "saveProject" && slug) {
     const userId = await requireUserId(request);
     const project = await saveProject({
       content: content as any,
@@ -51,8 +56,11 @@ export const action: ActionFunction = async ({ request, params }) => {
 };
 
 export default function Playground() {
+  const transition = useTransition();
+  const submit = useSubmit();
   const loaderData = useLoaderData();
   const jscAppRef = useRef<any>();
+  const saveProjectFormRef = useRef<HTMLFormElement>(null);
   const [value, setValue] = useState(
     loaderData?.project?.content ? loaderData?.project?.content : ""
   );
@@ -62,6 +70,7 @@ export default function Playground() {
   const [showPreviewText, setShowPreviewText] = useState(true);
 
   const runButtonRef = useRef<HTMLButtonElement>(null);
+  const params = useParams();
 
   const monacoRef = useRef<any>(null);
 
@@ -69,6 +78,17 @@ export default function Playground() {
     // here is the monaco instance
     // do something before editor is mounted
     monaco.languages.typescript.javascriptDefaults.setEagerModelSync(true);
+
+    // var modelUri = monaco.Uri.parse("a://b/foo.json"); // a made up unique URI for our model
+    // var model = monaco.editor.createModel("[]", "json", modelUri);
+
+    monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+      allowComments: true,
+      validate: true,
+      schemas,
+    });
+
+    // monaco.editor.setModelLanguage(model);
   }
 
   function handleEditorDidMount(editor: any, monaco: Monaco) {
@@ -90,9 +110,22 @@ export default function Playground() {
     monacoRef.current = editor;
   }
 
+  const saveProject = useCallback(() => {
+    const formData = new FormData();
+    formData.set("content", value);
+    formData.set("_action", "saveProject");
+
+    if (!saveProjectFormRef?.current) return;
+
+    submit(formData, { replace: true, method: "post" });
+  }, [saveProjectFormRef, submit, value]);
+
   const runCode = useCallback(() => {
     if (value && jscAppRef?.current) {
-      jscAppRef?.current?.setMarkup(JSON.parse(value));
+      const components = (parse(value, undefined, true) as any).components;
+      const config = (parse(value, undefined, true) as any).config;
+      jscAppRef?.current?.setGlobalConfig(config);
+      jscAppRef?.current?.setMarkup(JSON.stringify(components));
       setShowPreviewText(false);
     }
   }, [jscAppRef, value]);
@@ -111,15 +144,15 @@ export default function Playground() {
 
   const onInsertComponent = (component: any) => {
     // remove the last square bracket
-    setValue((value) => value.slice(0, value.length - 1));
+    setValue((value: string) => value.slice(0, value.length - 1));
 
     // add a square bracket to the beginning
     if (value[0] !== "[") {
-      setValue((value) => "[" + value);
+      setValue((value: string) => "[" + value);
     }
 
     if (value.includes("}")) {
-      setValue((value) => value + ",");
+      setValue((value: string) => value + ",");
     }
 
     monacoRef.current.trigger("keyboard", "type", {
@@ -136,19 +169,16 @@ export default function Playground() {
     setShowAddComponentModal(false);
   };
 
+  useEffect(() => {
+    const saveProjectTimeout = setTimeout(() => saveProject(), 3000);
+
+    return () => {
+      clearTimeout(saveProjectTimeout);
+    };
+  }, [saveProject, value]);
+
   return (
     <div>
-      <script
-        type="module"
-        src={`http://localhost:3333/build/components.esm.js`}
-        async
-      ></script>
-      <script
-        noModule
-        src={`http://localhost:3333/build/components.js`}
-        async
-      ></script>
-
       <PlaygroundHeader
         actions={
           <>
@@ -181,15 +211,19 @@ export default function Playground() {
             >
               Examples
             </Button>
-            <Form method="post" id="projectForm">
+            <Form method="post" id="projectForm" ref={saveProjectFormRef}>
               <Button
                 size="xs"
-                onClick={runCode}
                 leftIcon={<DeviceFloppy />}
                 ref={runButtonRef}
                 type="submit"
-                name="intent"
+                name="_action"
+                form="projectForm"
                 value="saveProject"
+                loading={
+                  transition.state === "submitting" &&
+                  transition.submission.formData.get("_action") == "saveProject"
+                }
               >
                 Save
               </Button>
@@ -202,6 +236,16 @@ export default function Playground() {
               ref={runButtonRef}
             >
               Run
+            </Button>
+
+            <Button
+              component={Link}
+              leftIcon={<ExternalLink />}
+              size="xs"
+              to={`/site/${params.slug}`}
+              target="_blank"
+            >
+              View Site
             </Button>
           </>
         }
@@ -216,7 +260,7 @@ export default function Playground() {
             theme="vs-dark"
             options={{ formatOnType: true, formatOnPaste: true }}
             defaultValue=""
-            value={value}
+            value={typeof value === "string" ? value : JSON.stringify(value)}
             onChange={(value) => setValue(value as string)}
             beforeMount={handleEditorWillMount}
             onMount={handleEditorDidMount}

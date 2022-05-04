@@ -17,6 +17,7 @@ model User {
   password Password?
   notes    Note[]
   projects Project[]
+  Graph    Graph[]
 }
 
 model Password {
@@ -41,7 +42,7 @@ model Note {
 model Project {
   id        String  @id @default(cuid())
   slug      String  @unique
-  content   Json
+  content   Json    @default("{\n\t\n}")
   title     String?
   user      User    @relation(fields: [userId], references: [id])
   published Boolean @default(false)
@@ -49,4 +50,15 @@ model Project {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   userId    String
+}
+
+model Graph {
+  id        String   @id @default(cuid())
+  jid       String   @unique
+  name      String
+  endpoint  String
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

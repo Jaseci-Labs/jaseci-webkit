@@ -60,7 +60,7 @@ export const action: ActionFunction = async ({ request }) => {
     request,
     userId: user.id,
     remember: remember === "on" ? true : false,
-    redirectTo: typeof redirectTo === "string" ? redirectTo : "/notes",
+    redirectTo: typeof redirectTo === "string" ? redirectTo : "/projects",
   });
 };
 
@@ -72,7 +72,7 @@ export const meta: MetaFunction = () => {
 
 export default function LoginPage() {
   const [searchParams] = useSearchParams();
-  const redirectTo = searchParams.get("redirectTo") || "/notes";
+  const redirectTo = searchParams.get("redirectTo") || "/projects";
   const actionData = useActionData() as ActionData;
   const emailRef = React.useRef<HTMLInputElement>(null);
   const passwordRef = React.useRef<HTMLInputElement>(null);
@@ -113,10 +113,8 @@ export default function LoginPage() {
       <PasswordInput
         label="Password"
         placeholder="Your Password"
-        id="password"
         ref={passwordRef}
         name="password"
-        type="password"
         autoComplete="new-password"
         aria-invalid={actionData?.errors?.password ? true : undefined}
         aria-describedby="password-error"

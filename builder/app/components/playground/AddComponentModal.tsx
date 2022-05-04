@@ -7,6 +7,7 @@ import {
   Space,
   Text,
   TextInput,
+  JsonInput,
   Title,
 } from "@mantine/core";
 import { Prism } from "@mantine/prism";
@@ -14,13 +15,22 @@ import React, { useCallback, useState } from "react";
 import { jaseciComps } from "~/data/jsc-comps";
 import { actions, jaseciEvents } from "~/data/jsc-events";
 
+function isJsonString(str) {
+    try {
+        JSON.parse(str);
+    } catch (e) {
+        return false;
+    }
+    return true;
+}
+
 const AddComponentModal = ({ opened, setOpened, onInsertComponent }: any) => {
   const [component, setComponent] = useState<{
     component: string;
     props: Record<string, string>;
     events: {};
   }>({ component: "", props: {}, events: {} });
-
+const [css, setCSS] = useState("")
   const [newEvent, setNewEvent] = useState<any>({
     name: "",
     data: {},
@@ -34,6 +44,13 @@ const AddComponentModal = ({ opened, setOpened, onInsertComponent }: any) => {
       props: {},
     }));
   };
+
+  const setComponentCSS = (css: string) => {
+    setComponent((currentComp) => ({
+      ...currentComp,
+      css: JSON.parse(css)
+    }));
+  }
 
   const setProperty = (name: string, value: string) => {
     setComponent((currentComp) => ({
@@ -119,7 +136,6 @@ const AddComponentModal = ({ opened, setOpened, onInsertComponent }: any) => {
           {JSON.stringify(component, null, 2)}
         </Prism>
 
-        {JSON.stringify(newEvent)}
 
         {component?.component && (
           <div>
@@ -242,8 +258,22 @@ const AddComponentModal = ({ opened, setOpened, onInsertComponent }: any) => {
             <Button variant="outline" onClick={onAddEvent}>
               Add Event
             </Button>
+
+
+        <Space h="md"></Space>
+        <Title order={3}>Styles</Title>
+        <JsonInput label="Styles (JSON)" placeholder="Enter styles object" formatOnBlur minRows={4} 
+          value={css} onChange={value => {
+              setCSS(value)
+
+              if(isJsonString(value)) {
+                setComponentCSS(value)
+              }
+            }} />
           </div>
         )}
+
+        
 
         <Space h="lg"></Space>
         <Button onClick={() => onInsertComponent(component)}>Insert</Button>

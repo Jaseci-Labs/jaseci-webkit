@@ -1,5 +1,6 @@
 import type { ColorScheme } from "@mantine/core";
 import { ColorSchemeProvider, MantineProvider } from "@mantine/core";
+import { NotificationsProvider } from "@mantine/notifications";
 import type { CatchBoundaryComponent } from "@remix-run/react/routeModules";
 import { useState } from "react";
 import type { LinksFunction, LoaderFunction, MetaFunction } from "remix";
@@ -22,7 +23,7 @@ export const links: LinksFunction = () => {
 
 export const meta: MetaFunction = () => ({
   charset: "utf-8",
-  title: "Jaseci Builder",
+  title: "Jaseci Webkit",
   viewport: "width=device-width,initial-scale=1",
 });
 
@@ -92,7 +93,7 @@ function MantineTheme({ children }: { children: React.ReactNode }) {
         withNormalizeCSS
         withGlobalStyles
       >
-        {children}
+        <NotificationsProvider>{children}</NotificationsProvider>
       </MantineProvider>
     </ColorSchemeProvider>
   );

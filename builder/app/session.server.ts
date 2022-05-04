@@ -1,6 +1,5 @@
 import { createCookieSessionStorage, redirect } from "remix";
 import invariant from "tiny-invariant";
-
 import type { User } from "~/models/user.server";
 import { getUserById } from "~/models/user.server";
 
@@ -46,10 +45,12 @@ export async function requireUserId(
   redirectTo: string = new URL(request.url).pathname
 ): Promise<string> {
   const userId = await getUserId(request);
+
   if (!userId) {
     const searchParams = new URLSearchParams([["redirectTo", redirectTo]]);
     throw redirect(`/login?${searchParams}`);
   }
+
   return userId;
 }
 

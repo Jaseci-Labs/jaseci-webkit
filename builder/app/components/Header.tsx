@@ -13,7 +13,7 @@ import {
 } from "@mantine/core";
 import { useBooleanToggle } from "@mantine/hooks";
 import React, { useState } from "react";
-import { Form } from "remix";
+import { Form, useNavigate } from "remix";
 import {
   ChevronDown,
   Heart,
@@ -98,15 +98,19 @@ const useStyles = createStyles((theme) => ({
 
 interface HeaderTabsProps {
   user: { name: string; image: string };
-  tabs: string[];
+  tabs: { label: string; to: string }[];
 }
 
 export function Header({ user, tabs }: HeaderTabsProps) {
   const { classes, theme, cx } = useStyles();
+  const [activeTab, setActiveTab] = useState<number | undefined>();
   const [opened, toggleOpened] = useBooleanToggle(false);
   const [userMenuOpened, setUserMenuOpened] = useState(false);
+  const navigate = useNavigate();
 
-  const items = tabs.map((tab) => <Tabs.Tab label={tab} key={tab} />);
+  const renderTabs = tabs.map((tab) => (
+    <Tabs.Tab key={tab.label} tabKey={tab.to} label={tab.label} />
+  ));
 
   return (
     <div className={classes.header}>
@@ -114,7 +118,7 @@ export function Header({ user, tabs }: HeaderTabsProps) {
         <Group position="apart">
           {/* <MantineLogo variant="white" /> */}
           <Title order={3} sx={{ color: "#fff" }}>
-            Jaseci Builder
+            Jaseci Studio
           </Title>
 
           <Burger
@@ -207,8 +211,13 @@ export function Header({ user, tabs }: HeaderTabsProps) {
             tabControl: classes.tabControl,
             tabActive: classes.tabControlActive,
           }}
+          active={activeTab}
+          onTabChange={(activeTab, tabKey) => {
+            setActiveTab(activeTab);
+            navigate(tabKey || "#");
+          }}
         >
-          {items}
+          {renderTabs}
         </Tabs>
       </Container>
     </div>

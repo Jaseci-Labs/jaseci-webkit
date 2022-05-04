@@ -1,7 +1,7 @@
 import { Button, Group, Input, Title } from "@mantine/core";
 import React from "react";
 import type { LoaderFunction } from "remix";
-import { json, Link, useLoaderData } from "remix";
+import { json, Link, Outlet, useLoaderData } from "remix";
 import { Hammer } from "tabler-icons-react";
 import { ProjectsTable } from "~/components/ProjectsTable";
 import { getProjects } from "~/models/project.server";
@@ -31,6 +31,7 @@ const ProjectsPage = () => {
         </Button>
       </Group>
       <ProjectsTable projects={loaderData.projects}></ProjectsTable>
+      <Outlet></Outlet>
     </div>
   );
 };

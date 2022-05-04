@@ -15,7 +15,7 @@ export async function createProject({ userId }: { userId: string }) {
   const project = await prisma.project.create({
     data: {
       userId,
-      content: [],
+      content: "{\n\t\n}",
       slug: friendlySlug,
       title: randomWordsString.toString(),
     },
@@ -27,6 +27,7 @@ export async function createProject({ userId }: { userId: string }) {
 export async function getProjects({ userId }: { userId: string }) {
   return prisma.project.findMany({
     where: { userId },
+    orderBy: { id: "desc" },
   });
 }
 
@@ -53,4 +54,34 @@ export async function saveProject({
 
 export async function getProject({ slug }: { slug: string }) {
   return prisma.project.findFirst({ where: { slug } });
+}
+
+export async function getProjectById({ projectId }: { projectId: string }) {
+  return prisma.project.findFirst({ where: { id: projectId } });
+}
+
+type UpdateProjectInput = Prisma.ProjectUpdateInput;
+
+export async function updateProject({
+  projectId,
+  userId,
+  input,
+}: {
+  projectId: string;
+  userId: string;
+  input: UpdateProjectInput;
+}) {
+  const project = await prisma.project.findFirst({
+    where: {
+      id: projectId,
+      userId,
+    },
+  });
+
+  if (!project) throw new Error("Project not found.");
+
+  return prisma.project.update({
+    where: { id: projectId },
+    data: { ...input },
+  });
 }
