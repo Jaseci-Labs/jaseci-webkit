@@ -55,6 +55,23 @@ Here's an example of how we can render a Navbar component:
 ]
 ```
 
+## Guide
+
+- [Introduction](./docs/what-is-jaseci-webkit.md)
+- [Basic Concepts](./docs/basic-concepts.md)
+- [Built-in Actions](./docs/built-in-actions.md)
+- [Connecting an API](./docs/connecting-an-api.md)
+- [Components](./docs/components/)
+  - [Button](./docs/components/button.md)
+  - [Column](./docs/components/column.md)
+  - [Container](./docs/components/container.md)
+  - [Inputbox](./docs/components/inputbox.md)
+  - [Navbar](./docs/components/navbar.md)
+  - [Navbar](./docs/components/navlink.md)
+  - [Row](./docs/components/row.md)
+  - [Text](./docs/components/text.md)
+  - [Textbox](./docs/components/textbox.md)
+
 The above code will generate the following markup.
 
 ```html
