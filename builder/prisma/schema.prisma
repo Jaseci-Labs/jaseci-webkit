@@ -40,16 +40,25 @@ model Note {
 }
 
 model Project {
-  id        String  @id @default(cuid())
-  slug      String  @unique
-  content   Json    @default("{\n\t\n}")
-  title     String?
-  user      User    @relation(fields: [userId], references: [id])
-  published Boolean @default(false)
-
+  id        String   @id @default(cuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  userId    String
+
+  title String?
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+}
+
+model ProjectSite {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  title     String
+  slug      String  @unique
+  published Boolean @default(false)
+  content   Json    @default("{\n\t\n}")
 }
 
 model Graph {
