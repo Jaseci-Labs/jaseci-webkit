@@ -27,7 +27,7 @@ const EditProjectPage = () => {
           ></TextInput>
 
           <Group position="right">
-            <Button type="submit">Save</Button>
+            <Button type="submit">Save Project</Button>
           </Group>
         </Stack>
       </Form>
@@ -42,14 +42,12 @@ export const action: ActionFunction = async ({ request, params }) => {
   const formData = await request.formData();
 
   const title = (formData.get("title") as string) || undefined;
-  const published = (formData.get("published") as string) || undefined;
 
-  console.log({ published });
 
   await updateProject({
     projectId,
     userId,
-    input: { title, published: published === "true" },
+    input: { title },
   });
 
   return redirect("/projects");

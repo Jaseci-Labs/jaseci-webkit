@@ -1,7 +1,6 @@
-import { Space, Title } from "@mantine/core";
-import React from "react";
+import { Button, Group, Space, Title } from "@mantine/core";
 import type { LoaderFunction } from "remix";
-import { json, useLoaderData } from "remix";
+import { json, Outlet, useLoaderData } from "remix";
 import GraphList from "~/components/GraphList";
 import SiteList from "~/components/SiteList";
 import { graphService } from "~/services/graph.server";
@@ -12,12 +11,17 @@ const ProjectPage = () => {
 
   return (
     <div>
-      <Title mb="lg">Sites</Title>
+      <Group align="center" position="apart">
+        <Title mb="lg">Sites</Title>
+        <Button>Create</Button>
+      </Group>
       <SiteList></SiteList>
 
       <Space h={100}></Space>
       <Title mb="lg">Graphs</Title>
       <GraphList graphs={loaderData.graphs}></GraphList>
+
+      <Outlet></Outlet>
     </div>
   );
 };

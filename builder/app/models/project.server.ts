@@ -1,46 +1,41 @@
 import type { Prisma } from "@prisma/client";
-import { nanoid } from "nanoid";
-import randomWords from "random-words";
 import { prisma } from "~/db.server";
 
-export async function createProject({ userId }: { userId: string }) {
-  const randomWordsString = randomWords({
-    exactly: 1,
-    wordsPerString: 2,
-    separator: "-",
-  });
+type CreateProjectInput = {
+  userId: string;
+  title: string;
+};
 
-  const friendlySlug = `${randomWordsString}-${nanoid(5)}`;
-
+export async function createProject({ userId, title }: CreateProjectInput) {
   const project = await prisma.project.create({
     data: {
       userId,
-      content: "{\n\t\n}",
-      slug: friendlySlug,
-      title: randomWordsString.toString(),
+      title,
     },
   });
 
   return project;
 }
 
-export async function getProjects({ userId }: { userId: string }) {
+type GetProjectsInput = {
+  userId: string;
+};
+
+export async function getProjects({ userId }: GetProjectsInput) {
   return prisma.project.findMany({
     where: { userId },
     orderBy: { id: "desc" },
   });
 }
 
-// update the project's site content
-export async function saveProject({
-  slug,
-  userId,
-  content,
-}: {
+type SaveProjectInput = {
   slug: string;
   userId: string;
   content: Prisma.InputJsonValue;
-}) {
+};
+
+// update the project's site content
+export async function saveProject({ slug, userId, content }: SaveProjectInput) {
   const project = await prisma.project.findFirst({ where: { slug } });
   if (!project) throw new Error("Project not found.");
   if (project.userId !== userId)
@@ -52,8 +47,21 @@ export async function saveProject({
   });
 }
 
-export async function getProject({ slug }: { slug: string }) {
+type GetProjectInput = {
+  projectId: string;
+};
+
+export async function getProject({ slug }: GetProjectInput) {
   return prisma.project.findFirst({ where: { slug } });
+}
+
+type DeleteProjectInput = {
+  projectId: string;
+  userId: string;
+};
+
+export async function deleteProject({ projectId, userId }: DeleteProjectInput) {
+  return prisma.project.deleteMany({ where: { id: projectId, userId } });
 }
 
 export async function getProjectById({ projectId }: { projectId: string }) {

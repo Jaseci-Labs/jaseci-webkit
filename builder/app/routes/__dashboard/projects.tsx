@@ -18,6 +18,8 @@ type LoaderData = {
   projects: Awaited<ReturnType<typeof getProjects>>;
 };
 
+
+
 const ProjectsPage = () => {
   const loaderData = useLoaderData<LoaderData>();
 
@@ -26,7 +28,7 @@ const ProjectsPage = () => {
       <Title>Projects</Title>
       <Group position="apart" py={20}>
         <Input placeholder="Search Projects"></Input>
-        <Button component={Link} to="/playground" leftIcon={<Hammer></Hammer>}>
+        <Button component={Link} to="new-project" leftIcon={<Hammer></Hammer>}>
           New Project
         </Button>
       </Group>
