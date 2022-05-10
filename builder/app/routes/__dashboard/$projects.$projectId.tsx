@@ -1,37 +1,28 @@
-import { Button, Group, Space, Title } from "@mantine/core";
+import { Space, Title } from "@mantine/core";
 import React from "react";
 import type { LoaderFunction } from "remix";
-import { json, Link, useLoaderData } from "remix";
-import { Affiliate } from "tabler-icons-react";
+import { json, useLoaderData } from "remix";
 import GraphList from "~/components/GraphList";
+import SiteList from "~/components/SiteList";
 import { graphService } from "~/services/graph.server";
 import { requireUserId } from "~/session.server";
 
-const GraphsIndexPage = () => {
-  const loaderData = useLoaderData<LoaderData>();
+const ProjectPage = () => {
+  const loaderData = useLoaderData<LoaderData>()
 
   return (
     <div>
-      <Group position="apart">
-        <Title order={1}>Graphs</Title>
-        <Button
-          leftIcon={<Affiliate></Affiliate>}
-          variant="light"
-          component={Link}
-          to="add-graph"
-        >
-          Add Graph
-        </Button>
-      </Group>
+      <Title mb="lg">Sites</Title>
+      <SiteList></SiteList>
 
-      <Space h="xl"></Space>
-
+      <Space h={100}></Space>
+      <Title mb="lg">Graphs</Title>
       <GraphList graphs={loaderData.graphs}></GraphList>
     </div>
   );
 };
 
-export default GraphsIndexPage;
+export default ProjectPage;
 
 type LoaderData = {
   graphs: Awaited<ReturnType<typeof graphService.getGraphs>>;
