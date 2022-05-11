@@ -1,14 +1,15 @@
 import { parse } from "comment-json";
 import React, { useEffect, useRef } from "react";
 import type { LoaderFunction } from "remix";
-import { json, useLoaderData } from "remix";
+import { useLoaderData } from "remix";
 import { PageNotFound } from "~/components/PageNotFound";
-import { getProject } from "~/models/project.server";
+// import { getProject } from "~/models/project.server";
 
 export const loader: LoaderFunction = async ({ params }) => {
-  const project = await getProject({ slug: params.slug as string });
+  // const project = await getProject({ slug: params.slug as string });
 
-  return json({ project });
+  // return json({ project });
+  return {}
 };
 
 const SitePage = () => {

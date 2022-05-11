@@ -48,6 +48,8 @@ model Project {
 
   user   User   @relation(fields: [userId], references: [id])
   userId String
+
+  sites ProjectSite[]
 }
 
 model ProjectSite {
@@ -59,6 +61,9 @@ model ProjectSite {
   slug      String  @unique
   published Boolean @default(false)
   content   Json    @default("{\n\t\n}")
+
+  project   Project @relation(fields: [projectId], references: [id])
+  projectId String
 }
 
 model Graph {

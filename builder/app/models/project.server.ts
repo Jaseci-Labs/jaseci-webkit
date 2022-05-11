@@ -28,33 +28,6 @@ export async function getProjects({ userId }: GetProjectsInput) {
   });
 }
 
-type SaveProjectInput = {
-  slug: string;
-  userId: string;
-  content: Prisma.InputJsonValue;
-};
-
-// update the project's site content
-export async function saveProject({ slug, userId, content }: SaveProjectInput) {
-  const project = await prisma.project.findFirst({ where: { slug } });
-  if (!project) throw new Error("Project not found.");
-  if (project.userId !== userId)
-    throw new Error("You don't have access to this project.");
-
-  return prisma.project.update({
-    where: { slug },
-    data: { content },
-  });
-}
-
-type GetProjectInput = {
-  projectId: string;
-};
-
-export async function getProject({ slug }: GetProjectInput) {
-  return prisma.project.findFirst({ where: { slug } });
-}
-
 type DeleteProjectInput = {
   projectId: string;
   userId: string;

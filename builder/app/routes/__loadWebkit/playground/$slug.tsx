@@ -11,7 +11,7 @@ import {
   useLoaderData,
   useParams,
   useSubmit,
-  useTransition,
+  useTransition
 } from "remix";
 import {
   Braces,
@@ -21,19 +21,19 @@ import {
   EyeOff,
   InfoSquare,
   NewSection,
-  PlayerPlay,
+  PlayerPlay
 } from "tabler-icons-react";
 import AddComponentModal from "~/components/playground/AddComponentModal";
 import ExamplesModal from "~/components/playground/ExamplesModal";
 import { PlaygroundHeader } from "~/components/PlaygroundHeader";
 import { schemas } from "~/data/schema";
-import { getProject, saveProject } from "~/models/project.server";
+// import { getProject } from "~/models/project.server";
 import { requireUserId } from "~/session.server";
 
 export const loader: LoaderFunction = async ({ params }) => {
-  const project = await getProject({ slug: params.slug as string });
+  // const project = await getProject({ slug: params.slug as string });
 
-  return json({ project });
+  return json({ project: {} });
 };
 
 export const action: ActionFunction = async ({ request, params }) => {
@@ -44,12 +44,12 @@ export const action: ActionFunction = async ({ request, params }) => {
 
   if (action === "saveProject" && slug) {
     const userId = await requireUserId(request);
-    const project = await saveProject({
-      content: content as any,
-      slug,
-      userId,
-    });
-    return json({ project });
+    // const project = await saveProject({
+    //   content: content as any,
+    //   slug,
+    //   userId,
+    // });
+    // return json({ project });
   }
 
   return json({});
@@ -170,10 +170,10 @@ export default function Playground() {
   };
 
   useEffect(() => {
-    const saveProjectTimeout = setTimeout(() => saveProject(), 3000);
+    // const saveProjectTimeout = setTimeout(() => saveProject(), 3000);
 
     return () => {
-      clearTimeout(saveProjectTimeout);
+      // clearTimeout(saveProjectTimeout);
     };
   }, [saveProject, value]);
 

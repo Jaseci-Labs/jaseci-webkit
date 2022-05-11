@@ -1,8 +1,12 @@
 import { ActionIcon, Card, Divider, Group, Image, Text } from "@mantine/core";
+import type { ProjectSite } from "@prisma/client";
 import React from "react";
-import { Edit, ExternalLink } from "tabler-icons-react";
+import { useNavigate } from "remix";
+import { Edit, ExternalLink, Trash } from "tabler-icons-react";
 
-const SiteCard = () => {
+const SiteCard = ({ site }: { site: Partial<ProjectSite> }) => {
+  const navigate = useNavigate()
+
   return (
     <Card shadow="xs">
       <Card.Section>
@@ -39,6 +43,16 @@ const SiteCard = () => {
             color="orange"
           >
             <ExternalLink></ExternalLink>
+          </ActionIcon>
+          <ActionIcon
+            variant="hover"
+            size="sm"
+            onClick={() => {
+              navigate(`site/${site.id}/delete`);
+            }}
+            color="red"
+          >
+            <Trash></Trash>
           </ActionIcon>
         </Group>
       </Card.Section>

@@ -12,7 +12,7 @@ export function ProjectsTable({ projects }: { projects: Project[] }) {
     <tr
       key={project.id}
       style={{ cursor: "pointer" }}
-      onClick={() => navigate(`/project/${project.id}`)}
+      onClick={() => navigate(`/projects/${project.id}`)}
     >
       <td>{project.id}</td>
       <td>{project.title}</td>

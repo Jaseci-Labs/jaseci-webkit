@@ -1,0 +1,28 @@
+{
+    "components": [
+        {
+            "component": "Inputbox",
+            "name": "email",
+            "props": {
+                "label": "Email",
+                "fullWidth": true
+            }
+        },
+        {
+            "component": "Inputbox",
+            "name": "password",
+            "props": {
+                "labe": "Password",
+                "fullWidth": true,
+                "type": "password"
+            }
+        },
+        {
+            "component": "Button",
+            "name": "loginButton",
+            "props": {
+                "label": "Login"
+            }
+        }
+    ]
+}
