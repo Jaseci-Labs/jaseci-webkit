@@ -1,22 +1,15 @@
-# Remix example
-
-This example deploys self-hosted version of [Remix](https://remix.run/) using their [indie-stack](https://github.com/remix-run/indie-stack). Internally it uses a PostgreSQL database to store the data.
-
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template/remix?referralCode=faraz)
-
-## ✨ Features
-
-- Remix
-- TypeScript
-- PostgreSQL
-
 ## 💁‍♀️ How to use
 
-- Click the Railway button 👆
+- Create a `.env` file
 - Add the `SESSION_SECRET` environment variable
-  - You can hit CMD+K and use our secret generator
+- Add the `DATABASE_URL` environment variable (must be a postgres database url)
+- Intall the dependencies with `yarn install`
+- For production deployment, run the following commands:
+  - `yarn prisma migrate deploy` to apply migrations to the database
+  - `yarn build`
+  - `yarn start` to run the production build on port 3000
 
-## 📝 Notes
+## The Stack
 
-- [Official docs](https://remix.run/docs/en/v1)
-- A [video](https://youtu.be/1uebyGwAGvg) introducing the stack
+- Jaseci Studio is powered by the Remix framework, for more information visit [Remix](https://remix.run/)
+- The database layer is powered by Prisma, see [Prisma](https://www.prisma.io/)

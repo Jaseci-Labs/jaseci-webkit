@@ -9,7 +9,7 @@ export const loader: LoaderFunction = async ({ params }) => {
   // const project = await getProject({ slug: params.slug as string });
 
   // return json({ project });
-  return {}
+  return {};
 };
 
 const SitePage = () => {

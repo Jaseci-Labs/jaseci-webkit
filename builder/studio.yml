@@ -1,0 +1,136 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: jaseci-studio
+spec:
+  selector:
+    pod: jaseci-studio
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jaseci-studio-up
+  namespace: default
+data:
+  prod_up: |-
+    apk add --update --no-cache git
+    git clone https://github.com/Jaseci-Labs/jaseci-webkit.git
+    cd jaseci-webkit/builder;
+    git config pull.ff only
+    git checkout main
+    yarn install
+
+    # create environment file
+    echo "DATABASE_URL=postgresql://${POSTGRES_USERNAME}:${POSTGRES_PASSWORD}@127.0.0.1:5432/jaseci-studio\nSECRET=somevalue" >| .env
+    yarn prisma migrate deploy
+
+    # populate environment file
+    yarn build
+    yarn start
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-config
+type: Opaque
+data:
+  username: cG9zdGdyZXM=
+  password: UHIwZE4xbmo0
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jaseci-studio-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      pod: jaseci-studio-app
+  template:
+    metadata:
+      labels:
+        pod: jaseci-studio-app
+      name: jaseci-studio-pp
+    spec:
+      containers:
+        - name: jaseci-studio-app
+          image: node:alpine
+          imagePullPolicy: IfNotPresent
+          command: [sh, -c, "source script/prod_up"]
+          resources:
+            limits:
+              cpu: "200m"
+              memory: "1000m"
+          ports:
+            - containerPort: 3000
+          env:
+            - name: POSTGRES_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-config
+                  key: username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-config
+                  key: password
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: jaseci-studio-db-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 3Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jaseci-studio-db
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      pod: jaseci-studio-db
+  template:
+    metadata:
+      labels:
+        pod: jaseci-studio-db
+    spec:
+      containers:
+        - name: jaseci-postgres-db
+          image: postgres:alpine
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: POSTGRES_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-config
+                  key: username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-config
+                  key: password
+          resources:
+            limits:
+              cpu: "0.2"
+              memory: 300Mi
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: jaseci-studio-db-volume
+              mountPath: /var/lib/postgresql/data
+              subPath: jaseci
+      volumes:
+        - name: jaseci-studio-db-volume
+          persistentVolumeClaim:
+            claimName: jaseci-studio-db-pvc

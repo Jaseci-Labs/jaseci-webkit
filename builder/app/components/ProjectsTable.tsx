@@ -6,13 +6,11 @@ import { Edit, Trash, View360 } from "tabler-icons-react";
 export function ProjectsTable({ projects }: { projects: Project[] }) {
   const navigate = useNavigate();
 
-
-
   const rows = projects.map((project) => (
     <tr
       key={project.id}
       style={{ cursor: "pointer" }}
-      onClick={() => navigate(`/projects/${project.id}`)}
+      onClick={() => navigate(`/studio/${project.id}/editor/tab/blank`)}
     >
       <td>{project.id}</td>
       <td>{project.title}</td>

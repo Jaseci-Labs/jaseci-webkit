@@ -1,5 +1,4 @@
 import { Button, Group, Space, Title } from "@mantine/core";
-import React from "react";
 import type { LoaderFunction } from "remix";
 import { json, Link, useLoaderData } from "remix";
 import { Affiliate } from "tabler-icons-react";

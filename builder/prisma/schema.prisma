@@ -50,6 +50,7 @@ model Project {
   userId String
 
   sites ProjectSite[]
+  tab   TabFile[]
 }
 
 model ProjectSite {
@@ -75,4 +76,23 @@ model Graph {
   userId    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model TabFile {
+  id        String      @id @default(cuid())
+  name      String
+  type      TabFileType
+  ext       String?
+  content   String?
+  project   Project?    @relation(fields: [projectId], references: [id])
+  projectId String?
+  opened_at DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum TabFileType {
+  View
+  Jac
 }

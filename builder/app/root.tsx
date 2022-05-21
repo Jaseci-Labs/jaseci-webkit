@@ -2,8 +2,11 @@ import type { ColorScheme } from "@mantine/core";
 import { ColorSchemeProvider, MantineProvider } from "@mantine/core";
 import { NotificationsProvider } from "@mantine/notifications";
 import type { CatchBoundaryComponent } from "@remix-run/react/routeModules";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { LinksFunction, LoaderFunction, MetaFunction } from "remix";
+import { useTransition } from "remix";
+import NProgress from "nprogress";
+import nProgressStyles from "nprogress/nprogress.css";
 import {
   json,
   Links,
@@ -29,6 +32,11 @@ export const links: LinksFunction = () => {
       href: "https://fonts.googleapis.com/css2?family=Readex+Pro:wght@200;300;400;500;600;700&display=swap",
       rel: "stylesheet",
     },
+    { rel: "stylesheet", href: nProgressStyles },
+    {
+      href: "https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap",
+      rel: "stylesheet",
+    },
   ];
 };
 
@@ -49,6 +57,15 @@ export const loader: LoaderFunction = async ({ request }) => {
 };
 
 export default function App() {
+  const transition = useTransition();
+  useEffect(() => {
+    // when the state is idle then we can to complete the progress bar
+    if (transition.state === "idle") NProgress.done();
+    // and when it's something else it means it's either submitting a form or
+    // waiting for the loaders of the next location so we start it
+    else NProgress.start();
+  }, [transition.state]);
+
   return (
     <html lang="en" className="h-full">
       <head>
@@ -99,7 +116,7 @@ function MantineTheme({ children }: { children: React.ReactNode }) {
       <MantineProvider
         theme={{
           fontFamily: "'Readex Pro', sans-serif",
-          headings: { fontFamily: "'Readex Pro', sans-serif" },
+          headings: { fontFamily: "'Barlow', sans-serif" },
           primaryColor: "orange",
           colorScheme,
         }}

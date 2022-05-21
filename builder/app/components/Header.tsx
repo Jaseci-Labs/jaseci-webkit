@@ -9,11 +9,11 @@ import {
   Tabs,
   Text,
   Title,
-  UnstyledButton,
+  UnstyledButton
 } from "@mantine/core";
 import { useBooleanToggle } from "@mantine/hooks";
 import React, { useState } from "react";
-import { Form, useNavigate } from "remix";
+import { Form, Link, useNavigate } from "remix";
 import {
   ChevronDown,
   Heart,
@@ -23,7 +23,7 @@ import {
   Settings,
   Star,
   SwitchHorizontal,
-  Trash,
+  Trash
 } from "tabler-icons-react";
 
 const useStyles = createStyles((theme) => ({
@@ -89,9 +89,8 @@ const useStyles = createStyles((theme) => ({
   },
 
   tabControlActive: {
-    color: `${
-      theme.colorScheme === "dark" ? theme.white : theme.black
-    } !important`,
+    color: `${theme.colorScheme === "dark" ? theme.white : theme.black
+      } !important`,
     borderColor: `${theme.colors[theme.primaryColor][6]} !important`,
   },
 }));
@@ -117,9 +116,11 @@ export function Header({ user, tabs }: HeaderTabsProps) {
       <Container className={classes.mainSection}>
         <Group position="apart">
           {/* <MantineLogo variant="white" /> */}
-          <Title order={3} sx={{ color: "#fff" }}>
-            Jaseci Studio
-          </Title>
+          <Link to="/" style={{ all: "unset", cursor: "pointer" }}>
+            <Title order={3} sx={{ color: "#fff" }}>
+              Jaseci Studio
+            </Title>
+          </Link>
 
           <Burger
             opened={opened}

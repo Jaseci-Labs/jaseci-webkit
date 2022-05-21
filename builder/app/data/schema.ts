@@ -28,9 +28,15 @@ export const schemas = [
               "Textbox",
               "Navbar",
               "Navlink",
+              "DatePicker",
+              "Column",
+              "Row",
             ],
           },
           props: {
+            type: "object",
+          },
+          css: {
             type: "object",
           },
           events: {
