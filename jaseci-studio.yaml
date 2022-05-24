@@ -25,6 +25,7 @@ data:
     cd jaseci-webkit/builder;
     git config pull.ff only
     git checkout main
+    yarn add npm-run-all --dev
     yarn install
 
     # create environment file
@@ -76,6 +77,9 @@ spec:
 
             - name: POSTGRES_PORT
               value: "5432"
+            
+            - name: NODE_ENV
+              value: production
 
           volumeMounts:
             - name: prod-script
