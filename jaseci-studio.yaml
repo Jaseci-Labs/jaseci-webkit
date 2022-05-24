@@ -27,12 +27,12 @@ data:
     git checkout main
     yarn add npm-run-all --dev
     yarn install
-
+    yarn install -D
+ 
     # create environment file
     echo "DATABASE_URL=postgresql://${POSTGRES_USERNAME}:${POSTGRES_PASSWORD}@jaseci-studio-db:5432/postgres" >> .env
     echo "SECRET=somevalue" >> .env
     yarn prisma migrate deploy
-
     # populate environment file
     yarn build
     yarn start
