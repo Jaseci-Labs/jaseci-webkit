@@ -21,7 +21,7 @@ import { schemas } from "~/data/schema";
 import ViewsSidebar from "~/components/ViewsSidebar";
 import AddComponentModal from "~/components/playground/AddComponentModal";
 import ExamplesModal from "~/components/playground/ExamplesModal";
-import invariant from "tiny-invariant";
+// import invariant from "tiny-invariant";
 import {
   getProjectOpenedTabs,
   getTabFile,
@@ -202,7 +202,7 @@ const StudioEditor = () => {
           sx={{ background: "#1E1E1E", color: "#fff" }}
         >
           <EditorHeader
-            onClickRun={runCode}
+            onClickRun={runCode as any}
             openTabs={loaderData.openedTabFiles}
             onClickFormat={formatCode}
             onTogglePreview={() => setShowPreview((prev) => !prev)}
@@ -236,7 +236,7 @@ const StudioEditor = () => {
                   typeof value === "string" ? value : JSON.stringify(value)
                 }
                 onChange={(value) => setValue(value as string)}
-                beforeMount={handleEditorWillMount}
+                beforeMount={handleEditorWillMount as any}
                 onMount={handleEditorDidMount}
                 loading={
                   <LoadingOverlay
@@ -332,10 +332,16 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 
   const userId = await requireUserId(request);
   const { projectId, tabId } = params;
-  invariant(typeof projectId === "string");
+  // invariant(typeof projectId === "string");
 
-  const tabFiles = await getProjectTabFiles({ projectId, userId });
-  const openedTabFiles = await getProjectOpenedTabs({ projectId, userId });
+  const tabFiles = await getProjectTabFiles({
+    projectId: projectId as string,
+    userId,
+  });
+  const openedTabFiles = await getProjectOpenedTabs({
+    projectId: projectId as string,
+    userId,
+  });
   const currentTab = openedTabFiles.find((tab) => tab.id === tabId);
 
   return json<LoaderData>({ tabFiles, openedTabFiles, currentTab });
@@ -344,7 +350,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 export const action: ActionFunction = async ({ request, params }) => {
   const userId = await requireUserId(request);
   const { projectId } = params;
-  invariant(projectId, "projectId is required");
+  // invariant(projectId, "projectId is required");
 
   const formData = await request.formData();
   const action = formData.get("_action");
@@ -355,33 +361,36 @@ export const action: ActionFunction = async ({ request, params }) => {
     const type = formData.get("type");
     const ext = formData.get("ext");
 
-    invariant(typeof name === "string", "name is required");
-    invariant(typeof content === "string", "content is required");
-    invariant(typeof type === "string", "type is required");
-    invariant(typeof ext === "string", "ext is required");
+    // invariant(typeof name === "string", "name is required");
+    // invariant(typeof content === "string", "content is required");
+    // invariant(typeof type === "string", "type is required");
+    // invariant(typeof ext === "string", "ext is required");
 
     await createTabFile({
-      name,
-      projectId,
+      name: name as string,
+      projectId: projectId as string,
       type: type as TabFileType,
       userId,
-      ext,
+      ext: ext as string,
     });
   }
 
   if (action === "openTabItem" || action === "closeTabItem") {
     const tabFileId = formData.get("tabFileId");
-    invariant(typeof tabFileId === "string", "tabFileId is required");
+    // invariant(typeof tabFileId === "string", "tabFileId is required");
 
     // if file is open already, then don't attempt to open it again
-    const tabFile = await getTabFile({ tabFileId, userId });
+    const tabFile = await getTabFile({
+      tabFileId: tabFileId as string,
+      userId,
+    });
 
     if (tabFile?.opened_at && action === "openTabItem") {
       return redirect(`/studio/${projectId}/editor/tab/${tabFileId}`);
     }
 
     await updateTabFile({
-      tabFileId,
+      tabFileId: tabFileId as string,
       userId,
       input: {
         opened_at: action === "openTabItem" ? new Date().toISOString() : null,
@@ -393,11 +402,15 @@ export const action: ActionFunction = async ({ request, params }) => {
     const content = formData.get("content");
     const { tabId } = params;
 
-    invariant(typeof tabId === "string", "tabFileId is required");
-    invariant(typeof content === "string", "content is required");
+    // invariant(typeof tabId === "string", "tabFileId is required");
+    // invariant(typeof content === "string", "content is required");
 
     if (content) {
-      await updateTabFile({ tabFileId: tabId, userId, input: { content } });
+      await updateTabFile({
+        tabFileId: tabId as string,
+        userId,
+        input: { content: content as string },
+      });
     }
   }
 

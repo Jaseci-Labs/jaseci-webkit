@@ -4,7 +4,7 @@ import type { ActionFunction } from "remix";
 import { Form, Link, redirect, useNavigate } from "remix";
 import { requireUserId } from "~/session.server";
 import { deleteProjectSite } from "~/models/projectSite.server";
-import invariant from "tiny-invariant";
+// import invariant from "tiny-invariant";
 
 const DeleteSitePage = () => {
   const navigate = useNavigate();
@@ -32,10 +32,10 @@ export const action: ActionFunction = async ({ request, params }) => {
   if (!projectId) throw redirect("/projects");
   const userId = await requireUserId(request);
 
-  invariant(typeof siteId === "string");
+  // invariant(typeof siteId === "string");
 
   await deleteProjectSite({
-    siteId,
+    siteId: siteId as string,
     userId,
   });
 

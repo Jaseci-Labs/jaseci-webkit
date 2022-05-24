@@ -1,16 +1,8 @@
-import {
-  Card,
-  Dialog,
-  Group,
-  LoadingOverlay,
-  Popover,
-  Text,
-  Title,
-} from "@mantine/core";
+import { Card, Dialog, LoadingOverlay, Text, Title } from "@mantine/core";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import type { LoaderFunction } from "remix";
 import { json, useFetcher, useLoaderData } from "remix";
-import invariant from "tiny-invariant";
+// import invariant from "tiny-invariant";
 import * as vis from "vis-network";
 import { graphService } from "~/services/graph.server";
 import { requireUserId } from "~/session.server";
@@ -153,7 +145,8 @@ type LoaderData = {
 export const loader: LoaderFunction = async ({ request, params }) => {
   const { graphId } = params;
   const userId = await requireUserId(request);
-  invariant(typeof graphId == "string");
+  // invariant(typeof graphId == "string");
+  if (typeof graphId !== "string") throw new Error("graphId must be a string");
 
   const graph = await graphService.getGraph({ id: graphId, userId });
 

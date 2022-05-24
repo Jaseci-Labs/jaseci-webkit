@@ -2,7 +2,7 @@ import { Button, Group, Modal, Stack, TextInput } from "@mantine/core";
 import React from "react";
 import type { ActionFunction, LoaderFunction } from "remix";
 import { Form, json, redirect, useLoaderData, useNavigate } from "remix";
-import invariant from "tiny-invariant";
+// import invariant from "tiny-invariant";
 import { getProjectById, updateProject } from "~/models/project.server";
 import { requireUserId } from "~/session.server";
 
@@ -43,7 +43,6 @@ export const action: ActionFunction = async ({ request, params }) => {
 
   const title = (formData.get("title") as string) || undefined;
 
-
   await updateProject({
     projectId,
     userId,
@@ -59,8 +58,8 @@ type LoaderData = {
 
 export const loader: LoaderFunction = async ({ request, params }) => {
   const { projectId } = params;
-  invariant(typeof projectId === "string", "projectId must be a string");
-  const project = await getProjectById({ projectId });
+  // invariant(typeof projectId === "string", "projectId must be a string");
+  const project = await getProjectById({ projectId: projectId as string });
 
   return json<LoaderData>({ project });
 };

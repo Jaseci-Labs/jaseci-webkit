@@ -3,7 +3,7 @@ import { useDebouncedValue, useInputState } from "@mantine/hooks";
 import React, { useEffect } from "react";
 import type { ActionFunction } from "remix";
 import { Form, redirect, useFetcher, useNavigate } from "remix";
-import invariant from "tiny-invariant";
+// import invariant from "tiny-invariant";
 import SelectGraph from "~/components/SelectGraph";
 import { graphService } from "~/services/graph.server";
 import { requireUserId } from "~/session.server";
@@ -65,15 +65,15 @@ export const action: ActionFunction = async ({ request }) => {
   const selectedGraph = formData.get("selectedGraph");
   const userId = await requireUserId(request);
 
-  invariant(typeof name == "string");
-  invariant(typeof selectedGraph == "string");
-  invariant(typeof endpoint == "string");
+  // invariant(typeof name == "string");
+  // invariant(typeof selectedGraph == "string");
+  // invariant(typeof endpoint == "string");
 
   await graphService.createGraph({
-    endpoint,
-    jid: selectedGraph,
+    endpoint: endpoint as string,
+    jid: selectedGraph as string,
     userId,
-    name,
+    name: name as string,
   });
 
   return redirect("/graphs");
