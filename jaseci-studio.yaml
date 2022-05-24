@@ -54,7 +54,7 @@ spec:
     spec:
       containers:
         - name: jaseci-studio-app
-          image: node:alpine
+          image: node:16-alpine
           imagePullPolicy: IfNotPresent
           command: [sh, -c, "source script/prod_up"]
           ports:
