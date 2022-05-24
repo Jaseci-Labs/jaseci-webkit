@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: jaseci-studio
+  name: jaseci-studio-app
 spec:
   selector:
-    pod: jaseci-studio
+    pod: jaseci-studio-app
   ports:
     - protocol: TCP
       port: 80
@@ -31,11 +31,13 @@ data:
  
     # create environment file
     echo "DATABASE_URL=postgresql://${POSTGRES_USERNAME}:${POSTGRES_PASSWORD}@jaseci-studio-db:5432/postgres" >> .env
-    echo "SECRET=somevalue" >> .env
+    echo "SESSION_SECRET=somevalue" >> .env
+    export DATABASE_URL=postgresql://${POSTGRES_USERNAME}:${POSTGRES_PASSWORD}@jaseci-studio-db:5432/postgres
+    export SESSION_SECRET=somevalue
     yarn prisma migrate deploy
     # populate environment file
     yarn build
-    yarn start
+    yarn start &
 ---
 apiVersion: apps/v1
 kind: Deployment
