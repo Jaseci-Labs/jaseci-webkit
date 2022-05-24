@@ -6,7 +6,7 @@ import {
   Text,
   Title,
 } from "@mantine/core";
-import { Link } from "react-router-dom";
+import { Link } from "remix";
 
 const useStyles = createStyles((theme) => ({
   root: {
