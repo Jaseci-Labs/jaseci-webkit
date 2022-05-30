@@ -11,26 +11,34 @@ import {
   Title,
 } from "@mantine/core";
 import { Prism } from "@mantine/prism";
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import { jaseciComps } from "~/data/jsc-comps";
 import { actions, jaseciEvents } from "~/data/jsc-events";
 
 function isJsonString(str) {
-    try {
-        JSON.parse(str);
-    } catch (e) {
-        return false;
-    }
-    return true;
+  try {
+    JSON.parse(str);
+  } catch (e) {
+    return false;
+  }
+  return true;
 }
 
-const AddComponentModal = ({ opened, setOpened, onInsertComponent }: any) => {
+const AddComponentModal = ({
+  opened,
+  onClose,
+  onInsertComponent,
+}: {
+  opened: boolean;
+  onClose: () => void;
+  onInsertComponent: (component: Record<any, any>) => void;
+}) => {
   const [component, setComponent] = useState<{
     component: string;
     props: Record<string, string>;
     events: {};
   }>({ component: "", props: {}, events: {} });
-const [css, setCSS] = useState("")
+  const [css, setCSS] = useState("");
   const [newEvent, setNewEvent] = useState<any>({
     name: "",
     data: {},
@@ -48,9 +56,9 @@ const [css, setCSS] = useState("")
   const setComponentCSS = (css: string) => {
     setComponent((currentComp) => ({
       ...currentComp,
-      css: JSON.parse(css)
+      css: JSON.parse(css),
     }));
-  }
+  };
 
   const setProperty = (name: string, value: string) => {
     setComponent((currentComp) => ({
@@ -113,7 +121,7 @@ const [css, setCSS] = useState("")
         title="Add Component"
         withCloseButton
         transition="rotate-left"
-        onClose={() => setOpened(false)}
+        onClose={onClose}
         size="lg"
         radius="md"
       >
@@ -135,7 +143,6 @@ const [css, setCSS] = useState("")
         <Prism language="json" sx={{ maxHeight: "200px", overflow: "auto" }}>
           {JSON.stringify(component, null, 2)}
         </Prism>
-
 
         {component?.component && (
           <div>
@@ -259,21 +266,24 @@ const [css, setCSS] = useState("")
               Add Event
             </Button>
 
+            <Space h="md"></Space>
+            <Title order={3}>Styles</Title>
+            <JsonInput
+              label="Styles (JSON)"
+              placeholder="Enter styles object"
+              formatOnBlur
+              minRows={4}
+              value={css}
+              onChange={(value) => {
+                setCSS(value);
 
-        <Space h="md"></Space>
-        <Title order={3}>Styles</Title>
-        <JsonInput label="Styles (JSON)" placeholder="Enter styles object" formatOnBlur minRows={4} 
-          value={css} onChange={value => {
-              setCSS(value)
-
-              if(isJsonString(value)) {
-                setComponentCSS(value)
-              }
-            }} />
+                if (isJsonString(value)) {
+                  setComponentCSS(value);
+                }
+              }}
+            />
           </div>
         )}
-
-        
 
         <Space h="lg"></Space>
         <Button onClick={() => onInsertComponent(component)}>Insert</Button>

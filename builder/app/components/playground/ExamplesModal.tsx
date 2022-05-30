@@ -4,7 +4,15 @@ import chatbox from "~/data/examples/chatbox.json";
 import counter from "~/data/examples/counter.json";
 import operationsBasic from "~/data/examples/operations-basic.json";
 
-const ExamplesModal = ({ opened, setOpened, onRunExample }: any) => {
+const ExamplesModal = ({
+  opened,
+  onClose,
+  onRunExample,
+}: {
+  opened: boolean;
+  onRunExample: (example: Record<any, any>) => void;
+  onClose: () => void;
+}) => {
   return (
     <div>
       <Modal
@@ -12,7 +20,7 @@ const ExamplesModal = ({ opened, setOpened, onRunExample }: any) => {
         title="View Examples"
         withCloseButton
         transition="rotate-left"
-        onClose={() => setOpened(false)}
+        onClose={onClose}
         size="lg"
         radius="md"
       >

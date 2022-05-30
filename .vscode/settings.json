@@ -1,3 +1,6 @@
 {
-  "cSpell.words": ["fullwidth"]
+  "cSpell.words": ["fullwidth"],
+  "yaml.schemas": {
+    "kubernetes://schema/v1%40service": "file:///home/shemar/Desktop/Projects/Work/jaseci-webkit/builder/studio.yml"
+  }
 }

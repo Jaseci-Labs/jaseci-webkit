@@ -1,11 +1,19 @@
 import { ActionIcon, Box, Stack, Tooltip, Text, Kbd } from "@mantine/core";
+import { useHotkeys } from "@mantine/hooks";
 import React from "react";
-import { Link, useParams, useSearchParams } from "remix";
+import { Link, useNavigate, useParams, useSearchParams } from "remix";
 import { Browser, Home, VectorTriangle } from "tabler-icons-react";
 
 const EditorActionBar = () => {
   const { projectId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+
+  useHotkeys([
+    ["mod+O", () => navigate(`/studio/${projectId}`)],
+    ["mod+V", () => navigate(`/studio/${projectId}/editor/tab/blank`)],
+    ["mod+G", () => navigate(`/studio/${projectId}/graphs`)],
+  ]);
 
   return (
     <Box sx={{ background: "#202327", width: 48 }}>
@@ -13,7 +21,7 @@ const EditorActionBar = () => {
         <Tooltip
           label={
             <Text>
-              Overview <Kbd ml="xs">gH</Kbd>
+              Overview <Kbd ml="xs">CTRL/CMD+O</Kbd>
             </Text>
           }
           position="right"
@@ -29,7 +37,7 @@ const EditorActionBar = () => {
         <Tooltip
           label={
             <Text>
-              Views <Kbd ml="xs">gV</Kbd>
+              Views <Kbd ml="xs">CTRL/CMD+V</Kbd>
             </Text>
           }
           position="right"
@@ -55,7 +63,7 @@ const EditorActionBar = () => {
         <Tooltip
           label={
             <Text>
-              Graphs <Kbd ml="xs">gG</Kbd>
+              Graphs <Kbd ml="xs">CTRL/CMD+G</Kbd>
             </Text>
           }
           position="right"

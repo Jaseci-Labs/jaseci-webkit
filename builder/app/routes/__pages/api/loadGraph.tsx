@@ -4,13 +4,13 @@ import { json } from "remix";
 export const loader: LoaderFunction = async ({ request }) => {
   const url = new URL(request.url);
   const endpointUrl = url.searchParams.get("endpointUrl");
-  const token =
-    "0e61e3b200c67e7f01f76c3dcc1984da966cc2f7ea4ce5e9879a476239c8338c";
+  const token = url.searchParams.get("token");
+  const gph = url.searchParams.get("gph");
 
   const graph = await fetch(`${endpointUrl}/js/graph_get`, {
     method: "POST",
     body: JSON.stringify({
-      gph: "urn:uuid:4e51bae2-3fe0-49e0-8ea2-913d47eba890",
+      gph,
       mode: "default",
       detailed: true,
     }),

@@ -34,6 +34,7 @@ const AddGraphPage = () => {
               placeholder="Enter a name"
               label="Name"
             ></TextInput>
+
             <TextInput
               name="endpoint"
               placeholder="http://localhost:8000"

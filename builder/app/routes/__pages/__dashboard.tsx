@@ -22,11 +22,7 @@ const DashboardLayout = () => {
   return (
     <>
       <Header
-        tabs={[
-          { label: "Projects", to: "/projects" },
-          { label: "Playground", to: "/playground" },
-          { label: "Graphs", to: "/graphs" },
-        ]}
+        tabs={[{ label: "Projects", to: "/projects" }]}
         user={{ name: user.email, image: "" }}
       ></Header>
       <Paper px={200}>

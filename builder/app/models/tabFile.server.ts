@@ -97,3 +97,14 @@ export const getTabFile = ({ tabFileId, userId }: GetTabFile) => {
     },
   });
 };
+
+type DeleteTabFile = { tabFileId: string; userId: string };
+
+export const deleteTabFile = ({ tabFileId, userId }: DeleteTabFile) => {
+  return prisma.tabFile.deleteMany({
+    where: {
+      id: tabFileId,
+      project: { userId: userId },
+    },
+  });
+};
