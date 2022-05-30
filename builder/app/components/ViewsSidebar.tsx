@@ -6,14 +6,25 @@ import {
   SegmentedControl,
   TextInput,
   Group,
+  Menu,
 } from "@mantine/core";
+import { useClickOutside, useDisclosure, useHotkeys } from "@mantine/hooks";
 import type { TabFile } from "@prisma/client";
+import type { ReactElement, ReactNode } from "react";
 import React from "react";
 import { Form } from "remix";
-import { BrandHtml5, Plus, VectorTriangle } from "tabler-icons-react";
+import {
+  BrandHtml5,
+  File,
+  Plus,
+  Settings,
+  Trash,
+  VectorTriangle,
+} from "tabler-icons-react";
 
 const ViewsSidebar = ({ tabFiles }: { tabFiles: TabFile[] }) => {
   const [showNewItemModal, setShowNewItemModal] = React.useState(false);
+
   return (
     <Box
       sx={{
@@ -41,31 +52,7 @@ const ViewsSidebar = ({ tabFiles }: { tabFiles: TabFile[] }) => {
           New
         </Button>
         {tabFiles.map((tabFile) => (
-          <Box key={tabFile.id} sx={{ width: "100%" }}>
-            <Form method="post" style={{ width: "100%" }}>
-              <input hidden name="tabFileId" value={tabFile.id}></input>
-              <Button
-                size="xs"
-                variant="subtle"
-                color="gray"
-                leftIcon={
-                  tabFile.ext === "jac" ? (
-                    <VectorTriangle></VectorTriangle>
-                  ) : (
-                    <BrandHtml5></BrandHtml5>
-                  )
-                }
-                compact
-                type="submit"
-                name="_action"
-                value="openTabItem"
-                sx={{ fontFamily: "sans-serif" }}
-                fullWidth
-              >
-                {tabFile.ext === "jac" ? tabFile.name + ".jac" : tabFile.name}
-              </Button>
-            </Form>
-          </Box>
+          <FileItem tabFile={tabFile} key={tabFile.id}></FileItem>
         ))}
       </Stack>
       <NewItemModal
@@ -127,6 +114,181 @@ const NewItemModal = ({
           </Group>
         </Form>
       )}
+    </Modal>
+  );
+};
+
+const FileMenu = ({
+  control,
+  opened,
+  tabFileId,
+  onClose,
+  tabFileName,
+}: {
+  control: ReactElement<any, any>;
+  opened: boolean;
+  onClose: () => void;
+  tabFileId: string;
+  tabFileName: string;
+}) => {
+  const [showRenameFileItemDialog, renameDialogHandlers] = useDisclosure(false);
+  const [showDeleteFileItemDialog, deleteDialogHandlers] = useDisclosure(false);
+  const ref = useClickOutside(() => onClose());
+
+  useHotkeys([["Escape", () => onClose()]]);
+
+  return (
+    <>
+      <Menu
+        ref={ref}
+        closeOnScroll={true}
+        opened={opened}
+        control={control}
+        position="right"
+      >
+        <Menu.Item
+          onClick={() => {
+            onClose();
+            renameDialogHandlers.open();
+          }}
+          icon={<File size={14} />}
+        >
+          Rename
+        </Menu.Item>
+        <Menu.Item
+          name="_action"
+          value="deleteTabItem"
+          icon={<Trash size={14} />}
+          onClick={() => {
+            onClose();
+            deleteDialogHandlers.open();
+          }}
+        >
+          Delete
+        </Menu.Item>
+      </Menu>
+
+      <RenameFileItemDialog
+        onClose={renameDialogHandlers.close}
+        opened={showRenameFileItemDialog}
+        tabFileName={tabFileName}
+        tabFileId={tabFileId}
+      />
+
+      <DeleteFileItemDialog
+        onClose={deleteDialogHandlers.close}
+        opened={showDeleteFileItemDialog}
+        tabFileId={tabFileId}
+      />
+    </>
+  );
+};
+
+const FileItem = ({ tabFile }: { tabFile: TabFile }) => {
+  const [opened, handlers] = useDisclosure(false);
+
+  return (
+    <Box key={tabFile.id} sx={{ width: "100%" }}>
+      <Form method="post" style={{ width: "100%" }}>
+        <input hidden name="tabFileId" value={tabFile.id}></input>
+        <FileMenu
+          tabFileId={tabFile.id}
+          opened={opened}
+          onClose={handlers.close}
+          tabFileName={tabFile.name}
+          control={
+            <Button
+              size="xs"
+              variant="subtle"
+              color="gray"
+              leftIcon={
+                tabFile.ext === "jac" ? (
+                  <VectorTriangle></VectorTriangle>
+                ) : (
+                  <BrandHtml5></BrandHtml5>
+                )
+              }
+              compact
+              type="submit"
+              name="_action"
+              value="openTabItem"
+              sx={{ fontFamily: "sans-serif" }}
+              fullWidth
+              onContextMenu={(e: any) => {
+                e.preventDefault();
+                handlers.toggle();
+              }}
+            >
+              {tabFile.ext === "jac" ? tabFile.name + ".jac" : tabFile.name}
+            </Button>
+          }
+        ></FileMenu>
+      </Form>
+    </Box>
+  );
+};
+
+const RenameFileItemDialog = ({
+  opened,
+  onClose,
+  tabFileName,
+  tabFileId,
+}: {
+  opened: boolean;
+  onClose: () => void;
+  tabFileName: string;
+  tabFileId: string;
+}) => {
+  return (
+    <Modal title="Rename File" onClose={onClose} opened={opened}>
+      <Form method="post">
+        <input hidden name="tabFileId" value={tabFileId}></input>
+        <TextInput
+          defaultValue={tabFileName}
+          name="name"
+          label="Name"
+        ></TextInput>
+        <Button mt="lg" type="submit" name="_action" value="renameTabItem">
+          Change Name
+        </Button>
+      </Form>
+    </Modal>
+  );
+};
+
+const DeleteFileItemDialog = ({
+  opened,
+  onClose,
+  tabFileId,
+}: {
+  opened: boolean;
+  onClose: () => void;
+  tabFileId: string;
+}) => {
+  return (
+    <Modal
+      title="Are you sure you want to delete this file?"
+      onClose={onClose}
+      opened={opened}
+    >
+      <Form method="post">
+        <input hidden name="tabFileId" value={tabFileId}></input>
+
+        <Group position="apart">
+          <Button color="teal" onClick={onClose}>
+            No
+          </Button>
+          <Button
+            color="red"
+            type="submit"
+            mt="lg"
+            name="_action"
+            value="deleteTabItem"
+          >
+            Yes
+          </Button>
+        </Group>
+      </Form>
     </Modal>
   );
 };

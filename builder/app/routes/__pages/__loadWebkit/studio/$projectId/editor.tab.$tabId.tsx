@@ -6,23 +6,23 @@ import {
   Text,
   Group,
   ActionIcon,
+  Anchor,
 } from "@mantine/core";
 import type { Monaco } from "@monaco-editor/react";
-import { useMonaco } from "@monaco-editor/react";
 import Editor from "@monaco-editor/react";
-import { parse } from "comment-json";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import type { ActionFunction, LoaderFunction } from "remix";
+import { Link, useParams } from "remix";
 import { redirect } from "remix";
 import { json } from "remix";
-import { useLoaderData, useParams, useSearchParams, useSubmit } from "remix";
+import { useLoaderData, useSearchParams } from "remix";
 import EditorHeader from "~/components/EditorHeader";
 import { schemas } from "~/data/schema";
 import ViewsSidebar from "~/components/ViewsSidebar";
-import AddComponentModal from "~/components/playground/AddComponentModal";
 import ExamplesModal from "~/components/playground/ExamplesModal";
 // import invariant from "tiny-invariant";
 import {
+  deleteTabFile,
   getProjectOpenedTabs,
   getTabFile,
   updateTabFile,
@@ -30,39 +30,46 @@ import {
 import { createTabFile, getProjectTabFiles } from "~/models/tabFile.server";
 import { requireUserId } from "~/session.server";
 import type { TabFile, TabFileType } from "@prisma/client";
-import {
-  ArrowsMaximize,
-  ExternalLink,
-  LayoutColumns,
-} from "tabler-icons-react";
-import { useDebouncedValue, useFullscreen } from "@mantine/hooks";
-import { JacLanguage } from "~/utils/jac.contribution";
+import { ArrowsMaximize, ExternalLink } from "tabler-icons-react";
+import { useFullscreen, useHotkeys } from "@mantine/hooks";
 import { jacLang } from "~/utils/jac";
+import useEditor from "~/hooks/useEditor";
+import { graphService } from "~/services/graph.server";
+import GraphRenderer from "~/components/GraphRenderer";
 
 const StudioEditor = () => {
-  const submit = useSubmit();
   const loaderData = useLoaderData<LoaderData>();
+  const {
+    editorRef,
+    formatCode,
+    jscAppRef,
+    monacoRef,
+    onInsertComponent,
+    runCode,
+    value,
+    setValue,
+    onRunExample,
+    showPreviewText,
+  } = useEditor({ content: loaderData?.currentTab?.content || "" });
   const [showPreview, setShowPreview] = useState(true);
 
   const [searchParams] = useSearchParams();
-  const { tabId } = useParams();
   const showViews = searchParams.get("showViews") || "false";
-  const [showPreviewText, setShowPreviewText] = useState(true);
-
-  const jscAppRef = useRef<any>();
-  const [value, setValue] = useState(loaderData?.currentTab?.content || "");
-  const [showAddComponentModal, setShowAddComponentModal] = useState(false);
   const [showExamplesModal, setShowExamplesModal] = useState(false);
-  const [debouncedValue] = useDebouncedValue(value, 1500);
-
   const runButtonRef = useRef<HTMLButtonElement>(null);
-
-  const monacoRef = useRef<any>(null);
-  const editorRef = useRef<any>(null);
   const { toggle, ref: fullscreenFef } = useFullscreen();
-  const monaco = useMonaco();
+  const { projectId } = useParams();
 
-  function handleEditorWillMount(monaco: Monaco, editor) {
+  useHotkeys([
+    ["mod+M", () => alert("More actions")],
+    ["mod+F", () => alert("Format")],
+    ["mod+R", () => alert("Run code")],
+    ["mod+S", () => alert("Hide/show sidebar")],
+    ["mod+E", () => alert("Show examples")],
+    ["mod+N", () => alert("Add component")],
+  ]);
+
+  function handleEditorWillMount(monaco: Monaco) {
     // here is the monaco instance
     // do something before editor is mounted
     monaco.languages.typescript.javascriptDefaults.setEagerModelSync(true);
@@ -101,96 +108,6 @@ const StudioEditor = () => {
     // monaco.editor.setModelLanguage(model);
   }
 
-  const saveTabContent = useCallback(() => {
-    if (!tabId) return;
-    const formData = new FormData();
-    formData.set("content", value);
-    formData.set("tabFileId", tabId);
-    formData.set("_action", "saveTabContent");
-
-    submit(formData, { replace: true, method: "post" });
-  }, [submit, value]);
-
-  const formatCode = () => {
-    if (editorRef?.current) {
-      editorRef?.current.getAction("editor.action.formatDocument").run();
-    }
-  };
-
-  const runCode = useCallback(
-    (value) => {
-      if (value && jscAppRef?.current) {
-        const components = (parse(value, undefined, true) as any).components;
-        const config = (parse(value, undefined, true) as any).config;
-        jscAppRef?.current?.setGlobalConfig(config);
-        jscAppRef?.current?.setMarkup(JSON.stringify(components));
-        setShowPreviewText(false);
-      }
-    },
-    [jscAppRef]
-  );
-
-  const onRunExample = (exampleJSON: any) => {
-    setValue(JSON.stringify(exampleJSON));
-    formatCode();
-    runCode(value);
-  };
-
-  const onInsertComponent = (component: any) => {
-    // remove the last square bracket
-    setValue((value: string) => value.slice(0, value.length - 1));
-
-    // add a square bracket to the beginning
-    if (value[0] !== "[") {
-      setValue((value: string) => "[" + value);
-    }
-
-    if (value.includes("}")) {
-      setValue((value: string) => value + ",");
-    }
-
-    editorRef.current.trigger("keyboard", "type", {
-      text: JSON.stringify(component) + "\n",
-    });
-
-    formatCode();
-    setShowAddComponentModal(false);
-  };
-
-  useEffect(() => {
-    const saveTabContentTimeout = setTimeout(() => saveTabContent(), 3000);
-
-    return () => {
-      clearTimeout(saveTabContentTimeout);
-    };
-  }, [saveTabContent, value]);
-
-  useEffect(() => {
-    setValue(loaderData?.currentTab?.content || "");
-  }, [loaderData?.currentTab]);
-
-  useEffect(() => {
-    try {
-      if (jscAppRef?.current) {
-        runCode(value);
-      }
-    } catch (err) {
-      console.error(err);
-      console.log(
-        "Unable to run your code. Please check to see if it is valid."
-      );
-    }
-  }, [jscAppRef, editorRef, runCode, debouncedValue]);
-
-  useEffect(() => {
-    if (editorRef.current) {
-      monacoRef.current.editor.setModelLanguage(
-        editorRef.current.getModel(),
-        loaderData?.currentTab?.type === "Jac" ? "jac" : "json"
-      );
-    }
-  }, [editorRef, loaderData?.currentTab?.ext]);
-
   return (
     <>
       <Grid
@@ -202,10 +119,12 @@ const StudioEditor = () => {
           sx={{ background: "#1E1E1E", color: "#fff" }}
         >
           <EditorHeader
+            onInsertComponent={onInsertComponent}
             onClickRun={runCode as any}
             openTabs={loaderData.openedTabFiles}
             onClickFormat={formatCode}
             onTogglePreview={() => setShowPreview((prev) => !prev)}
+            onRunExample={(example) => onRunExample(example)}
           ></EditorHeader>
           <Grid gutter={0}>
             <Grid.Col span={showViews !== "true" ? 2 : 0}>
@@ -280,10 +199,34 @@ const StudioEditor = () => {
             </Group>
 
             <div ref={fullscreenFef} style={{ background: "#fff" }}>
-              <jsc-app ref={jscAppRef}></jsc-app>
+              {loaderData?.currentTab?.type === "View" && (
+                <jsc-app ref={jscAppRef}></jsc-app>
+              )}
+
+              {loaderData?.currentTab?.type === "Jac" && (
+                <>
+                  {loaderData.graphs.length ? (
+                    <GraphRenderer
+                      token={loaderData.graphs?.[0]?.token}
+                      graphJid={loaderData.graphs?.[0]?.jid}
+                      endpoint={loaderData.graphs?.[0]?.endpoint}
+                    ></GraphRenderer>
+                  ) : (
+                    <p>
+                      No graph added to this project yet.{" "}
+                      <Anchor
+                        component={Link}
+                        to={`/studio/${projectId}/graphs/add-graph`}
+                      >
+                        Add one.
+                      </Anchor>
+                    </p>
+                  )}
+                </>
+              )}
             </div>
 
-            {showPreviewText && (
+            {showPreviewText && loaderData?.currentTab?.type === "View" && (
               <>
                 <Title
                   sx={(theme) => ({
@@ -307,11 +250,6 @@ const StudioEditor = () => {
         </Grid.Col>
       </Grid>
 
-      <AddComponentModal
-        opened={showAddComponentModal}
-        setOpened={setShowAddComponentModal}
-        onInsertComponent={onInsertComponent}
-      ></AddComponentModal>
       <ExamplesModal
         opened={showExamplesModal}
         setOpened={setShowExamplesModal}
@@ -324,6 +262,7 @@ const StudioEditor = () => {
 type LoaderData = {
   tabFiles: Awaited<ReturnType<typeof getProjectTabFiles>>;
   openedTabFiles: Awaited<ReturnType<typeof getProjectOpenedTabs>>;
+  graphs: Awaited<ReturnType<typeof graphService.getGraphs>>;
   currentTab: TabFile | undefined;
 };
 
@@ -344,7 +283,9 @@ export const loader: LoaderFunction = async ({ request, params }) => {
   });
   const currentTab = openedTabFiles.find((tab) => tab.id === tabId);
 
-  return json<LoaderData>({ tabFiles, openedTabFiles, currentTab });
+  const graphs = await graphService.getGraphs({ userId });
+
+  return json<LoaderData>({ tabFiles, openedTabFiles, currentTab, graphs });
 };
 
 export const action: ActionFunction = async ({ request, params }) => {
@@ -412,6 +353,23 @@ export const action: ActionFunction = async ({ request, params }) => {
         input: { content: content as string },
       });
     }
+  }
+
+  if (action === "deleteTabItem") {
+    const tabFileId = formData.get("tabFileId");
+
+    await deleteTabFile({ tabFileId: tabFileId as string, userId });
+  }
+
+  if (action === "renameTabItem") {
+    const tabFileId = formData.get("tabFileId");
+    const name = formData.get("name");
+
+    await updateTabFile({
+      tabFileId: tabFileId as string,
+      userId,
+      input: { name: name as string },
+    });
   }
 
   console.log("referrer", request.headers.get("referer"));

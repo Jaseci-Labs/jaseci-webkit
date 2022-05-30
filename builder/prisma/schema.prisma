@@ -49,8 +49,9 @@ model Project {
   user   User   @relation(fields: [userId], references: [id])
   userId String
 
-  sites ProjectSite[]
-  tab   TabFile[]
+  sites  ProjectSite[]
+  tab    TabFile[]
+  graphs Graph[]
 }
 
 model ProjectSite {
@@ -72,10 +73,13 @@ model Graph {
   jid       String   @unique
   name      String
   endpoint  String
+  token     String   @default("")
   user      User     @relation(fields: [userId], references: [id])
   userId    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  project   Project? @relation(fields: [projectId], references: [id])
+  projectId String?
 }
 
 model TabFile {

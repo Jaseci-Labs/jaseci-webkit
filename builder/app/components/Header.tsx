@@ -9,7 +9,7 @@ import {
   Tabs,
   Text,
   Title,
-  UnstyledButton
+  UnstyledButton,
 } from "@mantine/core";
 import { useBooleanToggle } from "@mantine/hooks";
 import React, { useState } from "react";
@@ -23,7 +23,7 @@ import {
   Settings,
   Star,
   SwitchHorizontal,
-  Trash
+  Trash,
 } from "tabler-icons-react";
 
 const useStyles = createStyles((theme) => ({
@@ -89,8 +89,9 @@ const useStyles = createStyles((theme) => ({
   },
 
   tabControlActive: {
-    color: `${theme.colorScheme === "dark" ? theme.white : theme.black
-      } !important`,
+    color: `${
+      theme.colorScheme === "dark" ? theme.white : theme.black
+    } !important`,
     borderColor: `${theme.colors[theme.primaryColor][6]} !important`,
   },
 }));
@@ -163,33 +164,8 @@ export function Header({ user, tabs }: HeaderTabsProps) {
               </UnstyledButton>
             }
           >
-            <Menu.Item icon={<Heart size={14} color={theme.colors.red[6]} />}>
-              Liked posts
-            </Menu.Item>
-            <Menu.Item icon={<Star size={14} color={theme.colors.yellow[6]} />}>
-              Saved posts
-            </Menu.Item>
-            <Menu.Item
-              icon={<Message size={14} color={theme.colors.blue[6]} />}
-            >
-              Your comments
-            </Menu.Item>
-
-            <Menu.Label>Settings</Menu.Label>
-            <Menu.Item icon={<Settings size={14} />}>
-              Account settings
-            </Menu.Item>
-            <Menu.Item icon={<SwitchHorizontal size={14} />}>
-              Change account
-            </Menu.Item>
-            <Menu.Item icon={<Logout size={14} />}>Logout</Menu.Item>
-
-            <Divider />
-
             <Menu.Label>Danger zone</Menu.Label>
-            <Menu.Item icon={<PlayerPause size={14} />}>
-              Pause subscription
-            </Menu.Item>
+
             <Form action="/logout" method="post">
               <Menu.Item<"button">
                 color="red"

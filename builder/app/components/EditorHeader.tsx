@@ -7,10 +7,10 @@ import {
   Text,
   Tooltip,
 } from "@mantine/core";
-import { useHover } from "@mantine/hooks";
+import { useDisclosure, useHotkeys, useHover } from "@mantine/hooks";
 import type { TabFile } from "@prisma/client";
 import React from "react";
-import { Form, Link, useNavigate, useParams, useSearchParams } from "remix";
+import { Form, useNavigate, useParams, useSearchParams } from "remix";
 
 import {
   Braces,
@@ -23,104 +23,138 @@ import {
   VectorTriangle,
   X,
 } from "tabler-icons-react";
+import AddComponentModal from "./playground/AddComponentModal";
+import ExamplesModal from "./playground/ExamplesModal";
 
 const EditorHeader = ({
   openTabs,
   onClickRun,
   onClickFormat,
   onTogglePreview,
+  onInsertComponent,
+  onRunExample,
 }: {
   openTabs: TabFile[];
   onClickRun: () => void;
+  onRunExample: (example: Record<any, any>) => void;
   onClickFormat: () => void;
   onTogglePreview: () => void;
+  onInsertComponent: (component: Record<any, any>) => void;
 }) => {
   const { projectId } = useParams();
   const { tabId } = useParams();
   const navigate = useNavigate();
+  const [showNewComponentDialog, newComponentDialogHandlers] =
+    useDisclosure(false);
+  const [showExamplesDialog, examplesDialogHandlers] = useDisclosure(false);
+
+  useHotkeys([["alt+N", () => newComponentDialogHandlers.open()]]);
 
   return (
-    <Group
-      position="apart"
-      sx={{
-        height: "40px",
-        width: "100%",
-        background: "#202327",
-        borderBottom: "1px solid #484f567d",
-      }}
-    >
-      <Group sx={{ height: "100%", gap: 0, maxWidth: "80%" }}>
-        {openTabs.map((tab) => (
-          <EditorTab
-            key={tab.id}
-            ext={tab.ext}
-            active={tabId == tab.id}
-            title={tab.name}
-            onClick={() => {
-              navigate(`/studio/${projectId}/editor/tab/${tab.id}`);
-            }}
-            id={tab.id}
-          />
-        ))}
-      </Group>
-      {/* Action Icons */}
-      <Group px="md" spacing={2}>
-        <Group px="md" spacing={1}>
-          <ActionIcon onClick={onClickRun} color="teal" variant="filled">
-            <PlayerPlay size={16}></PlayerPlay>
-          </ActionIcon>
-        </Group>
-        <ActionIcon color="indigo" onClick={onTogglePreview} variant="filled">
-          <LayoutColumns size={16}></LayoutColumns>
-        </ActionIcon>
-        <Tooltip
-          label={
-            <Text>
-              Format <Kbd ml="xs">CTRL</Kbd> + <Kbd>SHIFT</Kbd> + <Kbd>F</Kbd>
-            </Text>
-          }
-          position="bottom"
-          withArrow
-        >
-          <ActionIcon onClick={onClickFormat}>
-            <Braces size={16} color={"#9ba9b8"}></Braces>
-          </ActionIcon>
-        </Tooltip>
+    <>
+      <ExamplesModal
+        onClose={examplesDialogHandlers.close}
+        onRunExample={(example) => onRunExample(example)}
+        opened={showExamplesDialog}
+      ></ExamplesModal>
 
-        <Menu
-          color={"red"}
-          control={
-            <Tooltip
-              label={
-                <Text>
-                  More Actions <Kbd ml="xs">CTRL</Kbd> + <Kbd>M</Kbd>
-                </Text>
-              }
-              position="bottom"
-              withArrow
+      <AddComponentModal
+        opened={showNewComponentDialog}
+        onInsertComponent={(component) => {
+          newComponentDialogHandlers.close();
+          onInsertComponent(component);
+        }}
+        onClose={() => newComponentDialogHandlers.close()}
+      ></AddComponentModal>
+
+      <Group
+        position="apart"
+        sx={{
+          height: "40px",
+          width: "100%",
+          background: "#202327",
+          borderBottom: "1px solid #484f567d",
+        }}
+      >
+        <Group sx={{ height: "100%", gap: 0, maxWidth: "80%" }}>
+          {openTabs.map((tab) => (
+            <EditorTab
+              key={tab.id}
+              ext={tab.ext || ""}
+              active={tabId == tab.id}
+              title={tab.name}
+              onClick={() => {
+                navigate(`/studio/${projectId}/editor/tab/${tab.id}`);
+              }}
+              id={tab.id}
+            />
+          ))}
+        </Group>
+        {/* Action Icons */}
+        <Group px="md" spacing={2}>
+          <Group px="md" spacing={1}>
+            <ActionIcon onClick={onClickRun} color="teal" variant="filled">
+              <PlayerPlay size={16}></PlayerPlay>
+            </ActionIcon>
+          </Group>
+          <ActionIcon color="indigo" onClick={onTogglePreview} variant="filled">
+            <LayoutColumns size={16}></LayoutColumns>
+          </ActionIcon>
+          <Tooltip
+            label={
+              <Text>
+                Format <Kbd ml="xs">CTRL</Kbd> + <Kbd>SHIFT</Kbd> + <Kbd>F</Kbd>
+              </Text>
+            }
+            position="bottom"
+            withArrow
+          >
+            <ActionIcon onClick={onClickFormat}>
+              <Braces size={16} color={"#9ba9b8"}></Braces>
+            </ActionIcon>
+          </Tooltip>
+
+          <Menu
+            color={"red"}
+            control={
+              <Tooltip
+                label={
+                  <Text>
+                    More Actions <Kbd ml="xs">CTRL</Kbd> + <Kbd>M</Kbd>
+                  </Text>
+                }
+                position="bottom"
+                withArrow
+              >
+                <ActionIcon>
+                  <MenuIcon size={16} color={"#9ba9b8"}></MenuIcon>
+                </ActionIcon>
+              </Tooltip>
+            }
+          >
+            <Menu.Label>Actions</Menu.Label>
+            <Menu.Item
+              onClick={newComponentDialogHandlers.open}
+              icon={<NewSection></NewSection>}
             >
-              <ActionIcon>
-                <MenuIcon size={16} color={"#9ba9b8"}></MenuIcon>
-              </ActionIcon>
-            </Tooltip>
-          }
-        >
-          <Menu.Label>Actions</Menu.Label>
-          <Menu.Item icon={<NewSection></NewSection>}>
-            Add Component
-            <Box mt="xs">
-              <Kbd my="md">CTRL</Kbd> + <Kbd my="md">N</Kbd>
-            </Box>
-          </Menu.Item>
-          <Menu.Item icon={<InfoSquare></InfoSquare>}>
-            Examples
-            <Box mt="xs">
-              <Kbd my="md">CTRL</Kbd> + <Kbd my="md">E</Kbd>
-            </Box>
-          </Menu.Item>
-        </Menu>
+              Add Component
+              <Box mt="xs">
+                <Kbd my="md">CTRL</Kbd> + <Kbd my="md">N</Kbd>
+              </Box>
+            </Menu.Item>
+            <Menu.Item
+              onClick={examplesDialogHandlers.open}
+              icon={<InfoSquare></InfoSquare>}
+            >
+              Examples
+              <Box mt="xs">
+                <Kbd my="md">CTRL</Kbd> + <Kbd my="md">E</Kbd>
+              </Box>
+            </Menu.Item>
+          </Menu>
+        </Group>
       </Group>
-    </Group>
+    </>
   );
 };
 

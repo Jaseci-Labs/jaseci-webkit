@@ -29,6 +29,7 @@ const NewProjectPage = () => {
           name="title"
           label="Name"
           placeholder="Enter project name"
+          required
         ></TextInput>
         <Group position="right" my="lg">
           <Button type="submit">Create Project</Button>

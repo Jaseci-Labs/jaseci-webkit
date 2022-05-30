@@ -3,7 +3,12 @@ import { ColorSchemeProvider, MantineProvider } from "@mantine/core";
 import { NotificationsProvider } from "@mantine/notifications";
 import type { CatchBoundaryComponent } from "@remix-run/react/routeModules";
 import { useEffect, useState } from "react";
-import type { LinksFunction, LoaderFunction, MetaFunction } from "remix";
+import type {
+  ErrorBoundaryComponent,
+  LinksFunction,
+  LoaderFunction,
+  MetaFunction,
+} from "remix";
 import { useTransition } from "remix";
 import NProgress from "nprogress";
 import nProgressStyles from "nprogress/nprogress.css";
@@ -83,6 +88,23 @@ export default function App() {
     </html>
   );
 }
+
+export const ErrorBoundary: ErrorBoundaryComponent = ({ children, error }) => {
+  return (
+    <>
+      <html lang="en" className="h-full">
+        <head>
+          <Meta />
+          <Links />
+        </head>
+        <body>
+          <MantineTheme>{children}</MantineTheme>
+          {JSON.stringify(error)}
+        </body>
+      </html>
+    </>
+  );
+};
 
 export const CatchBoundary: CatchBoundaryComponent = ({ children }) => {
   const caught = useCatch();

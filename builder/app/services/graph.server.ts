@@ -5,6 +5,8 @@ type CreateGraphInput = {
   endpoint: string;
   userId: string;
   name: string;
+  token: string;
+  projectId: string;
 };
 
 type GetGraphsInput = {
@@ -17,10 +19,17 @@ type GetGraphInput = {
 };
 
 export class GraphService extends BaseService {
-  async createGraph({ jid, endpoint, userId, name }: CreateGraphInput) {
+  async createGraph({
+    jid,
+    endpoint,
+    userId,
+    name,
+    token,
+    projectId,
+  }: CreateGraphInput) {
     try {
       const graph = await this.db.graph.create({
-        data: { jid, userId, endpoint, name },
+        data: { jid, userId, endpoint, name, token, projectId },
       });
 
       return graph;

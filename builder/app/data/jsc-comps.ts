@@ -117,10 +117,29 @@ export const jaseciComps: any = {
         label: "Variant",
         name: "variant",
         data: [
-          { label: "Simple", value: "simple" },
-          { label: "Title", value: "title" },
+          { label: "h1", value: "h1" },
+          { label: "h2", value: "h2" },
+          { label: "h3", value: "h3" },
+          { label: "h4", value: "h4" },
+          { label: "h5", value: "h5" },
+          { label: "h6", value: "h6" },
         ],
       },
+    ],
+  },
+  Divider: {
+    props: [{ type: "input", name: "name", label: "Name" }],
+  },
+  DatePicker: {
+    props: [
+      { type: "input", name: "name", label: "Name" },
+      { type: "input", name: "label", label: "Label" },
+    ],
+  },
+  Chip: {
+    props: [
+      { type: "input", name: "name", label: "Name" },
+      { type: "input", name: "label", label: "Label" },
     ],
   },
 };

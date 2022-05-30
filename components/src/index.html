@@ -20,11 +20,17 @@
 
 <body>
   <jsc-app></jsc-app>
-  <!-- <my-component first="Stencil" last="'Don't call me a framework' JS"></my-component> -->
+
   <script>
     customElements.whenDefined('jsc-app').then(() => {
       const app = document.querySelector('jsc-app');
-      const config = { siteName: "Hello World" }
+      const config = {
+        siteName: "Hello World",
+        css: {
+          background: "#F2F6F9",
+          height: "100%"
+        }
+      }
 
       app.setGlobalConfig(config)
 
@@ -34,295 +40,83 @@
             component: 'Navbar',
             sections: {
               links: [
-                { component: 'NavLink', props: { label: 'Home', href: 'https://google.com', color: '#fff' } },
-                { component: 'NavLink', props: { label: 'About', href: 'https://google.com', color: '#fff' } },
+                { component: 'NavLink', props: { label: 'My Logs', href: 'https://google.com', color: '#fff' } },
+                { component: 'NavLink', props: { label: 'Logout', href: 'https://google.com', color: '#fff' } },
               ],
             },
             props: { label: 'config(siteName)' },
             css: { background: '#000000' },
           },
           {
-            component: 'Container',
+
+            component: 'Row',
+            props: {
+              items: "center",
+              justify: "between",
+            },
             css: {
               width: '100%',
               height: '100%',
-              border: '2px solid blue',
-              padding: '10px',
+              padding: '10px 300px',
+              display: "flex",
             },
             sections: {
               children: [
                 {
-                  component: 'Row',
+                  component: "Text",
                   props: {
-                    justify: 'around',
-                  },
-                  css: {
-                    width: '100%',
-                    padding: '10px 0px',
-                  },
-                  sections: {
-                    children: [
-                      {
-                        component: 'Column',
-                        css: {
-                          width: '400px',
-                          height: '600px',
-                          padding: '10px',
-                          background: 'rgba(155, 0, 50, 0.2)',
-                        },
-                        props: {
-                          justify: 'center',
-                          items: 'start',
-                        },
-                        sections: {
-                          children: [
-                            {
-                              component: 'Container',
-                              css: {
-                                width: '100px',
-                                background: 'green',
-                                height: '100px',
-                              },
-                            },
-                            {
-                              component: 'Container',
-                              props: {},
-                              css: {
-                                width: '100px',
-                                background: 'blue',
-                                height: '100px',
-                              },
-                            },
-                            {
-                              component: 'Container',
-                              css: {
-                                width: '100px',
-                                background: 'red',
-                                height: '100px',
-                              },
-                            },
-                          ],
-                        },
-                      },
-                      {
-                        component: 'Row',
-                        sections: {
-                          children: [
-                            {
-                              component: 'Container',
-                              css: {
-                                width: '100px',
-                                height: '100px',
-                                background: 'purple',
-                                border: '2px solid red',
-                              },
-                            },
-                            {
-                              component: 'Container',
-                              css: {
-                                width: '100px',
-                                height: '100px',
-                                background: 'blue',
-                                border: '2px solid purple',
-                              },
-                            },
-                            {
-                              component: 'Container',
-                              css: {
-                                width: '100px',
-                                height: '100px',
-                                background: 'green',
-                                border: '2px solid blue',
-                              },
-                            },
-                          ],
-                        },
-                        props: {
-                          // justify: 'around',
-                          items: 'center',
-                        },
-                        css: {
-                          width: '400px',
-                          height: '300px',
-                          padding: '10px',
-                          background: 'rgba(155, 0, 50, 0.2)',
-                        },
-                      },
-                    ],
+                    variant: "h1",
+                    value: "Logs"
                   },
                 },
                 {
-                  name: 'ib1',
-                  component: 'Inputbox',
+                  component: "Button",
                   props: {
-                    label: 'Name',
-                    value: '',
-                    placeholder: 'Enter your name',
-                    fullwidth: 'true',
-                    margin: '10px 0',
-                  },
-                  events: {
-                    onEnterKeyPress: [
-                      {
-                        fn: 'runOperation',
-                        operation: 'msgs.appendMessage',
-                        args: ['Hello world.'],
-                      },
-                    ],
-                  },
-                },
-                {
-                  name: 'textBox1',
-                  component: 'Textbox',
-                  props: {
-                    placeholder: 'Enter a message for config(siteName)...',
-                    label: 'Biography',
-                    fullwidth: 'true',
-                    margin: '10px 0',
-                  },
-                },
-                {
-                  name: 'b1',
-                  component: 'Button',
-                  events: {
-                    onClick: [
-                      {
-                        fn: 'update',
-                        args: ['textBox1.placeholder', 'var(ib1.placeholder)'],
-                      },
-                      {
-                        fn: 'update',
-                        args: ['b1.label', 'var(ib1.value)'],
-                      },
-                    ],
-                  },
-                  css: {
-                    marginTop: '10px',
-                  },
-                  props: {
-                    label: 'Click Here',
-                  },
-                },
-
-                {
-                  name: 'msgs',
-                  component: 'Container',
-                  css: {
-                    width: '300px',
-                    height: '200px',
-                    background: '#fff',
-                    border: '1px solid red',
-                    margin: '10px 0',
-                    padding: '0px 8px',
-                  },
-                  operations: {
-                    alertMessage: {
-                      args: ['message1', 'message2'],
-                      run: [
-                        { fn: 'alert', args: ['arg(message1) huh'] },
-                        { fn: 'alert', args: ['arg(message2) cool'] },
-                      ],
-                    },
-                    appendMessage: {
-                      args: ['messageBody'],
-                      run: [
-                        {
-                          fn: 'append',
-                          args: [
-                            {
-                              component: 'Text',
-                              props: { value: 'var(messageBody) cool' },
-                            },
-                          ],
-                        },
-                      ],
-                    },
-                  },
-                },
-                {
-                  component: 'Button',
-                  props: { label: 'View Operations' },
-                  events: {
-                    onClick: [{ fn: 'alert', args: ['var(msgs.operations)'] }],
-                  },
-                },
-                // run the messages operation
-                {
-                  component: 'Button',
-                  props: { label: 'Run Operations' },
-                  events: {
-                    onClick: [
-                      {
-                        fn: 'runOperation',
-                        operation: 'msgs.alertMessage',
-                        args: ['does this work well?', 'This is another message'],
-                        onCompleted: { fn: 'alert', args: ['Phase 1 Done'] },
-                      },
-                      {
-                        fn: 'runOperation',
-                        operation: 'msgs.alertMessage',
-                        args: ['new message', 'Cool shiz', 'bug?'],
-                      },
-                      {
-                        fn: "callEndpoint",
-                        endpoint: "http://127.0.0.1:3334",
-                        args: ["GET"],
-                        onCompleted: { fn: "alert", args: ["👋 Hello res(hello)"] }
-                      }
-                    ],
-                  },
-                },
-
-                {
-                  component: 'Container',
-                  sections: {
-                    children: [
-                      {
-                        component: 'Text',
-                        props: { value: 'Counter' },
-                        css: { fontWeight: 'bold', fontSize: '1.2em', textDecoration: 'underline' },
-                      },
-                      {
-                        component: 'Row',
-                        sections: {
-                          children: [
-                            {
-                              component: 'Text',
-                              props: { value: 'Current value: ' },
-                              css: { marginRight: '5px' },
-                            },
-                            {
-                              name: 'counterText',
-                              component: 'Text',
-                              props: { value: '0' },
-                            },
-                          ],
-                        },
-                      },
-                      {
-                        name: 'counterButton',
-                        component: 'Button',
-                        props: { label: 'Count' },
-                        events: {
-                          onClick: [
-                            {
-                              fn: 'add',
-                              args: ['var(counterText.value)', 1],
-                              cond: ['var(counterText.value)::#neq::10'],
-                              onCompleted: {
-                                fn: 'update',
-                                args: ['counterText.value', 'var(result)'],
-                              },
-                            },
-                          ],
-                        },
-                      },
-                    ],
-                  },
-                },
-              ],
+                    label: "Add a Log"
+                  }
+                }
+              ]
             },
           },
+          {
+            component: "Card",
+            props: {
+              variant: "outline",
+              shadow: "md",
+              outlineColor: "red",
+              radius: "lg"
+            },
+            css: {
+              padding: "20px 20px",
+              borderColor: "blue"
+            },
+            sections: {
+              children: [
+                {
+                  component: "Text",
+                  props: {
+                    variant: "h2",
+                    value: "Logs"
+                  },
+                },
+                {
+                  component: "Textbox",
+                  props: {
+                    label: "Date",
+                  },
+                  css: {
+                  }
+                }
+              ]
+            }
+          },
+
+          {
+            component: "DatePicker",
+            props: {
+              label: "Date"
+            }
+          }
         ])
       );
     })
