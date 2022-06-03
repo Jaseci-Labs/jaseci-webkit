@@ -1,19 +1,23 @@
 import { useDebouncedValue } from "@mantine/hooks";
+import type { TabFile } from "@prisma/client";
 import { parse } from "comment-json";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSubmit, useParams, useLoaderData } from "remix";
+import useViewer from "./useViewer";
 
-const useEditor = ({ content }: { content: string }) => {
+const useEditor = ({ content, tabs }: { content: string; tabs: TabFile[] }) => {
   const [value, setValue] = useState(content);
-  const [showPreviewText, setShowPreviewText] = useState(true);
   const submit = useSubmit();
-  const { tabId } = useParams();
-  const [showAddComponentModal, setShowAddComponentModal] = useState(false);
+  const { tabId, projectId } = useParams();
+  const [, setShowAddComponentModal] = useState(false);
   const [debouncedValue] = useDebouncedValue(value, 1500);
   const editorRef = useRef<any>(null);
   const monacoRef = useRef<any>(null);
-  const jscAppRef = useRef<any>();
   const loaderData = useLoaderData();
+
+  const { runCode, showPreviewText, jscAppRef } = useViewer({
+    projectId: projectId as string,
+  });
 
   const saveTabContent = useCallback(() => {
     if (!tabId) return;
@@ -31,23 +35,10 @@ const useEditor = ({ content }: { content: string }) => {
     }
   };
 
-  const runCode = useCallback(
-    (value) => {
-      if (value && jscAppRef?.current) {
-        const components = (parse(value, undefined, true) as any).components;
-        const config = (parse(value, undefined, true) as any).config;
-        jscAppRef?.current?.setGlobalConfig(config);
-        jscAppRef?.current?.setMarkup(JSON.stringify(components));
-        setShowPreviewText(false);
-      }
-    },
-    [jscAppRef]
-  );
-
   const onRunExample = (exampleJSON: any) => {
     setValue(JSON.stringify(exampleJSON));
     formatCode();
-    runCode(value);
+    runCode(value, tabs);
   };
 
   const onInsertComponent = (component: any) => {
@@ -86,7 +77,7 @@ const useEditor = ({ content }: { content: string }) => {
   useEffect(() => {
     try {
       if (jscAppRef?.current) {
-        runCode(value);
+        runCode(value, tabs);
       }
     } catch (err) {
       console.error(err);

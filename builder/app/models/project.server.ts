@@ -28,6 +28,21 @@ export async function getProjects({ userId }: GetProjectsInput) {
   });
 }
 
+type GetProjectHomepageInput = {
+  projectId: string;
+};
+
+export async function getProjectHomepage({
+  projectId,
+}: GetProjectHomepageInput) {
+  const project = await prisma.project.findFirst({
+    where: { id: projectId },
+    include: { homepage: true },
+  });
+
+  return project?.homepage;
+}
+
 type DeleteProjectInput = {
   projectId: string;
   userId: string;

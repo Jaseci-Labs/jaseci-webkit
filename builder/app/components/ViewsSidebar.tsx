@@ -18,11 +18,18 @@ import {
   File,
   Plus,
   Settings,
+  Star,
   Trash,
   VectorTriangle,
 } from "tabler-icons-react";
 
-const ViewsSidebar = ({ tabFiles }: { tabFiles: TabFile[] }) => {
+const ViewsSidebar = ({
+  tabFiles,
+  homepage,
+}: {
+  tabFiles: TabFile[];
+  homepage: TabFile | null | undefined;
+}) => {
   const [showNewItemModal, setShowNewItemModal] = React.useState(false);
 
   return (
@@ -52,7 +59,11 @@ const ViewsSidebar = ({ tabFiles }: { tabFiles: TabFile[] }) => {
           New
         </Button>
         {tabFiles.map((tabFile) => (
-          <FileItem tabFile={tabFile} key={tabFile.id}></FileItem>
+          <FileItem
+            isHomepage={tabFile.id === homepage?.id}
+            tabFile={tabFile}
+            key={tabFile.id}
+          ></FileItem>
         ))}
       </Stack>
       <NewItemModal
@@ -184,7 +195,13 @@ const FileMenu = ({
   );
 };
 
-const FileItem = ({ tabFile }: { tabFile: TabFile }) => {
+const FileItem = ({
+  tabFile,
+  isHomepage,
+}: {
+  tabFile: TabFile;
+  isHomepage: boolean;
+}) => {
   const [opened, handlers] = useDisclosure(false);
 
   return (
@@ -208,9 +225,13 @@ const FileItem = ({ tabFile }: { tabFile: TabFile }) => {
                   <BrandHtml5></BrandHtml5>
                 )
               }
+              rightIcon={isHomepage ? <Star size={14}></Star> : undefined}
               compact
               type="submit"
               name="_action"
+              styles={(theme) => ({
+                rightIcon: { marginLeft: 6, color: theme.colors.orange[8] },
+              })}
               value="openTabItem"
               sx={{ fontFamily: "sans-serif" }}
               fullWidth

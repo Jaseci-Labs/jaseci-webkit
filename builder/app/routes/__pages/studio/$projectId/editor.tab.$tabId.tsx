@@ -7,11 +7,13 @@ import {
   Group,
   ActionIcon,
   Anchor,
+  Button,
 } from "@mantine/core";
 import type { Monaco } from "@monaco-editor/react";
 import Editor from "@monaco-editor/react";
 import { useRef, useState } from "react";
 import type { ActionFunction, LoaderFunction } from "remix";
+import { Form } from "remix";
 import { Link, useParams } from "remix";
 import { redirect } from "remix";
 import { json } from "remix";
@@ -30,12 +32,13 @@ import {
 import { createTabFile, getProjectTabFiles } from "~/models/tabFile.server";
 import { requireUserId } from "~/session.server";
 import type { TabFile, TabFileType } from "@prisma/client";
-import { ArrowsMaximize, ExternalLink } from "tabler-icons-react";
+import { ArrowsMaximize, ExternalLink, Star } from "tabler-icons-react";
 import { useFullscreen, useHotkeys } from "@mantine/hooks";
 import { jacLang } from "~/utils/jac";
 import useEditor from "~/hooks/useEditor";
 import { graphService } from "~/services/graph.server";
 import GraphRenderer from "~/components/GraphRenderer";
+import { getProjectHomepage, updateProject } from "~/models/project.server";
 
 const StudioEditor = () => {
   const loaderData = useLoaderData<LoaderData>();
@@ -50,7 +53,10 @@ const StudioEditor = () => {
     setValue,
     onRunExample,
     showPreviewText,
-  } = useEditor({ content: loaderData?.currentTab?.content || "" });
+  } = useEditor({
+    content: loaderData?.currentTab?.content || "",
+    tabs: loaderData.tabFiles,
+  });
   const [showPreview, setShowPreview] = useState(true);
 
   const [searchParams] = useSearchParams();
@@ -58,7 +64,7 @@ const StudioEditor = () => {
   const [showExamplesModal, setShowExamplesModal] = useState(false);
   const runButtonRef = useRef<HTMLButtonElement>(null);
   const { toggle, ref: fullscreenFef } = useFullscreen();
-  const { projectId } = useParams();
+  const { tabId, projectId } = useParams();
 
   useHotkeys([
     ["mod+M", () => alert("More actions")],
@@ -120,7 +126,7 @@ const StudioEditor = () => {
         >
           <EditorHeader
             onInsertComponent={onInsertComponent}
-            onClickRun={runCode as any}
+            onClickRun={() => runCode(value, loaderData?.tabFiles)}
             openTabs={loaderData.openedTabFiles}
             onClickFormat={formatCode}
             onTogglePreview={() => setShowPreview((prev) => !prev)}
@@ -129,7 +135,10 @@ const StudioEditor = () => {
           <Grid gutter={0}>
             <Grid.Col span={showViews !== "true" ? 2 : 0}>
               {showViews !== "true" && (
-                <ViewsSidebar tabFiles={loaderData.tabFiles}></ViewsSidebar>
+                <ViewsSidebar
+                  homepage={loaderData.projectHomepage}
+                  tabFiles={loaderData.tabFiles}
+                ></ViewsSidebar>
               )}
             </Grid.Col>
             <Grid.Col span={showViews !== "true" ? 10 : 12}>
@@ -187,9 +196,31 @@ const StudioEditor = () => {
                 borderBottom: "1px solid #484f567d",
               }}
             >
-              <Group px="md"></Group>
               <Group px="md">
-                <ActionIcon color="grape" variant="filled">
+                {tabId && loaderData?.currentTab?.type === "View" && (
+                  <Form method="post">
+                    <Button
+                      type="submit"
+                      name="_action"
+                      value="setProjectHomepage"
+                      size="xs"
+                      color="orange"
+                      disabled={loaderData?.projectHomepage?.id === tabId}
+                      leftIcon={<Star size={14}></Star>}
+                    >
+                      Set as Homepage
+                    </Button>
+                  </Form>
+                )}
+              </Group>
+              <Group px="md">
+                <ActionIcon
+                  component={Link}
+                  to={`/site/${projectId}/${loaderData.currentTab?.name.toLowerCase()}`}
+                  target="_blank"
+                  color="grape"
+                  variant="filled"
+                >
                   <ExternalLink size={16}></ExternalLink>
                 </ActionIcon>
                 <ActionIcon onClick={toggle} color="blue" variant="filled">
@@ -200,7 +231,11 @@ const StudioEditor = () => {
 
             <div ref={fullscreenFef} style={{ background: "#fff" }}>
               {loaderData?.currentTab?.type === "View" && (
-                <jsc-app ref={jscAppRef}></jsc-app>
+                <div
+                  style={{ maxHeight: "calc(100vh - 40px)", overflow: "auto" }}
+                >
+                  <jsc-app ref={jscAppRef}></jsc-app>
+                </div>
               )}
 
               {loaderData?.currentTab?.type === "Jac" && (
@@ -252,7 +287,7 @@ const StudioEditor = () => {
 
       <ExamplesModal
         opened={showExamplesModal}
-        setOpened={setShowExamplesModal}
+        onClose={() => setShowExamplesModal(false)}
         onRunExample={onRunExample}
       ></ExamplesModal>
     </>
@@ -264,11 +299,10 @@ type LoaderData = {
   openedTabFiles: Awaited<ReturnType<typeof getProjectOpenedTabs>>;
   graphs: Awaited<ReturnType<typeof graphService.getGraphs>>;
   currentTab: TabFile | undefined;
+  projectHomepage: Awaited<ReturnType<typeof getProjectHomepage>>;
 };
 
 export const loader: LoaderFunction = async ({ request, params }) => {
-  const url = new URL(request.url);
-
   const userId = await requireUserId(request);
   const { projectId, tabId } = params;
   // invariant(typeof projectId === "string");
@@ -282,15 +316,24 @@ export const loader: LoaderFunction = async ({ request, params }) => {
     userId,
   });
   const currentTab = openedTabFiles.find((tab) => tab.id === tabId);
+  const projectHomepage = await getProjectHomepage({
+    projectId: projectId as string,
+  });
 
   const graphs = await graphService.getGraphs({ userId });
 
-  return json<LoaderData>({ tabFiles, openedTabFiles, currentTab, graphs });
+  return json<LoaderData>({
+    tabFiles,
+    openedTabFiles,
+    currentTab,
+    graphs,
+    projectHomepage,
+  });
 };
 
 export const action: ActionFunction = async ({ request, params }) => {
   const userId = await requireUserId(request);
-  const { projectId } = params;
+  const { projectId, tabId } = params;
   // invariant(projectId, "projectId is required");
 
   const formData = await request.formData();
@@ -369,6 +412,14 @@ export const action: ActionFunction = async ({ request, params }) => {
       tabFileId: tabFileId as string,
       userId,
       input: { name: name as string },
+    });
+  }
+
+  if (action === "setProjectHomepage") {
+    await updateProject({
+      projectId: projectId as string,
+      input: { homepage: { connect: { id: tabId } } },
+      userId,
     });
   }
 

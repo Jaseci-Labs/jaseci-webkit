@@ -29,7 +29,7 @@ export function ProjectsTable({ projects }: { projects: Project[] }) {
             variant="hover"
             size="sm"
             onClick={() => {
-              navigate(`/projects/${project.id}/edit`);
+              navigate(`/site/${project.id}`);
             }}
           >
             <View360></View360>

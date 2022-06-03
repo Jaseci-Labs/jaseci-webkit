@@ -98,6 +98,23 @@ export const getTabFile = ({ tabFileId, userId }: GetTabFile) => {
   });
 };
 
+type GetTabFileByName = {
+  tabFileName: string;
+  projectId: string;
+};
+
+export const getTabFileByName = ({
+  tabFileName,
+  projectId,
+}: GetTabFileByName) => {
+  return prisma.tabFile.findFirst({
+    where: {
+      name: { equals: tabFileName, mode: "insensitive" },
+      projectId: projectId,
+    },
+  });
+};
+
 type DeleteTabFile = { tabFileId: string; userId: string };
 
 export const deleteTabFile = ({ tabFileId, userId }: DeleteTabFile) => {
