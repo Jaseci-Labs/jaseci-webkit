@@ -12,12 +12,14 @@ const GraphDetailPage = () => {
 
   return (
     <div>
-      <Card shadow="xs" sx={{ width: "100%", height: 300 }} mt="lg">
+      <Card shadow="xs" sx={{ width: "100%", height: 500 }} mt="lg">
         <Title order={3}>View Graph</Title>
+        {loaderData?.graph?.jid}
         <GraphRenderer
           endpoint={loaderData?.graph?.endpoint as string}
           graphJid={loaderData?.graph?.jid as string}
           token={loaderData?.graph?.token as string}
+          height="500px"
         ></GraphRenderer>
       </Card>
     </div>

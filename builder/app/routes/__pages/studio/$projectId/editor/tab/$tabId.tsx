@@ -13,6 +13,7 @@ import type { Monaco } from "@monaco-editor/react";
 import Editor from "@monaco-editor/react";
 import { useRef, useState } from "react";
 import type { ActionFunction, LoaderFunction } from "remix";
+import { Outlet } from "remix";
 import { Form } from "remix";
 import { Link, useParams } from "remix";
 import { redirect } from "remix";
@@ -39,6 +40,7 @@ import useEditor from "~/hooks/useEditor";
 import { graphService } from "~/services/graph.server";
 import GraphRenderer from "~/components/GraphRenderer";
 import { getProjectHomepage, updateProject } from "~/models/project.server";
+import type { CatchBoundaryComponent } from "@remix-run/react/routeModules";
 
 const StudioEditor = () => {
   const loaderData = useLoaderData<LoaderData>();
@@ -245,6 +247,7 @@ const StudioEditor = () => {
                       token={loaderData.graphs?.[0]?.token}
                       graphJid={loaderData.graphs?.[0]?.jid}
                       endpoint={loaderData.graphs?.[0]?.endpoint}
+                      height="600px"
                     ></GraphRenderer>
                   ) : (
                     <p>
@@ -290,6 +293,7 @@ const StudioEditor = () => {
         onClose={() => setShowExamplesModal(false)}
         onRunExample={onRunExample}
       ></ExamplesModal>
+      <Outlet></Outlet>
     </>
   );
 };
@@ -384,6 +388,7 @@ export const action: ActionFunction = async ({ request, params }) => {
 
   if (action === "saveTabContent") {
     const content = formData.get("content");
+    const redirectTo = formData.get("redirectTo");
     const { tabId } = params;
 
     // invariant(typeof tabId === "string", "tabFileId is required");
@@ -395,6 +400,12 @@ export const action: ActionFunction = async ({ request, params }) => {
         userId,
         input: { content: content as string },
       });
+    }
+
+    console.log({ url: request.url });
+
+    if (typeof redirectTo === "string") {
+      return redirect(redirectTo);
     }
   }
 

@@ -10,7 +10,7 @@ import {
 import { useDisclosure, useHotkeys, useHover } from "@mantine/hooks";
 import type { TabFile } from "@prisma/client";
 import React from "react";
-import { Form, useNavigate, useParams, useSearchParams } from "remix";
+import { Form, Link, useNavigate, useParams } from "remix";
 
 import {
   Braces,
@@ -22,9 +22,11 @@ import {
   PlayerPlay,
   VectorTriangle,
   X,
+  File,
 } from "tabler-icons-react";
 import AddComponentModal from "./playground/AddComponentModal";
 import ExamplesModal from "./playground/ExamplesModal";
+import ImportExportModal from "./playground/ImportExportModal";
 
 const EditorHeader = ({
   openTabs,
@@ -47,6 +49,8 @@ const EditorHeader = ({
   const [showNewComponentDialog, newComponentDialogHandlers] =
     useDisclosure(false);
   const [showExamplesDialog, examplesDialogHandlers] = useDisclosure(false);
+  const [showImportExportDialog, importExportDialogHandlers] =
+    useDisclosure(false);
 
   useHotkeys([["alt+N", () => newComponentDialogHandlers.open()]]);
 
@@ -147,6 +151,13 @@ const EditorHeader = ({
               icon={<InfoSquare></InfoSquare>}
             >
               Examples
+              <Box mt="xs">
+                <Kbd my="md">CTRL</Kbd> + <Kbd my="md">E</Kbd>
+              </Box>
+            </Menu.Item>
+
+            <Menu.Item component={Link} icon={<File></File>} to="port">
+              Import/Export
               <Box mt="xs">
                 <Kbd my="md">CTRL</Kbd> + <Kbd my="md">E</Kbd>
               </Box>

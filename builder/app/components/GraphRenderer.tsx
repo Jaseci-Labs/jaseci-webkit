@@ -7,9 +7,15 @@ type GraphRendererProps = {
   endpoint: string;
   token: string;
   graphJid: string;
+  height: string;
 };
 
-const GraphRenderer = ({ endpoint, token, graphJid }: GraphRendererProps) => {
+const GraphRenderer = ({
+  endpoint,
+  token,
+  graphJid,
+  height = "300px",
+}: GraphRendererProps) => {
   const graphFetcher = useFetcher();
   const targetNode = useRef<HTMLDivElement>(null);
   const networkRef = useRef<HTMLDivElement>(null);
@@ -39,7 +45,7 @@ const GraphRenderer = ({ endpoint, token, graphJid }: GraphRendererProps) => {
       `/api/loadGraph?endpointUrl=${endpoint}&token=${token}&gph=${graphJid}`
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [graphJid]);
 
   const nodes: vis.Node[] = useMemo(
     () => graphFetcher?.data?.graph?.nodes,
@@ -57,7 +63,7 @@ const GraphRenderer = ({ endpoint, token, graphJid }: GraphRendererProps) => {
         networkRef.current,
         { edges, nodes },
         {
-          height: "300px",
+          height: height,
           edges: { arrows: "to" },
           interaction: {},
         }

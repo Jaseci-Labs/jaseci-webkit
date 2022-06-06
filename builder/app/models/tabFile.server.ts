@@ -7,12 +7,14 @@ export const createTabFile = async ({
   userId,
   projectId,
   ext,
+  content,
 }: {
   userId: string;
   projectId: string;
   name: string;
   type: TabFileType;
   ext?: string;
+  content?: string;
 }) => {
   // check that user owns the projects
   const project = await prisma.project.findFirst({
@@ -30,6 +32,7 @@ export const createTabFile = async ({
       type,
       ext,
       projectId,
+      content,
     },
   });
 };

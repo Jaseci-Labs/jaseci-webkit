@@ -2,7 +2,13 @@ import { useDebouncedValue } from "@mantine/hooks";
 import type { TabFile } from "@prisma/client";
 import { parse } from "comment-json";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useSubmit, useParams, useLoaderData } from "remix";
+import {
+  useSubmit,
+  useParams,
+  useLoaderData,
+  useResolvedPath,
+  useLocation,
+} from "remix";
 import useViewer from "./useViewer";
 
 const useEditor = ({ content, tabs }: { content: string; tabs: TabFile[] }) => {
@@ -14,16 +20,19 @@ const useEditor = ({ content, tabs }: { content: string; tabs: TabFile[] }) => {
   const editorRef = useRef<any>(null);
   const monacoRef = useRef<any>(null);
   const loaderData = useLoaderData();
+  const location = useLocation();
 
   const { runCode, showPreviewText, jscAppRef } = useViewer({
     projectId: projectId as string,
   });
 
   const saveTabContent = useCallback(() => {
+    console.log({ location });
     if (!tabId) return;
     const formData = new FormData();
     formData.set("content", value);
     formData.set("tabFileId", tabId);
+    formData.set("redirectTo", location.pathname);
     formData.set("_action", "saveTabContent");
 
     submit(formData, { replace: true, method: "post" });
