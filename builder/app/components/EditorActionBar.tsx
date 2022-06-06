@@ -9,11 +9,11 @@ const EditorActionBar = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  useHotkeys([
-    ["mod+O", () => navigate(`/studio/${projectId}`)],
-    ["mod+V", () => navigate(`/studio/${projectId}/editor/tab/blank`)],
-    ["mod+G", () => navigate(`/studio/${projectId}/graphs`)],
-  ]);
+  // useHotkeys([
+  //   ["mod+O", () => navigate(`/studio/${projectId}`)],
+  //   ["mod+V", () => navigate(`/studio/${projectId}/editor/tab/blank`)],
+  //   ["mod+G", () => navigate(`/studio/${projectId}/graphs`)],
+  // ]);
 
   return (
     <Box sx={{ background: "#202327", width: 48 }}>

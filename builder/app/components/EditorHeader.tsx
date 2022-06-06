@@ -52,7 +52,7 @@ const EditorHeader = ({
   const [showImportExportDialog, importExportDialogHandlers] =
     useDisclosure(false);
 
-  useHotkeys([["alt+N", () => newComponentDialogHandlers.open()]]);
+  // useHotkeys([["alt+N", () => newComponentDialogHandlers.open()]]);
 
   return (
     <>
