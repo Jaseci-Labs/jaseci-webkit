@@ -4,7 +4,8 @@ import { useLoaderData } from "remix";
 import { json, Link, Outlet } from "remix";
 import { VectorTriangle } from "tabler-icons-react";
 import GraphList from "~/components/GraphList";
-import { graphService } from "~/services/graph.server";
+import type { graphService } from "~/services/graph.server";
+import { getProjectGraphs } from "~/services/graph.server";
 import { requireUserId } from "~/session.server";
 
 const StudioGraphsPage = () => {
@@ -33,13 +34,16 @@ const StudioGraphsPage = () => {
 };
 
 type LoaderData = {
-  graphs: Awaited<ReturnType<typeof graphService.getGraphs>>;
+  graphs: Awaited<ReturnType<typeof getProjectGraphs>>;
 };
 
-export const loader: LoaderFunction = async ({ request }) => {
+export const loader: LoaderFunction = async ({ request, params }) => {
   const userId = await requireUserId(request);
 
-  const graphs = await graphService.getGraphs({ userId });
+  const graphs = await getProjectGraphs(
+    { projectId: params.projectId, userId },
+    { name: "hello" }
+  );
 
   return json<LoaderData>({ graphs });
 };

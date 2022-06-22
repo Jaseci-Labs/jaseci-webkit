@@ -1,32 +1,47 @@
+import { assign, nonempty, object, size, string } from "superstruct";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "~/db.server";
+import { createResolver, message } from "~/lib/server-kit";
+import { json } from "remix";
 
-type CreateProjectInput = {
-  userId: string;
-  title: string;
+export const toJson = (output: unknown) => {
+  return json(output);
 };
 
-export async function createProject({ userId, title }: CreateProjectInput) {
-  const project = await prisma.project.create({
-    data: {
-      userId,
-      title,
-    },
-  });
+export const createProject = createResolver({
+  schema: object({
+    userId: message(string(), "User id is not a string"),
+    title: message(
+      nonempty(
+        message(
+          size(string(), 2, 20),
+          "Title must be between 2 and 20 characters."
+        )
+      ),
+      "Title cannot be empty"
+    ),
+  }),
+  async resolve({ userId, title }) {
+    const project = await prisma.project.create({
+      data: {
+        userId,
+        title,
+      },
+    });
 
-  return project;
-}
+    return project;
+  },
+});
 
-type GetProjectsInput = {
-  userId: string;
-};
-
-export async function getProjects({ userId }: GetProjectsInput) {
-  return prisma.project.findMany({
-    where: { userId },
-    orderBy: { id: "desc" },
-  });
-}
+export const getProjects = createResolver({
+  schema: object({ userId: string() }),
+  async resolve({ userId }) {
+    return prisma.project.findMany({
+      where: { userId },
+      orderBy: { id: "desc" },
+    });
+  },
+});
 
 type GetProjectHomepageInput = {
   projectId: string;
@@ -81,3 +96,19 @@ export async function updateProject({
     data: { ...input },
   });
 }
+
+export const setProjectHomepage = createResolver({
+  schema: object({
+    userId: nonempty(string()),
+    projectId: nonempty(string()),
+    tabId: nonempty(string()),
+  }),
+  async resolve({ tabId, projectId, userId }) {
+    const project = await updateProject({
+      projectId,
+      input: { homepage: { connect: { id: tabId } } },
+      userId,
+    });
+    return project;
+  },
+});

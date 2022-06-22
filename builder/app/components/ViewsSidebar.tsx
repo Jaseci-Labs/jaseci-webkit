@@ -10,14 +10,13 @@ import {
 } from "@mantine/core";
 import { useClickOutside, useDisclosure, useHotkeys } from "@mantine/hooks";
 import type { TabFile } from "@prisma/client";
-import type { ReactElement, ReactNode } from "react";
+import type { ReactElement } from "react";
 import React from "react";
-import { Form } from "remix";
+import { Form, useActionData } from "remix";
 import {
   BrandHtml5,
   File,
   Plus,
-  Settings,
   Star,
   Trash,
   VectorTriangle,
@@ -82,6 +81,7 @@ const NewItemModal = ({
   onClose: () => void;
 }) => {
   const [tabFileType, setTabFileType] = React.useState("View");
+  const actionData = useActionData();
 
   return (
     <Modal title="Add Item" opened={opened} onClose={onClose}>
@@ -94,37 +94,27 @@ const NewItemModal = ({
           { label: "Jac File", value: "Jac" },
         ]}
       />
-      {tabFileType === "View" && (
-        <Form method="post">
-          <TextInput name="name" label="Name"></TextInput>
+      <Form method="post">
+        <TextInput
+          name="name"
+          label="Name"
+          error={actionData?.errors?.name?.message}
+        ></TextInput>
 
-          <input name="type" value={tabFileType} hidden></input>
-          <input name="ext" value="json" hidden></input>
-          <input name="content" value="" hidden></input>
+        <input name="type" value={tabFileType} hidden></input>
+        <input
+          name="ext"
+          value={tabFileType === "View" ? "json" : "jac"}
+          hidden
+        ></input>
+        <input name="content" value="" hidden></input>
 
-          <Group position="right" mt="lg">
-            <Button name="_action" value="createTabItem" type="submit">
-              Create View
-            </Button>
-          </Group>
-        </Form>
-      )}
-
-      {tabFileType === "Jac" && (
-        <Form method="post">
-          <TextInput name="name" label="Name"></TextInput>
-
-          <input name="type" value={tabFileType} hidden></input>
-          <input name="ext" value="jac" hidden></input>
-          <input name="content" value="" hidden></input>
-
-          <Group position="right" mt="lg">
-            <Button name="_action" value="createTabItem" type="submit">
-              Create Jac File
-            </Button>
-          </Group>
-        </Form>
-      )}
+        <Group position="right" mt="lg">
+          <Button name="_action" value="createTabItem" type="submit">
+            Create View
+          </Button>
+        </Group>
+      </Form>
     </Modal>
   );
 };
@@ -260,6 +250,7 @@ const RenameFileItemDialog = ({
   tabFileName: string;
   tabFileId: string;
 }) => {
+  const actionData = useActionData();
   return (
     <Modal title="Rename File" onClose={onClose} opened={opened}>
       <Form method="post">
@@ -268,6 +259,7 @@ const RenameFileItemDialog = ({
           defaultValue={tabFileName}
           name="name"
           label="Name"
+          error={actionData?.errors?.name?.message}
         ></TextInput>
         <Button mt="lg" type="submit" name="_action" value="renameTabItem">
           Change Name

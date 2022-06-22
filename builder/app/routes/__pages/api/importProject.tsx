@@ -1,77 +1,84 @@
-import {
-  redirect,
-  unstable_createFileUploadHandler,
-  unstable_createMemoryUploadHandler,
-} from "@remix-run/node";
+import { redirect, unstable_createFileUploadHandler } from "@remix-run/node";
 import type { ActionFunction } from "remix";
 import { unstable_parseMultipartFormData } from "remix";
 import { json } from "remix";
-import path from "path";
+import fs from "fs";
 import * as unzipper from "unzipper";
 import { createTabFile } from "~/models/tabFile.server";
 import { nanoid } from "nanoid";
 import { requireUserId } from "~/session.server";
+import { string } from "superstruct";
+import { validate } from "remix-server-kit";
 
 export const action: ActionFunction = async ({ request }) => {
-  throw json({ error: "something went terribly wrong" }, { status: 400 });
-  const url = new URL(request.url);
-  const projectId = url.searchParams.get("projectId");
-  const userId = await requireUserId(request);
-  const projectFileName = "myfile.zip";
+  try {
+    const url = new URL(request.url);
+    const projectId = validate(url.searchParams.get("projectId"), string());
+    const userId = await requireUserId(request);
+    const projectFileName = `import_${projectId}.zip`;
 
-  const uploadHandler = unstable_createFileUploadHandler({
-    directory: "uploads/",
-    file: ({ filename, name }) => {
-      if (name === "project") {
-        return projectFileName;
-      }
-      return filename;
-    },
-    // set max file size to 2mb
-    maxPartSize: 1024 * 1024 * 2,
-    filter: ({ filename, name, contentType }) => {
-      console.log({ name, filename });
-      console.log({ contentType });
-      if (name === "project" && contentType !== "application/zip") {
-        throw json({ error: "A zip file is required!" }, { status: 400 });
-      }
+    const uploadHandler = unstable_createFileUploadHandler({
+      directory: "uploads/",
+      file: ({ filename, name }) => {
+        if (name === "project") {
+          return projectFileName;
+        }
+        return filename;
+      },
+      // set max file size to 2mb
+      maxPartSize: 1024 * 1024 * 2,
+      filter({ filename, name, contentType }) {
+        if (name === "project" && contentType !== "application/zip") {
+          throw json({ error: "A zip file is required!" }, { status: 400 });
+        }
 
-      return true;
-    },
-  });
-
-  const formData = await unstable_parseMultipartFormData(
-    request,
-    uploadHandler
-  );
-
-  console.log({ projectId });
-
-  if (typeof projectId !== "string") {
-    // throw json({ error: "projectId is required" }, { status: 400 });
-    throw redirect(request.url, { status: 400 });
-  }
-
-  // read archive
-  const zip = formData.get("project") as File;
-
-  const buffer = Buffer.from(await zip.arrayBuffer());
-  const directory = await unzipper.Open.buffer(buffer);
-  directory.files.forEach(async (file) => {
-    let content = await file.buffer();
-    const tabData = JSON.parse(content.toString());
-
-    await createTabFile({
-      projectId,
-      name: tabData["name"] || nanoid(),
-      type: tabData["type"],
-      content: tabData["content"],
-      ext: tabData["ext"] || "json",
-      userId,
+        return true;
+      },
     });
-  });
 
-  console.log("zip", zip.name);
+    const formData = await unstable_parseMultipartFormData(
+      request,
+      uploadHandler
+    );
 
-  return redirect(`/studio/${projectId}/editor/tab/blank`);
+    console.log({ projectId });
+
+    if (typeof projectId !== "string") {
+      // throw json({ error: "projectId is required" }, { status: 400 });
+      throw redirect(request.url, { status: 400 });
+    }
+
+    // read archive
+    const zip = formData.get("project") as File;
+
+    const buffer = Buffer.from(await zip.arrayBuffer());
+    const directory = await unzipper.Open.buffer(buffer);
+    const createTabFiles = directory.files.map(async (file) => {
+      let content = await file.buffer();
+      const tabData = JSON.parse(content.toString());
+
+      await createTabFile({
+        projectId,
+        name: tabData["name"] || nanoid(),
+        type: tabData["type"],
+        content: tabData["content"],
+        ext: tabData["ext"] || "json",
+        userId,
+      });
+    });
+
+    await Promise.all(createTabFiles).then(() => {
+      fs.unlinkSync("uploads/" + zip.name);
+    });
+
+    console.log({ directory });
+
+    console.log("zip", zip.name);
+
+    return redirect(`/studio/${projectId}/editor/tab/blank`);
+  } catch (err) {
+    if (err instanceof Response && err.statusText == "ValidationError") {
+      return err;
+    }
+  }
 };

@@ -1,9 +1,9 @@
 import { Button, Group, Input, Title } from "@mantine/core";
-import React from "react";
 import type { LoaderFunction } from "remix";
 import { json, Link, Outlet, useLoaderData } from "remix";
 import { Hammer } from "tabler-icons-react";
 import { ProjectsTable } from "~/components/ProjectsTable";
+import type { ResolverReturnType } from "~/lib/server-kit";
 import { getProjects } from "~/models/project.server";
 import { requireUserId } from "~/session.server";
 
@@ -15,10 +15,8 @@ export const loader: LoaderFunction = async ({ request }) => {
 };
 
 type LoaderData = {
-  projects: Awaited<ReturnType<typeof getProjects>>;
+  projects: Awaited<ResolverReturnType<typeof getProjects>>;
 };
-
-
 
 const ProjectsPage = () => {
   const loaderData = useLoaderData<LoaderData>();

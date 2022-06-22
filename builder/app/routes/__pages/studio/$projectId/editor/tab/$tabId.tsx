@@ -28,19 +28,28 @@ import {
   deleteTabFile,
   getProjectOpenedTabs,
   getTabFile,
+  renameTabFile,
+  saveTabContent,
+  setTabFileOpenDate,
   updateTabFile,
 } from "~/models/tabFile.server";
 import { createTabFile, getProjectTabFiles } from "~/models/tabFile.server";
 import { requireUserId } from "~/session.server";
-import type { TabFile, TabFileType } from "@prisma/client";
+import type { TabFile } from "@prisma/client";
+import { TabFileType } from "@prisma/client";
 import { ArrowsMaximize, ExternalLink, Star } from "tabler-icons-react";
 import { useFullscreen, useHotkeys } from "@mantine/hooks";
 import { jacLang } from "~/utils/jac";
 import useEditor from "~/hooks/useEditor";
 import { graphService } from "~/services/graph.server";
 import GraphRenderer from "~/components/GraphRenderer";
-import { getProjectHomepage, updateProject } from "~/models/project.server";
-import type { CatchBoundaryComponent } from "@remix-run/react/routeModules";
+import {
+  getProjectHomepage,
+  setProjectHomepage,
+} from "~/models/project.server";
+import { string, optional } from "superstruct";
+import type { MatcherReturnType } from "~/lib/server-kit";
+import { createMatcher, validate } from "~/lib/server-kit";
 
 const StudioEditor = () => {
   const loaderData = useLoaderData<LoaderData>();
@@ -337,106 +346,83 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 
 export const action: ActionFunction = async ({ request, params }) => {
   const userId = await requireUserId(request);
-  const { projectId, tabId } = params;
-  // invariant(projectId, "projectId is required");
-
   const formData = await request.formData();
-  const action = formData.get("_action");
 
-  if (action === "createTabItem") {
-    const name = formData.get("name");
-    const content = formData.get("content");
-    const type = formData.get("type");
-    const ext = formData.get("ext");
-
-    // invariant(typeof name === "string", "name is required");
-    // invariant(typeof content === "string", "content is required");
-    // invariant(typeof type === "string", "type is required");
-    // invariant(typeof ext === "string", "ext is required");
-
-    await createTabFile({
-      name: name as string,
-      projectId: projectId as string,
-      type: type as TabFileType,
-      userId,
-      ext: ext as string,
-    });
-  }
-
-  if (action === "openTabItem" || action === "closeTabItem") {
-    const tabFileId = formData.get("tabFileId");
-    // invariant(typeof tabFileId === "string", "tabFileId is required");
-
-    // if file is open already, then don't attempt to open it again
-    const tabFile = await getTabFile({
-      tabFileId: tabFileId as string,
-      userId,
-    });
-
-    if (tabFile?.opened_at && action === "openTabItem") {
-      return redirect(`/studio/${projectId}/editor/tab/${tabFileId}`);
-    }
-
-    await updateTabFile({
-      tabFileId: tabFileId as string,
-      userId,
-      input: {
-        opened_at: action === "openTabItem" ? new Date().toISOString() : null,
-      },
-    });
-  }
-
-  if (action === "saveTabContent") {
-    const content = formData.get("content");
-    const redirectTo = formData.get("redirectTo");
-    const { tabId } = params;
-
-    // invariant(typeof tabId === "string", "tabFileId is required");
-    // invariant(typeof content === "string", "content is required");
-
-    if (content) {
-      await updateTabFile({
-        tabFileId: tabId as string,
+  const matcher = createMatcher({
+    async createTabItem(): Promise<
+      Response | ReturnType<typeof createTabFile>
+    > {
+      const tab = await createTabFile({
+        ext: formData.get("ext"),
+        content: formData.get("content"),
+        name: formData.get("name"),
+        projectId: params.projectId,
+        type: formData.get("type"),
         userId,
-        input: { content: content as string },
       });
-    }
 
-    console.log({ url: request.url });
+      return json(tab, { status: 201 });
+    },
+    setProjectHomepage() {
+      return setProjectHomepage({
+        projectId: params.projectId,
+        tabId: params.tabId,
+        userId,
+      });
+    },
+    async saveTabContent() {
+      const redirectTo = validate(
+        formData.get("redirectTo"),
+        optional(string())
+      );
+      if (redirectTo) return redirect(redirectTo);
 
-    if (typeof redirectTo === "string") {
-      return redirect(redirectTo);
-    }
-  }
+      await saveTabContent({
+        content: formData.get("content"),
+        tabId: params.tabId,
+        userId,
+      });
 
-  if (action === "deleteTabItem") {
-    const tabFileId = formData.get("tabFileId");
+      return "successfully updated tab";
+    },
+    async deleteTabItem() {
+      await deleteTabFile({ tabFileId: formData.get("tabFileId"), userId });
 
-    await deleteTabFile({ tabFileId: tabFileId as string, userId });
-  }
+      return { message: "tab deleted" };
+    },
+    renameTabItem() {
+      return renameTabFile({
+        name: formData.get("name"),
+        tabFileId: formData.get("tabFileId"),
+        userId,
+      });
+    },
+    async openTabItem() {
+      const tabFileId = formData.get("tabFileId");
+      const tabFile = await getTabFile({
+        tabFileId: validate(tabFileId, string()),
+        userId,
+      });
 
-  if (action === "renameTabItem") {
-    const tabFileId = formData.get("tabFileId");
-    const name = formData.get("name");
+      if (tabFile?.opened_at) {
+        return redirect(`/studio/${params.projectId}/editor/tab/${tabFileId}`);
+      }
 
-    await updateTabFile({
-      tabFileId: tabFileId as string,
-      userId,
-      input: { name: name as string },
-    });
-  }
+      await setTabFileOpenDate({ date: new Date(), tabFileId, userId });
 
-  if (action === "setProjectHomepage") {
-    await updateProject({
-      projectId: projectId as string,
-      input: { homepage: { connect: { id: tabId } } },
-      userId,
-    });
-  }
+      return "tab opened";
+    },
+    async closeTabItem() {
+      const tabFileId = formData.get("tabFileId");
+      await setTabFileOpenDate({ date: null, tabFileId, userId });
+      return "tab closed";
+    },
+  });
 
-  console.log("referrer", request.headers.get("referer"));
+  const action = matcher.validate(formData.get("_action"));
+  const result = await matcher.match(action);
 
-  return json({});
+  return result;
 };
 
 export default StudioEditor;

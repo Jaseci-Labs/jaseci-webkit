@@ -15,7 +15,7 @@ import { useCallback, useState } from "react";
 import { jaseciComps } from "~/data/jsc-comps";
 import { actions, jaseciEvents } from "~/data/jsc-events";
 
-function isJsonString(str) {
+function isJsonString(str: string) {
   try {
     JSON.parse(str);
   } catch (e) {

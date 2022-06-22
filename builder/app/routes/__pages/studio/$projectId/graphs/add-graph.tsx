@@ -1,8 +1,11 @@
 import { Button, Group, Modal, Stack, TextInput } from "@mantine/core";
 import { useDebouncedValue, useInputState } from "@mantine/hooks";
+import { useActionData } from "@remix-run/react";
 import { useEffect } from "react";
 import type { ActionFunction } from "remix";
 import { Form, redirect, useFetcher, useNavigate } from "remix";
+import { validate } from "remix-server-kit";
+import { nonempty, object, size, string } from "superstruct";
 // import invariant from "tiny-invariant";
 import SelectGraph from "~/components/SelectGraph";
 import { graphService } from "~/services/graph.server";
@@ -14,6 +17,7 @@ const AddGraphPage = () => {
   const navigate = useNavigate();
   const [endpoint, setEndpoint] = useInputState("");
   const [debouncedEndpointValue] = useDebouncedValue(endpoint, 200);
+  const actionData = useActionData();
 
   useEffect(() => {
     fetcher.load(
@@ -36,6 +40,7 @@ const AddGraphPage = () => {
               name="name"
               placeholder="Enter a name"
               label="Name"
+              error={actionData?.errors?.name?.message}
             ></TextInput>
             <TextInput
               onChange={setToken}
@@ -43,6 +48,7 @@ const AddGraphPage = () => {
               name="token"
               placeholder="Token"
               label="Token"
+              error={actionData?.errors?.token?.message}
             ></TextInput>
             <TextInput
               name="endpoint"
@@ -50,6 +56,7 @@ const AddGraphPage = () => {
               label="URL"
               value={endpoint}
               onChange={setEndpoint}
+              error={actionData?.errors?.endpoint?.message}
             ></TextInput>
 
             {fetcher.state === "loading" ? (
@@ -69,30 +76,43 @@ const AddGraphPage = () => {
 };
 
 export const action: ActionFunction = async ({ request, params }) => {
-  const formData = await request.formData();
-  const name = formData.get("name");
-  const token = formData.get("token");
-  const endpoint = formData.get("endpoint");
-  const selectedGraph = formData.get("selectedGraph");
-  const userId = await requireUserId(request);
-  const { projectId } = params;
+  try {
+    const NonEmptyString = nonempty(string());
+    const formData = await request.formData();
+    const userId = await requireUserId(request);
 
-  // invariant(typeof name == "string");
-  // invariant(typeof selectedGraph == "string");
-  // invariant(typeof endpoint == "string");
+    const { name, endpoint, projectId, selectedGraph, token } = validate(
+      {
+        name: formData.get("name"),
+        endpoint: formData.get("endpoint"),
+        projectId: params.projectId,
+        selectedGraph: formData.get("selectedGraph"),
+        token: formData.get("token"),
+      },
+      object({
+        name: nonempty(size(string(), 2, 16)),
+        token: NonEmptyString,
+        endpoint: NonEmptyString,
+        selectedGraph: NonEmptyString,
+        projectId: NonEmptyString,
+      })
+    );
 
-  console.log({ endpoint, selectedGraph, userId, name, token, projectId });
+    await graphService.createGraph({
+      endpoint,
+      jid: selectedGraph,
+      userId,
+      name,
+      token,
+      projectId,
+    });
 
-  await graphService.createGraph({
-    endpoint: endpoint as string,
-    jid: selectedGraph as string,
-    userId,
-    name: name as string,
-    token: token as string,
-    projectId: projectId as string,
-  });
-
-  return redirect(`/studio/${projectId}/graphs`);
+    return redirect(`/studio/${projectId}/graphs`);
+  } catch (err) {
+    if (err instanceof Response && err.statusText === "ValidationError") {
+      return err;
+    }
+  }
 };
 
 export default AddGraphPage;

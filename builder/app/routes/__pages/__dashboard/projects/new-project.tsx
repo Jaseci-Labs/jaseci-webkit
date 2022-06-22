@@ -1,8 +1,8 @@
 import { Button, Group, Modal, TextInput } from "@mantine/core";
 import React from "react";
 import type { ActionFunction } from "remix";
+import { useActionData } from "remix";
 import { Form, redirect, useNavigate } from "remix";
-// import invariant from 'tiny-invariant';
 import { createProject } from "~/models/project.server";
 import { requireUserId } from "~/session.server";
 
@@ -11,16 +11,21 @@ export const action: ActionFunction = async ({ request }) => {
   const formData = await request.formData();
   const title = formData.get("title");
 
-  // invariant(typeof title === "string", "title must be a string")
+  try {
+    // create the project
+    await createProject({ title, userId });
 
-  // create the project
-  await createProject({ title: title as string, userId });
-
-  return redirect("/projects");
+    return redirect("/projects");
+  } catch (err) {
+    if (err instanceof Response && err.statusText === "ValidationError") {
+      return err;
+    }
+  }
 };
 
 const NewProjectPage = () => {
   const navigate = useNavigate();
+  const actionData = useActionData();
 
   return (
     <Modal title="New Project" onClose={() => navigate("..")} opened={true}>
@@ -29,7 +34,8 @@ const NewProjectPage = () => {
           name="title"
           label="Name"
           placeholder="Enter project name"
-          required
+          // required
+          error={actionData?.errors?.title?.message}
         ></TextInput>
         <Group position="right" my="lg">
           <Button type="submit">Create Project</Button>

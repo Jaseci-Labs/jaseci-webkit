@@ -1,3 +1,6 @@
+import { object, string } from "superstruct";
+import { prisma } from "~/db.server";
+import { createResolver } from "~/lib/server-kit";
 import { BaseService } from "./base.server";
 
 type CreateGraphInput = {
@@ -17,6 +20,16 @@ type GetGraphInput = {
   id: string;
   userId: string;
 };
+
+export const getProjectGraphs = createResolver({
+  schema: object({
+    userId: string(),
+    projectId: string(),
+  }),
+  resolve({ projectId, userId }) {
+    return prisma.graph.findMany({ where: { projectId, userId } });
+  },
+});
 
 export class GraphService extends BaseService {
   async createGraph({
