@@ -138,6 +138,7 @@ const StudioEditor = () => {
           <EditorHeader
             onInsertComponent={onInsertComponent}
             onClickRun={() => runCode(value, loaderData?.tabFiles)}
+            onClickSave={() => saveTabContent()}
             openTabs={loaderData.openedTabFiles}
             onClickFormat={formatCode}
             onTogglePreview={() => setShowPreview((prev) => !prev)}
@@ -371,17 +372,17 @@ export const action: ActionFunction = async ({ request, params }) => {
       });
     },
     async saveTabContent() {
-      const redirectTo = validate(
-        formData.get("redirectTo"),
-        optional(string())
-      );
-      if (redirectTo) return redirect(redirectTo);
-
       await saveTabContent({
         content: formData.get("content"),
         tabId: params.tabId,
         userId,
       });
+
+      const redirectTo = validate(
+        formData.get("redirectTo"),
+        optional(string())
+      );
+      if (redirectTo) return redirect(redirectTo);
 
       return "successfully updated tab";
     },

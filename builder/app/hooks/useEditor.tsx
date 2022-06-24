@@ -72,10 +72,10 @@ const useEditor = ({ content, tabs }: { content: string; tabs: TabFile[] }) => {
   };
 
   useEffect(() => {
-    // const saveTabContentTimeout = setTimeout(() => saveTabContent(), 3000);
+    const saveTabContentTimeout = setTimeout(() => saveTabContent(), 3000);
 
     return () => {
-      // clearTimeout(saveTabContentTimeout);
+      clearTimeout(saveTabContentTimeout);
     };
   }, [saveTabContent, value]);
 

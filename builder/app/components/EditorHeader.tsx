@@ -23,6 +23,7 @@ import {
   VectorTriangle,
   X,
   File,
+  DeviceFloppy,
 } from "tabler-icons-react";
 import AddComponentModal from "./playground/AddComponentModal";
 import ExamplesModal from "./playground/ExamplesModal";
@@ -31,6 +32,7 @@ import ImportExportModal from "./playground/ImportExportModal";
 const EditorHeader = ({
   openTabs,
   onClickRun,
+  onClickSave,
   onClickFormat,
   onTogglePreview,
   onInsertComponent,
@@ -38,6 +40,7 @@ const EditorHeader = ({
 }: {
   openTabs: TabFile[];
   onClickRun: () => void;
+  onClickSave: () => void;
   onRunExample: (example: Record<any, any>) => void;
   onClickFormat: () => void;
   onTogglePreview: () => void;
@@ -101,6 +104,11 @@ const EditorHeader = ({
               <PlayerPlay size={16}></PlayerPlay>
             </ActionIcon>
           </Group>
+
+          <ActionIcon onClick={onClickSave} color="teal" variant="filled">
+            <DeviceFloppy size={16}></DeviceFloppy>
+          </ActionIcon>
+
           <ActionIcon color="indigo" onClick={onTogglePreview} variant="filled">
             <LayoutColumns size={16}></LayoutColumns>
           </ActionIcon>
@@ -141,7 +149,7 @@ const EditorHeader = ({
               onClick={newComponentDialogHandlers.open}
               icon={<NewSection></NewSection>}
             >
-              Add Component
+              Add a Component
               <Box mt="xs">
                 <Kbd my="md">CTRL</Kbd> + <Kbd my="md">N</Kbd>
               </Box>
