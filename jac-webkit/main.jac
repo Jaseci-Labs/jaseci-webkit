@@ -17,7 +17,7 @@ walker set_parent {
 walker build_json {
     has anchor nodes = [];
     has children = [];
-    
+
     for n in nodes {
         spawn n walker::set_parent(n=n);
         std.out("Parent: ", n.parent.name, "Child: ", n.name);
@@ -30,7 +30,7 @@ walker build_json {
                 n.parent.sections["children"] = [{ "name": n.name, "sections": n.sections }];
             }
         }
-        
+
     }
 }
 
@@ -38,7 +38,7 @@ walker build_json {
 walker init {
     has json = [];
     has nodes = [];
-    has nodes_reversed = [];  
+    has nodes_reversed = [];
 
     // Spawn main graph at root
     root {

@@ -1,9 +1,19 @@
 node Component {
     has name;
     has parent;
+    has loc=null;
     has css = {};
     has props = {};
     has sections = {};
+
+    can render with renderer exit {
+        loc['name'] = name;
+        loc['sections'] = {"children": []};
+        for i in --> {
+             i.loc={};
+             loc['sections']['children'].l::append(i.loc);
+        }
+    }
 
     can get_json {
         json = { "name": here.c_name };
@@ -54,10 +64,10 @@ node Button:Component {
     has tooltipPalette;
     has noRadius;
     has size;
-    
+
     can get_json {
         ::Component:get_json;
-    }   
+    }
 }
 
 node Anchor:Component {
