@@ -1,19 +1,5 @@
 import {*} with './site.jac';
 
-walker get_nodes {
-    has anchor nodes = [];
-    take -->;
-
-    Component {
-        nodes.list::append(here);
-    }
-}
-
-walker set_parent {
-    has n;
-    n.parent = <-[section]-[0];
-}
-
 walker build_json {
     has anchor nodes = [];
     has children = [];
@@ -36,27 +22,21 @@ walker build_json {
 
 
 walker init {
-    has json = [];
-    has nodes = [];
-    has nodes_reversed = [];  
+    has visited = [];
+    has stack = [];
 
     // Spawn main graph at root
     root {
         spawn here -[section(name="root")]-> graph::my_site;
-        nodes = spawn here walker::get_nodes();
-        nodes.list::reverse;
-        spawn here walker::build_json(nodes=nodes);
-
-        std.out("\n\n-----");
     }
 
     take -->;
 
     Component {
-        std.out(here.edge);
-        std.out(here.parent.type);
-        std.out("name", here.name);
-        std.out("sections", here.sections);
+        visited.list::append(here);
+        for n in -->: stack.list.append(n);
+
+        std.out(visited);       
     }
 }
 

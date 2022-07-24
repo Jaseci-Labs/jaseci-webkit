@@ -1,0 +1,19 @@
+{
+    "children": [
+        {
+            "name": "alert1",
+            "sections": {
+                "children": [
+                    {
+                        "name": "alertBtn",
+                        "sections": {}
+                    }
+                ]
+            }
+        },
+        {
+            "name": "navbar1",
+            "sections": {}
+        }
+    ]
+}
