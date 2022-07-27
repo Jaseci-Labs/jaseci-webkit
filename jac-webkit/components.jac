@@ -1,56 +1,64 @@
+import {*} with './main.jac';
+
 node Component {
     has name;
-    has parent;
+    has c_type;
     has loc=null;
     has css = {};
     has props = {};
     has sections = {};
-
-    can render with renderer exit {
-        loc['name'] = name;
-        loc['sections'] = {"children": []};
-        for i in --> {
-             i.loc={};
-             loc['sections']['children'].l::append(i.loc);
+    
+    can get_props {
+        std.out("After: ", here.info["jid"]);
+        for prop in here.context.dict::keys {
+            // std.out(loc["props"]);
+            if prop not in ["name", "type", "loc", "css", "props", "sections", "c_type"] {
+                if here.context[prop]: loc["props"][prop] = here.context[prop];
+            }
         }
     }
+    
 
-    can get_json {
-        json = { "name": here.c_name };
-        parents = <-[section]-;
+    can pre_render with pre_renderer exit {
+        loc['name'] = name;
+        loc['component'] = c_type;
+        loc['sections'] = {"children": []};
+        loc['css'] = css;
+        loc['props'] = {};
+        ::get_props;
+        
 
-        for parent in parents {
-            std.out("Parent: ", parent.name, "Child: ", here.name);
+
+        for i in --> {
+             i.loc={};
+             i.loc['name'] = i.name;
+             i.loc['css'] = i.css;
+             i.loc['component'] = c_type;
+             i.loc['sections'] = {};
+             i.loc['sections']["children"] = [];
+             i.loc['props'] = {};
+             std.out("Before: ", i.info["jid"]);
+             i::get_props;
+
+             loc['sections']["children"].l::append(i.loc);
         }
     }
 }
 
 node Container:Component {
     has c_type = "Container";
-
-    can get_json {
-        ::Component:get_json;
-    }
 }
 
 node Navbar:Component {
     has c_type = "Navbar";
     has title;
     has links = [];
-
-    can get_json {
-        ::Component:get_json;
-    }
 }
 
 node Alert:Component {
     has c_type = "Alert";
     has message;
     has palette;
-
-    can get_json {
-        ::Component:get_json;
-    }
 }
 
 node Button:Component {
@@ -64,10 +72,6 @@ node Button:Component {
     has tooltipPalette;
     has noRadius;
     has size;
-
-    can get_json {
-        ::Component:get_json;
-    }
 }
 
 node Anchor:Component {
@@ -161,4 +165,78 @@ node DataList:Component {
     has template;
     has getters;
 }
+
+node DatePicker:Component {
+    // has type;
+    has label;
+    has value;
+}
+
+node Dialog:Component {
+    has open;
+    has title;
+}
+
+node Divider:Component {
+    has orientation;
+    has color;
+    has label;
+    has size;
+}
+
+node Drawer {
+    has title;
+    has open;
+}
+
+node Dropdown {
+    has label;
+    has items;
+    has buttonprops;
+}
+
+node Hero:Component {
+    has action;
+    has description;
+    has background_image;
+    
+    can get_props {
+        ::Component:get_props;
+        std.out("Should only be hero comp", here.info);
+        std.out(loc["props"]);
+        loc["props"].dict::update({"backgroundimage": loc["props"]["background_image"]});
+        loc["props"].dict::pop("background_image");
+    }
+}
+
+
+// node Input {}
+
+// node Label {}
+
+// node Popover {}
+
+// node Progress {}
+
+// node Radio {}
+
+// node RadioGroup {}
+
+// node Range {}
+// node Rating {}
+// node Row {}
+// node Select {}
+// node SpeechInput {}
+// node Stat {}
+// node Tabs {}
+// node Text {}
+// node TextBox {}
+// node Toast {}
+// node Toggle {}
+// node Tooltip {}
+// node MyComponent {}
+
+
+
+
 

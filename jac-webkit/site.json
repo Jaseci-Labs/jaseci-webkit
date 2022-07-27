@@ -1,21 +1,37 @@
 {
     "name": "mainContainer",
+    "component": "Container",
     "sections": {
         "children": [
             {
+                "name": "navbar1",
+                "component": "Navbar",
+                "sections": {
+                    "children": []
+                }
+            },
+            {
                 "name": "alert1",
+                "component": "Alert",
                 "sections": {
                     "children": [
                         {
                             "name": "alertBtn",
-                            "sections": {}
+                            "component": "Button",
+                            "sections": {
+                                "children": [
+                                    {
+                                        "name": "alertBtn1",
+                                        "component": "Button",
+                                        "sections": {
+                                            "children": []
+                                        }
+                                    }
+                                ]
+                            }
                         }
                     ]
                 }
-            },
-            {
-                "name": "navbar1",
-                "sections": {}
             }
         ]
     }

@@ -7,6 +7,9 @@ graph my_site {
 
     spawn {
         root = spawn node::Container(name="mainContainer");
+        hero = spawn node::Hero(name="hero1", background_image="https://i.imgur.com/0Z1Z0Zm.jpg");
+        
+        root-[section(name="children")]->hero;
 
         navbar1 = spawn root-[section(name="children")]->node::Navbar(
             name="navbar1", 
@@ -15,11 +18,16 @@ graph my_site {
                 {"label": "About", "href": "#"}
             ]
         );
-            
-        alert1 = spawn root-[section(name="children")]->node::Alert(name="alert1", message="Hello", palette="Primary");
-        alertBtn = spawn alert1-[section(name="right")]->node::Button(name="alertBtn", label="Click Me");
 
-        alert1-[section(name="right")]->alertBtn; 
+        // navbar1.css.color = "red";
+            
+        // alert1 = spawn root-[section(name="right")]->node::Alert(name="alert1", message="Hello", palette="Primary");
+
+        // alertBtn = spawn alert1-[section(name="children")]->node::Button(name="alertBtn", label="Click Me")
+        //     -[section(name="children")]->node::Button(name="alertBtn1", label="Click Here");
+
+        // alert1-[section(name="children")]->alertBtn;
+        // alertBtn-[section(name="children")]->alertBtn2;
     }    
     
 }
