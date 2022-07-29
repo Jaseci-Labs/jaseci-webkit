@@ -42,7 +42,7 @@ data:
 
     # build and start the app
     yarn build
-    yarn start &
+    yarn start
 ---
 apiVersion: apps/v1
 kind: Deployment
