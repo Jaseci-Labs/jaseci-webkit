@@ -1,9 +1,8 @@
 import { parse } from "comment-json";
 import React, { useEffect, useRef } from "react";
-import type { LoaderFunction } from "remix";
-import { useParams } from "remix";
-import { json } from "remix";
-import { useLoaderData } from "remix";
+import type { LoaderFunction } from "@remix-run/node";
+import { json } from "@remix-run/node";
+import { useLoaderData, useParams } from "@remix-run/react";
 import { PageNotFound } from "~/components/PageNotFound";
 import useViewer from "~/hooks/useViewer";
 import { getProjectHomepage } from "~/models/project.server";

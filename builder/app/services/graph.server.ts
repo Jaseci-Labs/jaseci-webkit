@@ -1,6 +1,6 @@
 import { object, string } from "superstruct";
 import { prisma } from "~/db.server";
-import { createResolver } from "~/lib/server-kit";
+import { createResolver } from "remix-server-kit";
 import { BaseService } from "./base.server";
 
 type CreateGraphInput = {

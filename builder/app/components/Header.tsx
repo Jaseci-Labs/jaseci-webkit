@@ -11,9 +11,9 @@ import {
   Title,
   UnstyledButton,
 } from "@mantine/core";
-import { useBooleanToggle } from "@mantine/hooks";
+import { useDisclosure } from "@mantine/hooks";
 import React, { useState } from "react";
-import { Form, Link, useNavigate } from "remix";
+import { Form, Link, useNavigate } from "@remix-run/react";
 import {
   ChevronDown,
   Heart,
@@ -104,7 +104,7 @@ interface HeaderTabsProps {
 export function Header({ user, tabs }: HeaderTabsProps) {
   const { classes, theme, cx } = useStyles();
   const [activeTab, setActiveTab] = useState<number | undefined>();
-  const [opened, toggleOpened] = useBooleanToggle(false);
+  const [opened, toggleOpened] = useDisclosure(false);
   const [userMenuOpened, setUserMenuOpened] = useState(false);
   const navigate = useNavigate();
 
@@ -194,7 +194,9 @@ export function Header({ user, tabs }: HeaderTabsProps) {
             navigate(tabKey || "#");
           }}
         >
-          {renderTabs}
+          <Tabs.List>
+            {renderTabs}
+          </Tabs.List>
         </Tabs>
       </Container>
     </div>

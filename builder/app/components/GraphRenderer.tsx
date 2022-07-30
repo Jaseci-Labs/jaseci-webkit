@@ -1,6 +1,6 @@
 import { Dialog, Text, LoadingOverlay } from "@mantine/core";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useFetcher } from "remix";
+import { useFetcher } from "@remix-run/react";
 import * as vis from "vis-network";
 
 type GraphRendererProps = {

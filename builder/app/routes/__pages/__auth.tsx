@@ -1,6 +1,6 @@
 import { Anchor, createStyles, Paper, Text, Title } from "@mantine/core";
 import React from "react";
-import { Link, Outlet, useLocation } from "remix";
+import { Link, Outlet, useLocation } from "@remix-run/react";
 
 const useStyles = createStyles((theme) => ({
   wrapper: {

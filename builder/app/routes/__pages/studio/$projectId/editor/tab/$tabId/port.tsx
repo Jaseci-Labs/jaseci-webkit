@@ -4,7 +4,7 @@ import type { CatchBoundaryComponent } from "@remix-run/react/routeModules";
 import type { ReactNode } from "react";
 import { useEffect } from "react";
 import React from "react";
-import { useNavigate } from "remix";
+import { useNavigate } from "@remix-run/react";
 import ImportExportModal from "~/components/playground/ImportExportModal";
 
 const ImportExportProjectPage = ({ error }: { error?: ReactNode }) => {

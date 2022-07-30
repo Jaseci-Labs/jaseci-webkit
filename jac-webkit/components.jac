@@ -167,17 +167,20 @@ node DataList:Component {
 }
 
 node DatePicker:Component {
+    has c_type = "DatePicker";
     // has type;
     has label;
     has value;
 }
 
 node Dialog:Component {
+    has c_type = "Dialog";
     has open;
     has title;
 }
 
 node Divider:Component {
+    has c_type = "Divider";
     has orientation;
     has color;
     has label;
@@ -185,17 +188,20 @@ node Divider:Component {
 }
 
 node Drawer {
+    has c_type = "Drawer";
     has title;
     has open;
 }
 
 node Dropdown {
+    has c_type = "Dropdown";
     has label;
     has items;
     has buttonprops;
 }
 
 node Hero:Component {
+    has c_type = "Hero";
     has action;
     has description;
     has background_image;
@@ -210,32 +216,130 @@ node Hero:Component {
 }
 
 
-// node Input {}
+node Input:Component {
+    has c_type = "Input";
+    has label;
+    has altLabel;
+    has type;
+    has events;
+    has fullwidth;
+    has placeholder;
+    has palette;
+}
 
-// node Label {}
+node Popover:Component {
+    has c_type = "Popover";
+    has title;
+    has open;
+    has target;
+}
 
-// node Popover {}
+node Progress:Component {
+    has c_type = "Progress";
+    has size;
+    has value;
+    has max;
+    has palette;
+}
 
-// node Progress {}
+node Radio:Component {
+    has c_type = "Radio";
+    has label;
+    has altLabel;
+    has fullwidth;
+    has placeholder;
+    has palette;
+}
 
-// node Radio {}
+node RadioGroup:Component {
+    has c_type = "RadioGroup";
+    has label;
+    has options;
+    has palette;
+    has options;
+}
 
-// node RadioGroup {}
+node Range:Component {
+    has c_type = "Range";
+    has label;
+    has showvalue;
+    has altlabel;
+    has min;
+    has max;
+    has defaultvalue;
+    has fullwidth;
+    has size;
+    has palette;
+}
 
-// node Range {}
-// node Rating {}
-// node Row {}
-// node Select {}
-// node SpeechInput {}
-// node Stat {}
-// node Tabs {}
-// node Text {}
-// node TextBox {}
-// node Toast {}
-// node Toggle {}
-// node Tooltip {}
-// node MyComponent {}
+node Rating:Component {
+    has c_type = "Rating";
+    has label;
+    has stars;
+    has value;
+    has hover; // 'true' or 'false'
+    has palette;
+}
 
+node Row:Component {
+    has c_type = "Row";
+    has justify;
+    has items;
+    has gap;
+}
+
+node Select:Component {
+    has c_type = "Select";
+    has label;
+    has value;
+    has altlabel;
+    has options;
+    has palette;
+    has fullwidth;
+    has placeholder;
+}
+
+node SpeechInput:Component {
+    has c_type = "SpeechInput";
+    has label;
+    has altlabel;
+    has palette;
+    // has type;
+    has fullwidth;
+    has placeholder;
+}
+
+node Stat:Component {
+    has c_type = "Stat";
+    has label;
+    has total;
+    has description;
+}
+
+node Tabs:Component {
+    has c_type = "Tabs";
+    has tabs;
+}
+
+node Text:Component {
+    has c_type = "Text";
+    has value;
+    has variant;
+}
+
+node TextBox:Component {
+    has c_type = "TextBox";
+    has label;
+    has altlabel;
+    has palette;
+} 
+
+node Toggle:Component {
+    has c_type = 'Toggle';
+    has label;
+    has palette;
+    has value;
+}
 
 
 

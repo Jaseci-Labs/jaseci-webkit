@@ -3,18 +3,20 @@ import type { Monaco } from "@monaco-editor/react";
 import Editor from "@monaco-editor/react";
 import { parse } from "comment-json";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { LoaderFunction } from "remix";
-import { ActionFunction, Outlet } from "remix";
-import { useSearchParams } from "remix";
+import type { LoaderFunction } from "@remix-run/node";
+import { ActionFunction, json } from "@remix-run/node";
+
 import {
   Form,
-  json,
   Link,
+  Outlet,
   useLoaderData,
   useParams,
+  useSearchParams,
   useSubmit,
   useTransition,
-} from "remix";
+} from "@remix-run/react";
+
 import {
   Braces,
   DeviceFloppy,

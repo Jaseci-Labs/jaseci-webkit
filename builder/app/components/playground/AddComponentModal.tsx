@@ -1,7 +1,6 @@
 import {
   Button,
   Group,
-  InputWrapper,
   Modal,
   Select,
   Space,
@@ -9,6 +8,7 @@ import {
   TextInput,
   JsonInput,
   Title,
+  Input,
 } from "@mantine/core";
 import { Prism } from "@mantine/prism";
 import { useCallback, useState } from "react";
@@ -125,7 +125,7 @@ const AddComponentModal = ({
         size="lg"
         radius="md"
       >
-        <InputWrapper label="Choose Component Type">
+        <Input.Wrapper label="Choose Component Type">
           <Group>
             {Object.keys(jaseciComps).map((componentType) => (
               <Button
@@ -137,7 +137,7 @@ const AddComponentModal = ({
               </Button>
             ))}
           </Group>
-        </InputWrapper>
+        </Input.Wrapper>
         <Space h="md"></Space>
         <Text>Preview:</Text>
         <Prism language="json" sx={{ maxHeight: "200px", overflow: "auto" }}>

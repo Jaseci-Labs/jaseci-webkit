@@ -1,7 +1,8 @@
 import { Button, Group, Modal, Text } from "@mantine/core";
 import React from "react";
-import type { ActionFunction } from "remix";
-import { Form, Link, redirect, useNavigate } from "remix";
+import type { ActionFunction } from "@remix-run/node";
+import { redirect } from "@remix-run/node";
+import { Form, Link, useNavigate } from "@remix-run/react";
 // import invariant from 'tiny-invariant';
 import { deleteProject } from "~/models/project.server";
 import { requireUserId } from "~/session.server";

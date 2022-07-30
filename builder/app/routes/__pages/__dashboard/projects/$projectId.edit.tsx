@@ -1,7 +1,8 @@
 import { Button, Group, Modal, Stack, TextInput } from "@mantine/core";
 import React from "react";
-import type { ActionFunction, LoaderFunction } from "remix";
-import { Form, json, redirect, useLoaderData, useNavigate } from "remix";
+import type { ActionFunction, LoaderFunction } from "@remix-run/node";
+import { json, redirect } from "@remix-run/node";
+import { Form, useLoaderData, useNavigate } from "@remix-run/react";
 // import invariant from "tiny-invariant";
 import { getProjectById, updateProject } from "~/models/project.server";
 import { requireUserId } from "~/session.server";

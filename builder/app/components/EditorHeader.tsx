@@ -10,7 +10,7 @@ import {
 import { useDisclosure, useHotkeys, useHover } from "@mantine/hooks";
 import type { TabFile } from "@prisma/client";
 import React from "react";
-import { Form, Link, useNavigate, useParams } from "remix";
+import { Form, Link, useNavigate, useParams } from "@remix-run/react";
 
 import {
   Braces,

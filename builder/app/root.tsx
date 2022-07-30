@@ -8,12 +8,10 @@ import type {
   LinksFunction,
   LoaderFunction,
   MetaFunction,
-} from "remix";
-import { useTransition } from "remix";
-import NProgress from "nprogress";
-import nProgressStyles from "nprogress/nprogress.css";
+} from "@remix-run/node";
+import { json } from "@remix-run/node";
+
 import {
-  json,
   Links,
   LiveReload,
   Meta,
@@ -21,9 +19,14 @@ import {
   Scripts,
   ScrollRestoration,
   useCatch,
-} from "remix";
+  useTransition,
+} from "@remix-run/react";
+
+import NProgress from "nprogress";
+import nProgressStyles from "nprogress/nprogress.css";
 import { PageNotFound } from "./components/PageNotFound";
 import { getUser } from "./session.server";
+import {StylesPlaceholder} from "@mantine/remix";
 
 export const links: LinksFunction = () => {
   return [
@@ -39,7 +42,7 @@ export const links: LinksFunction = () => {
     },
     { rel: "stylesheet", href: nProgressStyles },
     {
-      href: "https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap",
+      href: "https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap",
       rel: "stylesheet",
     },
   ];
@@ -76,6 +79,7 @@ export default function App() {
       <head>
         <Meta />
         <Links />
+        <StylesPlaceholder />
       </head>
       <body>
         <MantineTheme>
@@ -137,8 +141,8 @@ function MantineTheme({ children }: { children: React.ReactNode }) {
     >
       <MantineProvider
         theme={{
-          fontFamily: "'Readex Pro', sans-serif",
-          headings: { fontFamily: "'Barlow', sans-serif" },
+          fontFamily: "'Poppins', sans-serif",
+          headings: { fontFamily: "'Poppins', sans-serif" },
           primaryColor: "orange",
           colorScheme,
         }}

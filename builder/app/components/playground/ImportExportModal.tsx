@@ -5,7 +5,7 @@ import { Dropzone } from "@mantine/dropzone";
 import { useNotifications } from "@mantine/notifications";
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useState } from "react";
-import { useFetcher, useParams } from "remix";
+import { useFetcher, useParams } from "@remix-run/react";
 import { Check } from "tabler-icons-react";
 
 const DropZoneComp = ({

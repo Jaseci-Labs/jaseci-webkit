@@ -1,0 +1,68 @@
+{
+    "name": "mainContainer",
+    "component": "Container",
+    "sections": {
+        "children": [
+            {
+                "name": "navbar1",
+                "css": {
+                    "color": "red"
+                },
+                "component": "Navbar",
+                "sections": {
+                    "children": []
+                },
+                "props": {
+                    "links": [
+                        {
+                            "label": "Home",
+                            "href": "#"
+                        },
+                        {
+                            "label": "About",
+                            "href": "#"
+                        }
+                    ]
+                }
+            },
+            {
+                "name": "alert1",
+                "css": {},
+                "component": "Alert",
+                "sections": {
+                    "children": [
+                        {
+                            "name": "alertBtn",
+                            "css": {},
+                            "component": "Button",
+                            "sections": {
+                                "children": [
+                                    {
+                                        "name": "alertBtn1",
+                                        "css": {},
+                                        "component": "Button",
+                                        "sections": {
+                                            "children": []
+                                        },
+                                        "props": {
+                                            "label": "Click Here"
+                                        }
+                                    }
+                                ]
+                            },
+                            "props": {
+                                "label": "Click Me"
+                            }
+                        }
+                    ]
+                },
+                "props": {
+                    "message": "Hello",
+                    "palette": "Primary"
+                }
+            }
+        ]
+    },
+    "css": {},
+    "props": {}
+}

@@ -1,7 +1,7 @@
 import { Box, Button, Group, Space, Title } from "@mantine/core";
-import type { LoaderFunction } from "remix";
-import { useLoaderData } from "remix";
-import { json, Link, Outlet } from "remix";
+import type { LoaderFunction } from "@remix-run/node";
+import { json } from "@remix-run/node";
+import { Link, Outlet, useLoaderData } from "@remix-run/react";
 import { VectorTriangle } from "tabler-icons-react";
 import GraphList from "~/components/GraphList";
 import type { graphService } from "~/services/graph.server";

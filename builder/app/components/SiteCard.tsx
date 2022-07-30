@@ -1,7 +1,7 @@
 import { ActionIcon, Card, Divider, Group, Image, Text } from "@mantine/core";
 import type { ProjectSite } from "@prisma/client";
 import React from "react";
-import { useNavigate } from "remix";
+import { useNavigate } from "@remix-run/react";
 import { Edit, ExternalLink, Trash } from "tabler-icons-react";
 
 const SiteCard = ({ site }: { site: Partial<ProjectSite> }) => {

@@ -1,6 +1,7 @@
 import { Button, Group, Space, Title } from "@mantine/core";
-import type { LoaderFunction } from "remix";
-import { json, Link, Outlet, useLoaderData } from "remix";
+import type { LoaderFunction } from "@remix-run/node";
+import { json } from "@remix-run/node";
+import { Link, Outlet, useLoaderData } from "@remix-run/react";
 // import invariant from "tiny-invariant";
 import GraphList from "~/components/GraphList";
 import SiteList from "~/components/SiteList";

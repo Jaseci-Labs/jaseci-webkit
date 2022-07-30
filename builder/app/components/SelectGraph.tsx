@@ -1,4 +1,4 @@
-import { Radio, RadioGroup, Text } from "@mantine/core";
+import { Radio, Text } from "@mantine/core";
 import React from "react";
 
 type Graph = { jid: string; name: string };
@@ -10,15 +10,14 @@ type SelectGraphListProps = {
 const SelectGraph = ({ graphs }: SelectGraphListProps) => {
   return (
     <div>
-      <RadioGroup
+      <Radio.Group
         label="Select your graph"
         description="Select the graph you want to use"
         required
-        name="selectedGraph"
       >
         {graphs?.length ? (
           graphs.map((graph) => (
-            <Radio
+            <Radio name="selectedGraph"
               label={
                 <>
                   <Text component="span">{graph.name}</Text>
@@ -39,7 +38,7 @@ const SelectGraph = ({ graphs }: SelectGraphListProps) => {
         ) : (
           <Text>No graph found.</Text>
         )}
-      </RadioGroup>
+      </Radio.Group>
     </div>
   );
 };

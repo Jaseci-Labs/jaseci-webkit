@@ -1,6 +1,6 @@
 import { Button, Checkbox, PasswordInput, TextInput } from "@mantine/core";
 import React from "react";
-import { useLocation } from "remix";
+import { useLocation } from "@remix-run/react";
 
 const HelloPage = () => {
   const location = useLocation();

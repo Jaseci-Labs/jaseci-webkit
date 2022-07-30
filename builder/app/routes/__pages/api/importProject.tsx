@@ -1,7 +1,6 @@
 import { redirect, unstable_createFileUploadHandler } from "@remix-run/node";
-import type { ActionFunction } from "remix";
-import { unstable_parseMultipartFormData } from "remix";
-import { json } from "remix";
+import type { ActionFunction } from "@remix-run/node";
+import { json, unstable_parseMultipartFormData } from "@remix-run/node";
 import fs from "fs";
 import * as unzipper from "unzipper";
 import { createTabFile } from "~/models/tabFile.server";

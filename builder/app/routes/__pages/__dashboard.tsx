@@ -1,7 +1,9 @@
 import { Paper } from "@mantine/core";
 import React from "react";
-import type { LoaderFunction } from "remix";
-import { json, Outlet, useLoaderData } from "remix";
+import type { LoaderFunction } from "@remix-run/node";
+import { redirect } from "@remix-run/node";
+import { json } from "@remix-run/node";
+import { Outlet, useLoaderData } from "@remix-run/react";
 import { Header } from "~/components/Header";
 import type { User } from "~/models/user.server";
 import { requireUser } from "~/session.server";

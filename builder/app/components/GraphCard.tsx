@@ -1,7 +1,7 @@
 import { Button, Card, Group, Text } from "@mantine/core";
 import type { Graph } from "@prisma/client";
 import React from "react";
-import { Link } from "remix";
+import { Link } from "@remix-run/react";
 
 type GraphCardProps = {
   graph: Graph;

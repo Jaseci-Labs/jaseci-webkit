@@ -1,7 +1,7 @@
 import type { CatchBoundaryComponent } from "@remix-run/react/routeModules";
 import React from "react";
-import type { ErrorBoundaryComponent, LinksFunction } from "remix";
-import { Outlet, useCatch } from "remix";
+import type { ErrorBoundaryComponent, LinksFunction } from "@remix-run/node";
+import { Outlet, useCatch } from "@remix-run/react";
 
 export const links: LinksFunction = () => {
   return [

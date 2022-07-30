@@ -1,8 +1,8 @@
 import { Button, Group, Modal, TextInput } from "@mantine/core";
 import React from "react";
-import type { ActionFunction } from "remix";
-import { useActionData } from "remix";
-import { Form, redirect, useNavigate } from "remix";
+import type { ActionFunction } from "@remix-run/node";
+import { redirect } from "@remix-run/node";
+import { Form, useActionData, useNavigate } from "@remix-run/react";
 import { createProject } from "~/models/project.server";
 import { requireUserId } from "~/session.server";
 

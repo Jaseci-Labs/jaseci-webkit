@@ -1,6 +1,7 @@
 import { Button, Group, Input, Title } from "@mantine/core";
-import type { LoaderFunction } from "remix";
-import { json, Link, Outlet, useLoaderData } from "remix";
+import type { LoaderFunction } from "@remix-run/node";
+import { json } from "@remix-run/node";
+import { Link, Outlet, useLoaderData } from "@remix-run/react";
 import { Hammer } from "tabler-icons-react";
 import { ProjectsTable } from "~/components/ProjectsTable";
 import type { ResolverReturnType } from "~/lib/server-kit";

@@ -1,4 +1,4 @@
-import { json, redirect } from "remix";
+import { json, redirect } from "@remix-run/node";
 import { prisma } from "~/db.server";
 
 type ServiceError = "NOT_FOUND" | "INTERNAL_SERVER_ERROR";

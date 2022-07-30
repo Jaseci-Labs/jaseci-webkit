@@ -1,7 +1,8 @@
 import { Card, Dialog, LoadingOverlay, Text, Title } from "@mantine/core";
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import type { LoaderFunction } from "remix";
-import { json, useFetcher, useLoaderData } from "remix";
+import type { LoaderFunction } from "@remix-run/node";
+import { json } from "@remix-run/node";
+import { useFetcher, useLoaderData } from "@remix-run/react";
 import GraphRenderer from "~/components/GraphRenderer";
 // import invariant from "tiny-invariant";
 import { graphService } from "~/services/graph.server";

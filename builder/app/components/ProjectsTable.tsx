@@ -1,6 +1,6 @@
 import { ActionIcon, Group, Table } from "@mantine/core";
 import type { Project } from "@prisma/client";
-import { useNavigate } from "remix";
+import { useNavigate } from "@remix-run/react";
 import { Edit, Trash, View360 } from "tabler-icons-react";
 
 export function ProjectsTable({ projects }: { projects: Project[] }) {

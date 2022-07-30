@@ -1,4 +1,4 @@
-import { createResolver } from "./../lib/server-kit/resolvers";
+import { createResolver } from "remix-server-kit";
 import type { Prisma } from "@prisma/client";
 import { TabFileType } from "@prisma/client";
 import { prisma } from "~/db.server";
@@ -11,7 +11,7 @@ import {
   optional,
   string,
 } from "superstruct";
-import { message } from "~/lib/server-kit";
+import { message } from "remix-server-kit";
 
 export const createTabFile = createResolver({
   schema: object({

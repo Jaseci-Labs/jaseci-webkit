@@ -12,13 +12,16 @@ import {
 import type { Monaco } from "@monaco-editor/react";
 import Editor from "@monaco-editor/react";
 import { useRef, useState } from "react";
-import type { ActionFunction, LoaderFunction } from "remix";
-import { Outlet } from "remix";
-import { Form } from "remix";
-import { Link, useParams } from "remix";
-import { redirect } from "remix";
-import { json } from "remix";
-import { useLoaderData, useSearchParams } from "remix";
+import type { ActionFunction, LoaderFunction } from "@remix-run/node";
+import { json, redirect } from "@remix-run/node";
+import {
+  Form,
+  Link,
+  Outlet,
+  useLoaderData,
+  useParams,
+  useSearchParams,
+} from "@remix-run/react";
 import EditorHeader from "~/components/EditorHeader";
 import { schemas } from "~/data/schema";
 import ViewsSidebar from "~/components/ViewsSidebar";
@@ -36,7 +39,6 @@ import {
 import { createTabFile, getProjectTabFiles } from "~/models/tabFile.server";
 import { requireUserId } from "~/session.server";
 import type { TabFile } from "@prisma/client";
-import { TabFileType } from "@prisma/client";
 import { ArrowsMaximize, ExternalLink, Star } from "tabler-icons-react";
 import { useFullscreen, useHotkeys } from "@mantine/hooks";
 import { jacLang } from "~/utils/jac";
@@ -48,8 +50,7 @@ import {
   setProjectHomepage,
 } from "~/models/project.server";
 import { string, optional } from "superstruct";
-import type { MatcherReturnType } from "~/lib/server-kit";
-import { createMatcher, validate } from "~/lib/server-kit";
+import { createMatcher, validate } from "remix-server-kit";
 
 const StudioEditor = () => {
   const loaderData = useLoaderData<LoaderData>();

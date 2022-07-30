@@ -1,7 +1,7 @@
 import { ActionIcon, Box, Stack, Tooltip, Text, Kbd } from "@mantine/core";
 import { useHotkeys } from "@mantine/hooks";
 import React from "react";
-import { Link, useNavigate, useParams, useSearchParams } from "remix";
+import { Link, useNavigate, useParams, useSearchParams } from "@remix-run/react";
 import { Browser, Home, VectorTriangle } from "tabler-icons-react";
 
 const EditorActionBar = () => {
@@ -9,11 +9,6 @@ const EditorActionBar = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  // useHotkeys([
-  //   ["mod+O", () => navigate(`/studio/${projectId}`)],
-  //   ["mod+V", () => navigate(`/studio/${projectId}/editor/tab/blank`)],
-  //   ["mod+G", () => navigate(`/studio/${projectId}/graphs`)],
-  // ]);
 
   return (
     <Box sx={{ background: "#202327", width: 48 }}>

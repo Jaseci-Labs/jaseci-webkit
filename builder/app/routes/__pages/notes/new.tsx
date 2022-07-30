@@ -1,6 +1,7 @@
 import * as React from "react";
-import { Form, json, redirect, useActionData } from "remix";
-import type { ActionFunction } from "remix";
+import type { ActionFunction } from "@remix-run/node";
+import { json, redirect } from "@remix-run/node";
+import { Form, useActionData } from "@remix-run/react";
 import Alert from "@reach/alert";
 
 import { createNote } from "~/models/note.server";

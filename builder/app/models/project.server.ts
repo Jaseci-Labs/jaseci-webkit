@@ -1,8 +1,8 @@
 import { assign, nonempty, object, size, string } from "superstruct";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "~/db.server";
-import { createResolver, message } from "~/lib/server-kit";
-import { json } from "remix";
+import { createResolver, message } from "remix-server-kit";
+import { json } from "@remix-run/node";
 
 export const toJson = (output: unknown) => {
   return json(output);
