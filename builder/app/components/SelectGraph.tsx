@@ -17,7 +17,8 @@ const SelectGraph = ({ graphs }: SelectGraphListProps) => {
       >
         {graphs?.length ? (
           graphs.map((graph) => (
-            <Radio name="selectedGraph"
+            <Radio
+              name="selectedGraph"
               label={
                 <>
                   <Text component="span">{graph.name}</Text>

@@ -14,6 +14,7 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  apiKey   String?   @default(cuid())
   password Password?
   notes    Note[]
   projects Project[]
@@ -89,18 +90,22 @@ model Graph {
 }
 
 model TabFile {
-  id        String      @id @default(cuid())
-  name      String
-  type      TabFileType
-  ext       String?
-  content   String?
-  project   Project?    @relation(fields: [projectId], references: [id])
-  projectId String?
-  opened_at DateTime?
+  id           String      @id @default(cuid())
+  name         String
+  type         TabFileType
+  ext          String?
+  content      String?
+  pageSections Json?
+  pageConfig   Json?
+  project      Project?    @relation(fields: [projectId], references: [id])
+  projectId    String?
+  opened_at    DateTime?
 
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
   homepage_project Project? @relation("project_homepage")
+
+  @@unique([projectId, name])
 }
 
 enum TabFileType {

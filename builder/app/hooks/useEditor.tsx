@@ -2,7 +2,13 @@ import { useDebouncedValue } from "@mantine/hooks";
 import type { TabFile } from "@prisma/client";
 import { parse } from "comment-json";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useLoaderData, useLocation, useParams, useResolvedPath, useSubmit } from "@remix-run/react";
+import {
+  useLoaderData,
+  useLocation,
+  useParams,
+  useResolvedPath,
+  useSubmit,
+} from "@remix-run/react";
 import useViewer from "./useViewer";
 
 const useEditor = ({ content, tabs }: { content: string; tabs: TabFile[] }) => {

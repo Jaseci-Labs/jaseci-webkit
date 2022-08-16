@@ -2,17 +2,35 @@ import { nanoid } from "nanoid";
 import { useState } from "react";
 import type { Section } from "~/data/sections";
 import { sections } from "~/data/sections";
+import { hideNotification, showNotification } from "@mantine/notifications";
+import { ArrowBack, Check } from "tabler-icons-react";
+import { Button, Group, Text } from "@mantine/core";
 
-type PageBuilderPage = {
+export type PageBuilderPage = {
   pageId: string;
   name: string;
   pageSections: Section[];
 };
 
-const usePageBuilder = () => {
-  const [currentPage, setCurrentPage] = useState<PageBuilderPage>();
-  const [pages, setPages] = useState<PageBuilderPage[]>([]);
-  const [selectedSection, setSelectedSection] = useState<Section>();
+export type PageConfig = {
+  id: string;
+  name: string;
+  value: string;
+};
+
+const usePageBuilder = ({
+  initialPages,
+}: {
+  initialPages: PageBuilderPage[];
+}) => {
+  const [config, setConfig] = useState<PageConfig[]>([
+    { id: nanoid(), name: "theme", value: "greenheart" },
+  ]);
+  const [currentPage, setCurrentPage] = useState<PageBuilderPage | null>(
+    initialPages?.length ? initialPages[0] : null
+  );
+  const [pages, setPages] = useState<PageBuilderPage[]>(initialPages || []);
+  const [selectedSection, setSelectedSection] = useState<Section | null>();
 
   function addPage(name: string) {
     const page = { pageId: nanoid(), name, pageSections: [] };
@@ -40,9 +58,38 @@ const usePageBuilder = () => {
   }
 
   function deletePage(pageId: string) {
-    setPages((pages) => ({
-      ...pages.filter((page) => page.pageId !== pageId),
-    }));
+    const oldPages = pages;
+    setCurrentPage(null);
+    setSelectedSection(null);
+    const newPages = pages.filter((page) => page.pageId !== pageId);
+    setPages(newPages);
+
+    showNotification({
+      id: "deletePage-" + pageId,
+      title: "Page Deleted",
+      message: (
+        <Group position="apart">
+          <Text>Page deleted</Text>
+          <Button
+            size={"xs"}
+            color={"green"}
+            variant={"light"}
+            onClick={() => {
+              hideNotification("deletePage-" + pageId);
+              setPages(oldPages);
+              setCurrentPage(
+                oldPages.find((page) => page.pageId === pageId) || null
+              );
+            }}
+            leftIcon={<ArrowBack></ArrowBack>}
+          >
+            Undo
+          </Button>
+        </Group>
+      ),
+      icon: <Check></Check>,
+      color: "green",
+    });
   }
 
   function addPageSection(section: Section) {
@@ -62,11 +109,42 @@ const usePageBuilder = () => {
 
   function deleteSection(id: string) {
     if (!currentPage) return;
+    const selectedPage = pages.find(
+      (page) => page.pageId === currentPage.pageId
+    );
+    setSelectedSection(null);
+    if (!selectedPage) return;
 
-    updatePage(currentPage.pageId, {
-      pageSections: currentPage.pageSections.filter(
+    updatePage(selectedPage.pageId, {
+      pageSections: selectedPage.pageSections.filter(
         (section) => section.id !== id
       ),
+    });
+
+    showNotification({
+      id: "deleteSection-" + id,
+      title: "Page Section Deleted",
+      message: (
+        <Group position="apart">
+          <Text>Page section deleted</Text>
+          <Button
+            size={"xs"}
+            color={"green"}
+            variant={"light"}
+            onClick={() => {
+              hideNotification("deleteSection-" + id);
+              updatePage(selectedPage.pageId, {
+                pageSections: selectedPage.pageSections,
+              });
+            }}
+            leftIcon={<ArrowBack></ArrowBack>}
+          >
+            Undo
+          </Button>
+        </Group>
+      ),
+      icon: <Check></Check>,
+      color: "green",
     });
   }
 
@@ -134,12 +212,59 @@ const usePageBuilder = () => {
     );
   }
 
+  function addConfig(name: string, value: string) {
+    setConfig((config) => [...config, { id: nanoid(), name, value }]);
+  }
+
+  function renameConfig(id: string, newName: string) {
+    setConfig((configs) => {
+      const index = configs.findIndex((config) => config.id === id);
+      const newConfigs: PageConfig[] = [...configs];
+      newConfigs[index].name = newName;
+
+      return newConfigs;
+    });
+  }
+
+  function setConfigValue(id: string, value: string) {
+    setConfig((configs) => {
+      const index = configs.findIndex((config) => config.id === id);
+      const newConfigs: PageConfig[] = [
+        ...configs.slice(0, index),
+        { ...configs[index], value },
+        ...config.slice(index + 1),
+      ];
+
+      return newConfigs;
+    });
+  }
+
+  function setConfigValueByName(name: string, value: string) {
+    setConfig((configs) => {
+      const index = configs.findIndex((config) => config.name === name);
+      const newConfigs: PageConfig[] = [
+        ...configs.slice(0, index),
+        { ...configs[index], value },
+        ...config.slice(index + 1),
+      ];
+
+      return newConfigs;
+    });
+  }
+
   return {
     pages,
     getPageContent,
     selectedSection,
     currentPage,
+    config,
     actions: {
+      addConfig,
+      renameConfig,
+      setConfigValue,
+      setConfigValueByName,
+      updatePage,
+      setPages,
       setCurrentPage,
       addPage,
       setSelectedSection,

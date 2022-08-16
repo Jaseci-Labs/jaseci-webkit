@@ -1,3 +1,5 @@
+import type { TabsValue } from "@mantine/core";
+import { Divider } from "@mantine/core";
 import {
   ActionIcon,
   Box,
@@ -10,45 +12,151 @@ import {
   Space,
   Stack,
   Tabs,
-  TabsValue,
   Text,
   TextInput,
   Title,
   useMantineTheme,
 } from "@mantine/core";
-import React, { useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { DndContext, DragOverlay } from "@dnd-kit/core";
 import type { Active, DragEndEvent, DragStartEvent } from "@dnd-kit/core";
 import DraggableSection from "~/components/page-builder/DraggableSection";
-import Section from "~/components/page-builder/Section";
 import DroppableSection from "~/components/page-builder/DroppableSection";
+import type { Section as TSection } from "~/data/sections";
 import { sections } from "~/data/sections";
+import type { PageBuilderPage } from "~/hooks/usePageBuilder";
 import usePageBuilder from "~/hooks/usePageBuilder";
 import ContentSection from "~/components/page-builder/ContentSection";
 import { useDebouncedValue, useInputState } from "@mantine/hooks";
 import { PropertyInspector } from "~/components/page-builder/PropertyInspector";
-import { ArrowBack, Note, Plus } from "tabler-icons-react";
+import {
+  ArrowBack,
+  DeviceFloppy,
+  EditCircle,
+  ExternalLink,
+  Link as ILink,
+  Note,
+  Plus,
+  Star,
+} from "tabler-icons-react";
 import SectionCategories from "~/components/page-builder/SectionCategories";
-import { Form } from "@remix-run/react";
+import {
+  Form,
+  Link,
+  useFetcher,
+  useLoaderData,
+  useParams,
+} from "@remix-run/react";
+import type { ActionFunction, LoaderFunction } from "@remix-run/node";
+import { json } from "@remix-run/node";
+import {
+  getProjectById,
+  savePageBuilderProject,
+  setProjectHomepage,
+} from "~/models/project.server";
+import { IconDeviceFloppy } from "@tabler/icons";
+import { getProjectTabFiles } from "~/models/tabFile.server";
+import { getUser, requireUser } from "~/session.server";
+import Section from "~/components/page-builder/Section";
+import { BiRename } from "react-icons/bi";
+
+export const loader: LoaderFunction = async ({ request, params }) => {
+  try {
+    const { projectId } = params;
+    const user = await getUser(request);
+
+    const project = await getProjectById({ projectId });
+    const tabFiles = await getProjectTabFiles({ projectId, userId: user?.id });
+
+    const pages = tabFiles?.map<PageBuilderPage>((tabFile) => ({
+      name: tabFile.name,
+      pageId: tabFile.id,
+      pageSections: tabFile.pageSections as TSection[],
+      saved: !!tabFile.createdAt,
+    }));
+
+    console.log({ pages });
+
+    return json({
+      pages,
+      projectName: project?.title,
+      projectHomepageId: project?.homepage_tabFileId,
+    });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+export const action: ActionFunction = async ({ request, params }) => {
+  const formData = await request.formData();
+  const action = formData.get("_action");
+  const user = await requireUser(request);
+
+  const { projectId } = params;
+
+  if (action === "savePageBuilderProject") {
+    const result = await savePageBuilderProject({
+      projectId: projectId,
+      pages: JSON.parse(formData.get("pages") || ("{}" as any)),
+      config: JSON.parse(formData.get("config") || ("{}" as any)),
+    });
+
+    return json({ result });
+  }
+
+  if (action === "setProjectHomepage") {
+    const project = await setProjectHomepage({
+      projectId,
+      tabId: formData.get("tabId"),
+      userId: user.id,
+    });
+
+    return json(project);
+  }
+
+  return json({});
+};
 
 const PageBuilder = () => {
+  const loaderData = useLoaderData<{
+    projectName: string;
+    pages: (PageBuilderPage & { saved: boolean })[];
+    projectHomepageId: string;
+  }>();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const { actions, selectedSection, pages, currentPage } = usePageBuilder();
+  const { actions, selectedSection, pages, currentPage, config } =
+    usePageBuilder({
+      initialPages: loaderData?.pages.map((page) => {
+        const { saved, ...pageData } = page;
+        return pageData;
+      }),
+    });
+  const { projectId } = useParams();
   const { addPageSection, setCurrentPage } = actions;
   const [active, setActive] = useState<Active | null>(null);
-  const [currentTab, setCurrentTab] = useState<TabsValue>("page1");
-  const [config, setConfig] = useState<Record<string, any>>({
-    theme: "greenheart",
-  });
+  const [currentTab, setCurrentTab] = useState<TabsValue>(
+    currentPage?.pageId || ""
+  );
   const [showAddPageModal, setShowPageModal] = useState(false);
 
   const [name, setName] = useInputState("");
+  const [renameConfigList, setRenameConfigList] = useState<string[]>([]);
   const [value, setValue] = useInputState("");
   const [debounceRate, setDebounceRate] = useState(200);
+  const savePages = useFetcher();
 
-  const [debouncedConfig] = useDebouncedValue(config, debounceRate);
+  // const [debouncedConfig] = useDebouncedValue(config, debounceRate);
 
   const theme = useMantineTheme();
+
+  useEffect(() => {
+    actions.setPages(
+      loaderData?.pages.map((page) => {
+        const { saved, ...pageData } = page;
+        return pageData;
+      })
+    );
+  }, [loaderData.pages]);
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -82,6 +190,7 @@ const PageBuilder = () => {
                     {!selectedCategory ? "Choose Category" : "Sections"}
                   </Title>
                 </Group>
+
                 {!selectedCategory && (
                   <SectionCategories
                     sections={sections}
@@ -105,17 +214,69 @@ const PageBuilder = () => {
           </Grid.Col>
 
           <Grid.Col span={6}>
+            {!!pages.length && (
+              <Group position={"apart"} color={"green"} align="center">
+                <Title order={3}>{loaderData.projectName}</Title>
+                <Group>
+                  <savePages.Form method={"post"}>
+                    <input
+                      name={"pages"}
+                      hidden
+                      readOnly
+                      value={JSON.stringify(pages)}
+                    />
+                    <input
+                      name={"config"}
+                      hidden
+                      readOnly
+                      value={JSON.stringify(
+                        config.reduce(
+                          (prev, current) => ({
+                            ...prev,
+                            [current.name]: current.value,
+                          }),
+                          {}
+                        )
+                      )}
+                    />
+                    <Button
+                      type={"submit"}
+                      variant={"light"}
+                      name="_action"
+                      value="savePageBuilderProject"
+                      loading={
+                        savePages.state === "submitting" ||
+                        savePages.state === "loading"
+                      }
+                      leftIcon={<IconDeviceFloppy></IconDeviceFloppy>}
+                    >
+                      Save Now
+                    </Button>
+                  </savePages.Form>
+
+                  <Button
+                    leftIcon={<ILink></ILink>}
+                    variant="light"
+                    color="green"
+                    component={Link}
+                    to={"/site/" + projectId}
+                  >
+                    View Site
+                  </Button>
+                </Group>
+              </Group>
+            )}
+
+            <Divider my="lg"></Divider>
+
             {pages.length ? (
               <Tabs
-                defaultValue={"page1"}
+                defaultValue={currentPage?.pageId}
                 value={currentTab}
                 onTabChange={(value) => {
                   setCurrentTab(value);
                   const page = pages.find((page) => page.pageId === value);
-                  console.log({ page });
-                  setCurrentPage(() =>
-                    pages.find((page) => page.pageId === value)
-                  );
+                  setCurrentPage(() => page || null);
                 }}
               >
                 <Tabs.List>
@@ -140,11 +301,17 @@ const PageBuilder = () => {
                     <Box py="md" sx={{ width: "100%" }}>
                       {pages
                         .find((page) => page.pageId === currentPage?.pageId)
-                        ?.pageSections.map((pageSection) => (
+                        ?.pageSections?.map((pageSection) => (
                           <>
                             <ContentSection
                               selected={selectedSection?.id === pageSection.id}
-                              config={debouncedConfig}
+                              config={config.reduce(
+                                (prev, current) => ({
+                                  ...prev,
+                                  [current.name]: current.value,
+                                }),
+                                {}
+                              )}
                               actions={actions}
                               section={pageSection}
                               key={pageSection.id}
@@ -153,21 +320,31 @@ const PageBuilder = () => {
                         ))}
 
                       <Space h={"md"}></Space>
-                      <DroppableSection id="starting"></DroppableSection>
                     </Box>
                   </Tabs.Panel>
                 ))}
+
+                {currentPage && (
+                  <DroppableSection
+                    key={currentPage.pageId}
+                    id={"starting"}
+                  ></DroppableSection>
+                )}
               </Tabs>
             ) : (
-              <Stack justify={"center"}>
-                <Title color={"dimmed"} sx={{ display: "block" }} order={3}>
-                  You haven't created any pages yet
-                </Title>
-                <Text color={"dimmed"}>
-                  Click the button below to start designing your first page
-                </Text>
-                <Button onClick={() => setShowPageModal(true)}>Add page</Button>
-              </Stack>
+              <Card>
+                <Stack justify={"center"}>
+                  <Title color={"dimmed"} sx={{ display: "block" }} order={3}>
+                    You haven't created any pages yet
+                  </Title>
+                  <Text color={"dimmed"}>
+                    Click the button below to start designing your first page
+                  </Text>
+                  <Button onClick={() => setShowPageModal(true)}>
+                    Add page
+                  </Button>
+                </Stack>
+              </Card>
             )}
 
             <AddPageModal
@@ -197,17 +374,65 @@ const PageBuilder = () => {
                   <Stack>
                     <TextInput
                       disabled={!currentPage}
-                      defaultValue={currentPage?.name}
-                      onClick={() => {
-                        if (currentPage) {
-                          actions.deletePage(currentPage?.pageId);
-                        }
-                      }}
+                      value={
+                        pages.find(
+                          (page) => page.pageId === currentPage?.pageId
+                        )?.name
+                      }
                       label={"Name"}
+                      onChange={(e) =>
+                        currentPage &&
+                        actions.updatePage(currentPage.pageId, {
+                          name: e.currentTarget.value,
+                        })
+                      }
                     ></TextInput>
-                    <Button color={"red"} disabled={!currentPage} fullWidth>
-                      Delete
-                    </Button>
+                    <Group>
+                      <Button
+                        color={"red"}
+                        onClick={() =>
+                          currentPage && actions.deletePage(currentPage?.pageId)
+                        }
+                        disabled={!currentPage}
+                      >
+                        Delete
+                      </Button>
+                      <Form method="post">
+                        <input
+                          readOnly
+                          hidden
+                          value={currentPage?.pageId}
+                          name="tabId"
+                        ></input>
+                        <input
+                          readOnly
+                          hidden
+                          value={projectId}
+                          name="projectId"
+                        ></input>
+                        <Button
+                          leftIcon={<Star size={16}></Star>}
+                          color={"orange"}
+                          type="submit"
+                          name="_action"
+                          value="setProjectHomepage"
+                          onClick={() =>
+                            currentPage &&
+                            actions.deletePage(currentPage?.pageId)
+                          }
+                          disabled={
+                            !currentPage ||
+                            currentPage?.pageId ===
+                              loaderData.projectHomepageId ||
+                            !loaderData.pages.find(
+                              (page) => page.pageId === currentPage.pageId
+                            )?.saved
+                          }
+                        >
+                          Set as Homepage
+                        </Button>
+                      </Form>
+                    </Group>
                   </Stack>
                 </Card>
 
@@ -215,10 +440,13 @@ const PageBuilder = () => {
                   <Title order={6}>Config</Title>
                   <Stack>
                     <Select
-                      onChange={(value) =>
-                        setConfig((config) => ({ ...config, theme: value }))
+                      onChange={(value) => {
+                        actions.setConfigValueByName("theme", value || "");
+                      }}
+                      value={
+                        config.find((configObj) => configObj.name === "theme")
+                          ?.value
                       }
-                      value={config.theme}
                       label="Theme"
                       onClick={(e) => setDebounceRate(200)}
                       data={[
@@ -261,38 +489,77 @@ const PageBuilder = () => {
                       ]}
                     ></Select>
 
-                    {Object.keys(config)
-                      .filter((key) => key !== "theme")
-                      .map((key) => (
-                        <Grid key={key} columns={2}>
+                    {config
+                      .filter((configObj) => configObj.name !== "theme")
+                      .map((configObj) => (
+                        <Grid key={configObj.id} columns={2}>
                           <Grid.Col span={1}>
                             <TextInput
                               label="Name"
-                              value={key}
-                              disabled
-                              onChange={(e) => {
-                                setConfig((config) => ({
-                                  ...config,
-                                  [e.target?.value]: config[key],
-                                }));
+                              value={configObj.name}
+                              rightSection={
+                                <ActionIcon
+                                  color="orange"
+                                  onClick={() => {
+                                    if (
+                                      !renameConfigList.includes(configObj.id)
+                                    ) {
+                                      setRenameConfigList(
+                                        (renameConfigList) => [
+                                          ...renameConfigList,
+                                          configObj?.id,
+                                        ]
+                                      );
+                                    } else {
+                                      // enable the text input field
+                                      setRenameConfigList((renameConfigList) =>
+                                        renameConfigList.filter(
+                                          (configName) =>
+                                            configName !== configObj.id
+                                        )
+                                      );
 
-                                delete config[key];
+                                      // // perform rename actions
+                                      // setConfig((config) => {
+                                      //   const newConfig = { ...config };
+                                      //   newConfig["hello"] = newConfig;
+                                      //   delete newConfig[configObj.id];
+                                      //   return newConfig;
+                                      // });
+                                    }
+                                  }}
+                                >
+                                  {!renameConfigList.includes(configObj.id) ? (
+                                    <EditCircle size={16}></EditCircle>
+                                  ) : (
+                                    <DeviceFloppy size={16}></DeviceFloppy>
+                                  )}
+                                </ActionIcon>
+                              }
+                              disabled={
+                                !renameConfigList.includes(configObj.id)
+                              }
+                              onChange={(e) => {
+                                actions.renameConfig(
+                                  configObj.id,
+                                  e.target?.value
+                                );
                               }}
                             ></TextInput>
                           </Grid.Col>
                           <Grid.Col span={1}>
                             <TextInput
                               label="Value"
-                              value={config[key]}
+                              value={configObj.value}
                               onFocusCapture={() => {
                                 setDebounceRate(1000);
                               }}
                               onChange={(e) => {
                                 // prevent site from being updated on every keystroke
-                                setConfig((config) => ({
-                                  ...config,
-                                  [key]: e.target?.value,
-                                }));
+                                actions.setConfigValue(
+                                  configObj.id,
+                                  e.target?.value
+                                );
                               }}
                             ></TextInput>
                           </Grid.Col>
@@ -317,7 +584,7 @@ const PageBuilder = () => {
                     </Grid>
                     <Button
                       onClick={() => {
-                        setConfig(() => ({ ...config, [name]: value }));
+                        actions.addConfig(name, value);
                         setName("");
                         setValue("");
                       }}
@@ -332,7 +599,13 @@ const PageBuilder = () => {
                     key={selectedSection.id}
                     setSectionContent={actions.setSectionContent}
                     section={selectedSection}
-                    config={config}
+                    config={config.reduce(
+                      (prev, current) => ({
+                        ...prev,
+                        [current.name]: current.value,
+                      }),
+                      {}
+                    )}
                   ></PropertyInspector>
                 )}
               </Stack>

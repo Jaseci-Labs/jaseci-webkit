@@ -1,4 +1,7 @@
 import bcrypt from "@node-rs/bcrypt";
+import { nanoid } from "nanoid";
+import { createResolver } from "remix-server-kit";
+import { object, string } from "superstruct";
 import { prisma } from "~/db.server";
 
 export type { User } from "@prisma/client";
@@ -53,3 +56,15 @@ export async function verifyLogin(email: string, password: string) {
 
   return userWithoutPassword;
 }
+
+export const resetAPIKey = createResolver({
+  schema: object({ userId: string() }),
+  resolve({ userId }, _ctx) {
+    return prisma.user.update({
+      where: { id: userId },
+      data: {
+        apiKey: nanoid(),
+      },
+    });
+  },
+});

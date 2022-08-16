@@ -4,35 +4,97 @@
     "sections": {
         "children": [
             {
+                "name": "hero1",
+                "css": {},
+                "component": "Hero",
+                "sections": {
+                    "children": []
+                },
+                "props": {
+                    "background_image": "https://i.imgur.com/0Z1Z0Zm.jpg"
+                },
+                "operations": {},
+                "events": {}
+            },
+            {
                 "name": "navbar1",
+                "css": {},
                 "component": "Navbar",
                 "sections": {
                     "children": []
-                }
-            },
-            {
-                "name": "alert1",
-                "component": "Alert",
-                "sections": {
-                    "children": [
+                },
+                "props": {
+                    "links": [
                         {
-                            "name": "alertBtn",
-                            "component": "Button",
-                            "sections": {
-                                "children": [
+                            "label": "Home",
+                            "href": "#"
+                        },
+                        {
+                            "label": "About",
+                            "href": "#"
+                        }
+                    ]
+                },
+                "operations": {
+                    "op1": {
+                        "run": [
+                            {
+                                "fn": "callEndpoint",
+                                "args": [
+                                    "POST",
+                                    {},
                                     {
-                                        "name": "alertBtn1",
-                                        "component": "Button",
-                                        "sections": {
-                                            "children": []
-                                        }
+                                        "Authorization": "token 198ab01ffecda8b09c98e2e679257d25644c430690ae0cacd54529bcd83b0b9a",
+                                        "Content-Type": "application/json"
+                                    }
+                                ]
+                            },
+                            {
+                                "fn": "showToast",
+                                "args": [
+                                    {
+                                        "message": "Congratulations!",
+                                        "timeout": 300
                                     }
                                 ]
                             }
+                        ],
+                        "args": [
+                            "a",
+                            "b"
+                        ]
+                    }
+                },
+                "events": {
+                    "onClick": [
+                        {
+                            "fn": "callEndpoint",
+                            "args": [
+                                "POST",
+                                {},
+                                {
+                                    "Authorization": "token 198ab01ffecda8b09c98e2e679257d25644c430690ae0cacd54529bcd83b0b9a",
+                                    "Content-Type": "application/json"
+                                }
+                            ]
+                        },
+                        {
+                            "fn": "runOperation",
+                            "operation": "navbar1.sayHello",
+                            "args": [
+                                [
+                                    "a",
+                                    "b"
+                                ]
+                            ]
                         }
                     ]
                 }
             }
         ]
-    }
+    },
+    "css": {},
+    "props": {},
+    "events": {},
+    "operations": {}
 }

@@ -7,6 +7,7 @@ import { PageNotFound } from "~/components/PageNotFound";
 import useViewer from "~/hooks/useViewer";
 import { getProjectHomepage } from "~/models/project.server";
 import { getTabFileByName } from "~/models/tabFile.server";
+import type { Section } from "~/data/sections";
 // import { getProject } from "~/models/project.server";
 
 type LoaderData = {
@@ -56,14 +57,29 @@ const SitePage = () => {
   // }, [jscAppRef?.current, loaderData?.page?.content, runCode]);
 
   useEffect(() => {
+    let content = loaderData.page?.content;
+    const pageSections = loaderData?.page?.pageSections as Section[];
+    const pageConfig = loaderData?.page?.pageConfig;
+
+    // handle page builder content
+    if (pageSections?.length) {
+      const components = pageSections?.map((section) =>
+        JSON.parse(section?.content)
+      );
+      content = JSON.stringify({ components });
+    }
+
     customElements.whenDefined("jsc-app").then(() => {
-      runCode(loaderData.page?.content || "");
+      runCode(content || "");
+      if (pageConfig) jscAppRef.current?.setGlobalConfig(pageConfig);
     });
-  }, [loaderData?.page?.content]);
+  }, []);
 
   return (
     <div>
-      {loaderData?.page?.content && loaderData.page.type === "View" ? (
+      {(loaderData?.page?.content ||
+        (loaderData?.page?.pageSections as Section[])?.length) &&
+      loaderData?.page?.type === "View" ? (
         <jsc-app
           // onRender={() => runCode(loaderData.page?.content || "")}
           ref={jscAppRef}

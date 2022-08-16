@@ -12,6 +12,8 @@ import {
   string,
 } from "superstruct";
 import { message } from "remix-server-kit";
+import type { Section } from "~/data/sections";
+import { drawBar } from "vis-network/declarations/DOMutil";
 
 export const createTabFile = createResolver({
   schema: object({
@@ -45,18 +47,18 @@ export const createTabFile = createResolver({
   },
 });
 
-export const getProjectTabFiles = ({
-  projectId,
-  userId,
-}: {
-  projectId: string;
-  userId: string;
-}) => {
-  return prisma.tabFile.findMany({
-    where: { project: { id: projectId, userId } },
-    orderBy: { name: "asc" },
-  });
-};
+export const getProjectTabFiles = createResolver({
+  schema: object({
+    projectId: string(),
+    userId: string(),
+  }),
+  async resolve({ projectId, userId }) {
+    return prisma.tabFile.findMany({
+      where: { project: { id: projectId, userId } },
+      orderBy: { name: "asc" },
+    });
+  },
+});
 
 export const saveTabContent = createResolver({
   schema: object({ tabId: string(), content: string(), userId: string() }),
@@ -68,25 +70,45 @@ export const saveTabContent = createResolver({
   },
 });
 
-export const updateTabFile = async ({
-  tabFileId,
-  userId,
-  input,
-}: {
-  tabFileId: string;
-  userId: string;
-  input: Prisma.TabFileUpdateInput;
-}) => {
-  return prisma.tabFile.updateMany({
-    where: {
-      id: tabFileId,
-      project: { userId },
-    },
-    data: {
-      ...input,
-    },
-  });
-};
+export const updateTabFile = createResolver({
+  schema: object({ tabFileId: string(), userId: string(), input: object() }),
+  resolve({ input, tabFileId, userId }) {
+    return prisma.tabFile.updateMany({
+      where: {
+        id: tabFileId,
+        project: { userId },
+      },
+      data: {
+        ...input,
+      },
+    });
+  },
+});
+
+export const convertTabFile = createResolver({
+  schema: object({
+    tabFileId: string(),
+    userId: string(),
+  }),
+  async resolve({ tabFileId }) {
+    const tabFile = await prisma.tabFile.findFirst({
+      where: { id: tabFileId },
+    });
+
+    const components = ((tabFile?.pageSections as Section[]) || [])?.map(
+      (section) => JSON.parse(section.content)
+    );
+
+    const config = tabFile?.pageConfig || {};
+
+    const content = JSON.stringify({ config, components });
+
+    return prisma.tabFile.update({
+      where: { id: tabFileId },
+      data: { content, pageSections: [] },
+    });
+  },
+});
 
 // get open tabs for the project
 export const getProjectOpenedTabs = ({

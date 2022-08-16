@@ -1,58 +1,28 @@
+import { useState } from "react";
 import {
-  Avatar,
-  Burger,
-  Container,
   createStyles,
-  Divider,
+  Header as MantineHeader,
+  Box,
   Group,
-  Menu,
-  Tabs,
-  Text,
+  Burger,
   Title,
-  UnstyledButton,
+  Button,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import React, { useState } from "react";
-import { Form, Link, useNavigate } from "@remix-run/react";
-import {
-  ChevronDown,
-  Heart,
-  Logout,
-  Message,
-  PlayerPause,
-  Settings,
-  Star,
-  SwitchHorizontal,
-  Trash,
-} from "tabler-icons-react";
+import { Form, Link } from "@remix-run/react";
 
 const useStyles = createStyles((theme) => ({
   header: {
-    paddingTop: theme.spacing.sm,
-    backgroundColor: theme.colors[theme.primaryColor][6],
-    borderBottom: `1px solid ${theme.colors[theme.primaryColor][6]}`,
-    marginBottom: 40,
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    height: "100%",
+    padding: "0 200px",
   },
 
-  mainSection: {
-    paddingBottom: theme.spacing.sm,
-  },
-
-  userMenu: {
+  links: {
     [theme.fn.smallerThan("xs")]: {
       display: "none",
-    },
-  },
-
-  user: {
-    color: theme.white,
-    padding: `${theme.spacing.xs}px ${theme.spacing.sm}px`,
-    borderRadius: theme.radius.sm,
-    transition: "background-color 100ms ease",
-
-    "&:hover": {
-      backgroundColor:
-        theme.colors[theme.primaryColor][theme.colorScheme === "dark" ? 7 : 5],
     },
   },
 
@@ -62,143 +32,104 @@ const useStyles = createStyles((theme) => ({
     },
   },
 
-  userActive: {
-    backgroundColor:
-      theme.colors[theme.primaryColor][theme.colorScheme === "dark" ? 7 : 5],
-  },
-
-  tabs: {
-    [theme.fn.smallerThan("sm")]: {
-      display: "none",
-    },
-  },
-
-  tabsList: {
-    borderBottom: "0 !important",
-  },
-
-  tabControl: {
+  link: {
+    display: "block",
+    lineHeight: 1,
+    padding: "8px 12px",
+    borderRadius: theme.radius.sm,
+    textDecoration: "none",
+    color:
+      theme.colorScheme === "dark"
+        ? theme.colors.dark[0]
+        : theme.colors.gray[7],
+    fontSize: theme.fontSizes.sm,
     fontWeight: 500,
-    height: 38,
-    color: `${theme.white} !important`,
 
     "&:hover": {
       backgroundColor:
-        theme.colors[theme.primaryColor][theme.colorScheme === "dark" ? 7 : 5],
+        theme.colorScheme === "dark"
+          ? theme.colors.dark[6]
+          : theme.colors.gray[0],
     },
   },
 
-  tabControlActive: {
-    color: `${
-      theme.colorScheme === "dark" ? theme.white : theme.black
-    } !important`,
-    borderColor: `${theme.colors[theme.primaryColor][6]} !important`,
+  linkActive: {
+    "&, &:hover": {
+      backgroundColor: theme.fn.variant({
+        variant: "light",
+        color: theme.primaryColor,
+      }).background,
+      color: theme.fn.variant({ variant: "light", color: theme.primaryColor })
+        .color,
+    },
   },
 }));
 
-interface HeaderTabsProps {
-  user: { name: string; image: string };
-  tabs: { label: string; to: string }[];
+interface HeaderSimpleProps {
+  links: { to: string; label: string }[];
 }
 
-export function Header({ user, tabs }: HeaderTabsProps) {
-  const { classes, theme, cx } = useStyles();
-  const [activeTab, setActiveTab] = useState<number | undefined>();
-  const [opened, toggleOpened] = useDisclosure(false);
-  const [userMenuOpened, setUserMenuOpened] = useState(false);
-  const navigate = useNavigate();
+export function Header({ links }: HeaderSimpleProps) {
+  const [opened, { toggle }] = useDisclosure(false);
+  const [active, setActive] = useState(links[0].to);
+  const { classes, cx } = useStyles();
 
-  const renderTabs = tabs.map((tab) => (
-    <Tabs.Tab key={tab.label} tabKey={tab.to} label={tab.label} />
+  const items = links.map((link) => (
+    <Button
+      key={link.label}
+      component={Link}
+      to={link.to}
+      variant="light"
+      size="xs"
+      // className={cx(classes.link, {
+      //   [classes.linkActive]: active === link.to,
+      // })}
+      // onClick={(event) => {
+      //   event.preventDefault();
+      //   setActive(link.to);
+      // }}
+    >
+      {link.label}
+    </Button>
   ));
 
   return (
-    <div className={classes.header}>
-      <Container className={classes.mainSection}>
-        <Group position="apart">
-          {/* <MantineLogo variant="white" /> */}
-          <Link to="/" style={{ all: "unset", cursor: "pointer" }}>
-            <Title order={3} sx={{ color: "#fff" }}>
-              Jaseci Studio
-            </Title>
-          </Link>
-
-          <Burger
-            opened={opened}
-            onClick={() => toggleOpened()}
-            className={classes.burger}
-            size="sm"
-            color={theme.white}
-          />
-
-          <Menu
-            size={260}
-            placement="end"
-            transition="pop-top-right"
-            className={classes.userMenu}
-            onClose={() => setUserMenuOpened(false)}
-            onOpen={() => setUserMenuOpened(true)}
-            control={
-              <UnstyledButton
-                className={cx(classes.user, {
-                  [classes.userActive]: userMenuOpened,
-                })}
-              >
-                <Group spacing={7}>
-                  <Avatar
-                    src={user.image}
-                    alt={user.name}
-                    radius="xl"
-                    size={20}
-                  />
-                  <Text
-                    weight={500}
-                    size="sm"
-                    sx={{ lineHeight: 1, color: theme.white }}
-                    mr={3}
-                  >
-                    {user.name}
-                  </Text>
-                  <ChevronDown size={12} />
-                </Group>
-              </UnstyledButton>
-            }
+    <MantineHeader height={60} mb={60}>
+      <Box className={classes.header}>
+        <Link to={"/"} style={{ all: "unset", cursor: "pointer" }}>
+          <Title
+            order={3}
+            sx={(theme) => ({ color: theme.colors[theme.primaryColor][6] })}
           >
-            <Menu.Label>Danger zone</Menu.Label>
-
-            <Form action="/logout" method="post">
-              <Menu.Item<"button">
-                color="red"
-                component="button"
-                type="submit"
-                icon={<Trash size={14} />}
-              >
-                Logout
-              </Menu.Item>
-            </Form>
-          </Menu>
+            Jaseci Studio
+          </Title>
+        </Link>
+        <Group spacing={5} className={classes.links}>
+          {items}
+          <Button
+            type={"submit"}
+            component={Link}
+            to="/settings"
+            color={"grape"}
+            variant={"light"}
+            size={"xs"}
+          >
+            Settings
+          </Button>
+          <Form method={"post"} action={"/logout"}>
+            <Button type={"submit"} color={"red"} variant={"light"} size={"xs"}>
+              Logout
+            </Button>
+          </Form>
         </Group>
-      </Container>
-      <Container>
-        <Tabs
-          variant="outline"
-          classNames={{
-            root: classes.tabs,
-            tabsListWrapper: classes.tabsList,
-            tabControl: classes.tabControl,
-            tabActive: classes.tabControlActive,
-          }}
-          active={activeTab}
-          onTabChange={(activeTab, tabKey) => {
-            setActiveTab(activeTab);
-            navigate(tabKey || "#");
-          }}
-        >
-          <Tabs.List>
-            {renderTabs}
-          </Tabs.List>
-        </Tabs>
-      </Container>
-    </div>
+
+        <Burger
+          opened={opened}
+          onClick={toggle}
+          className={classes.burger}
+          size="sm"
+        />
+      </Box>
+    </MantineHeader>
   );
 }

@@ -2,6 +2,7 @@ import {
   Button,
   Box,
   Stack,
+  Text,
   Modal,
   SegmentedControl,
   TextInput,
@@ -11,16 +12,21 @@ import {
 import { useClickOutside, useDisclosure, useHotkeys } from "@mantine/hooks";
 import type { TabFile } from "@prisma/client";
 import type { ReactElement } from "react";
+import { useEffect } from "react";
 import React from "react";
-import { Form, useActionData } from "@remix-run/react";
+import { Form, useActionData, useFetcher } from "@remix-run/react";
 import {
   BrandHtml5,
+  Check,
   File,
   Plus,
   Star,
+  Switch,
   Trash,
   VectorTriangle,
 } from "tabler-icons-react";
+import type { Section } from "~/data/sections";
+import { showNotification } from "@mantine/notifications";
 
 const ViewsSidebar = ({
   tabFiles,
@@ -125,48 +131,66 @@ const FileMenu = ({
   tabFileId,
   onClose,
   tabFileName,
+  isEditorOnly,
 }: {
   control: ReactElement<any, any>;
   opened: boolean;
   onClose: () => void;
   tabFileId: string;
   tabFileName: string;
+  isEditorOnly: boolean;
 }) => {
   const [showRenameFileItemDialog, renameDialogHandlers] = useDisclosure(false);
   const [showDeleteFileItemDialog, deleteDialogHandlers] = useDisclosure(false);
+  const [showConvertDialog, convertDialogHandlers] = useDisclosure(false);
   const ref = useClickOutside(() => onClose());
 
   useHotkeys([["Escape", () => onClose()]]);
 
   return (
-    <>
+    <div ref={ref}>
       <Menu
-        ref={ref}
-        closeOnScroll={true}
+        // closeOnScroll={true}
         opened={opened}
-        control={control}
+        // control={control}
+        transition={"pop"}
         position="right"
       >
-        <Menu.Item
-          onClick={() => {
-            onClose();
-            renameDialogHandlers.open();
-          }}
-          icon={<File size={14} />}
-        >
-          Rename
-        </Menu.Item>
-        <Menu.Item
-          name="_action"
-          value="deleteTabItem"
-          icon={<Trash size={14} />}
-          onClick={() => {
-            onClose();
-            deleteDialogHandlers.open();
-          }}
-        >
-          Delete
-        </Menu.Item>
+        <Menu.Target>{control}</Menu.Target>
+        <Menu.Dropdown>
+          {!isEditorOnly && (
+            <Menu.Item
+              onClick={() => {
+                onClose();
+                convertDialogHandlers.open();
+              }}
+              icon={<Switch size={14} />}
+            >
+              Convert to Editor Format
+            </Menu.Item>
+          )}
+
+          <Menu.Item
+            onClick={() => {
+              onClose();
+              renameDialogHandlers.open();
+            }}
+            icon={<File size={14} />}
+          >
+            Rename
+          </Menu.Item>
+          <Menu.Item
+            name="_action"
+            value="deleteTabItem"
+            icon={<Trash size={14} />}
+            onClick={() => {
+              onClose();
+              deleteDialogHandlers.open();
+            }}
+          >
+            Delete
+          </Menu.Item>
+        </Menu.Dropdown>
       </Menu>
 
       <RenameFileItemDialog
@@ -181,7 +205,13 @@ const FileMenu = ({
         opened={showDeleteFileItemDialog}
         tabFileId={tabFileId}
       />
-    </>
+
+      <ConvertPageDialog
+        onClose={convertDialogHandlers.close}
+        opened={showConvertDialog}
+        tabFileId={tabFileId}
+      />
+    </div>
   );
 };
 
@@ -203,6 +233,7 @@ const FileItem = ({
           opened={opened}
           onClose={handlers.close}
           tabFileName={tabFile.name}
+          isEditorOnly={!(tabFile?.pageSections as Section[])?.length}
           control={
             <Button
               size="xs"
@@ -212,7 +243,13 @@ const FileItem = ({
                 tabFile.ext === "jac" ? (
                   <VectorTriangle></VectorTriangle>
                 ) : (
-                  <BrandHtml5></BrandHtml5>
+                  <BrandHtml5
+                    color={
+                      (tabFile?.pageSections as Section[])?.length
+                        ? "lightblue"
+                        : undefined
+                    }
+                  ></BrandHtml5>
                 )
               }
               rightIcon={isHomepage ? <Star size={14}></Star> : undefined}
@@ -221,9 +258,9 @@ const FileItem = ({
               name="_action"
               styles={(theme) => ({
                 rightIcon: { marginLeft: 6, color: theme.colors.orange[8] },
+                inner: { justifyContent: "left" },
               })}
               value="openTabItem"
-              sx={{ fontFamily: "sans-serif" }}
               fullWidth
               onContextMenu={(e: any) => {
                 e.preventDefault();
@@ -302,6 +339,64 @@ const DeleteFileItemDialog = ({
           </Button>
         </Group>
       </Form>
+    </Modal>
+  );
+};
+
+export const ConvertPageDialog = ({
+  opened,
+  onClose,
+  tabFileId,
+}: {
+  opened: boolean;
+  onClose: () => void;
+  tabFileId: string;
+}) => {
+  const convert = useFetcher();
+
+  useEffect(() => {
+    if (convert.data) {
+      onClose();
+      showNotification({
+        message: "You can now edit this tab's content with the editor.",
+        color: "green",
+        icon: <Check></Check>,
+      });
+    }
+  }, [convert.data]);
+
+  return (
+    <Modal
+      title={
+        <Group>
+          <Text>Are you sure you want to convert this page?</Text>{" "}
+        </Group>
+      }
+      onClose={onClose}
+      opened={opened}
+    >
+      <Text weight={500}>This action is irreversible!</Text>
+      <convert.Form method="post">
+        <input hidden name="tabFileId" value={tabFileId}></input>
+
+        <Group position="apart">
+          <Button color="teal" onClick={onClose}>
+            No
+          </Button>
+          <Button
+            color="red"
+            type="submit"
+            mt="lg"
+            name="_action"
+            value="convertTabItemToEditorFormat"
+            loading={
+              convert.state === "loading" || convert.state === "submitting"
+            }
+          >
+            Yes
+          </Button>
+        </Group>
+      </convert.Form>
     </Modal>
   );
 };

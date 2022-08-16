@@ -126,50 +126,50 @@ const EditorHeader = ({
             </ActionIcon>
           </Tooltip>
 
-          <Menu
-            color={"red"}
-            control={
-              <Tooltip
-                label={
-                  <Text>
-                    More Actions <Kbd ml="xs">CTRL</Kbd> + <Kbd>M</Kbd>
-                  </Text>
-                }
-                position="bottom"
-                withArrow
-              >
+          <Menu>
+            <Tooltip
+              label={
+                <Text>
+                  More Actions <Kbd ml="xs">CTRL</Kbd> + <Kbd>M</Kbd>
+                </Text>
+              }
+              position="bottom"
+              withArrow
+            >
+              <Menu.Target>
                 <ActionIcon>
                   <MenuIcon size={16} color={"#9ba9b8"}></MenuIcon>
                 </ActionIcon>
-              </Tooltip>
-            }
-          >
-            <Menu.Label>Actions</Menu.Label>
-            <Menu.Item
-              onClick={newComponentDialogHandlers.open}
-              icon={<NewSection></NewSection>}
-            >
-              Add a Component
-              <Box mt="xs">
-                <Kbd my="md">CTRL</Kbd> + <Kbd my="md">N</Kbd>
-              </Box>
-            </Menu.Item>
-            <Menu.Item
-              onClick={examplesDialogHandlers.open}
-              icon={<InfoSquare></InfoSquare>}
-            >
-              Examples
-              <Box mt="xs">
-                <Kbd my="md">CTRL</Kbd> + <Kbd my="md">E</Kbd>
-              </Box>
-            </Menu.Item>
+              </Menu.Target>
+            </Tooltip>
+            {/*<Menu.Label>Actions</Menu.Label>*/}
+            <Menu.Dropdown>
+              <Menu.Item
+                onClick={newComponentDialogHandlers.open}
+                icon={<NewSection></NewSection>}
+              >
+                Add a Component
+                <Box mt="xs">
+                  <Kbd my="md">CTRL</Kbd> + <Kbd my="md">N</Kbd>
+                </Box>
+              </Menu.Item>
+              <Menu.Item
+                onClick={examplesDialogHandlers.open}
+                icon={<InfoSquare></InfoSquare>}
+              >
+                Examples
+                <Box mt="xs">
+                  <Kbd my="md">CTRL</Kbd> + <Kbd my="md">E</Kbd>
+                </Box>
+              </Menu.Item>
 
-            <Menu.Item component={Link} icon={<File></File>} to="port">
-              Import/Export
-              <Box mt="xs">
-                <Kbd my="md">CTRL</Kbd> + <Kbd my="md">E</Kbd>
-              </Box>
-            </Menu.Item>
+              <Menu.Item component={Link} icon={<File></File>} to="port">
+                Import/Export
+                <Box mt="xs">
+                  <Kbd my="md">CTRL</Kbd> + <Kbd my="md">E</Kbd>
+                </Box>
+              </Menu.Item>
+            </Menu.Dropdown>
           </Menu>
         </Group>
       </Group>

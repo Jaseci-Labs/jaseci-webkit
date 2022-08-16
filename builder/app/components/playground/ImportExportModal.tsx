@@ -1,41 +1,45 @@
 import { Button, Divider, Text, Modal, Space, Title } from "@mantine/core";
-import type { DropzoneStatus } from "@mantine/dropzone";
+// import type { DropzoneStatus } from "@mantine/dropzone";
 import { MIME_TYPES } from "@mantine/dropzone";
 import { Dropzone } from "@mantine/dropzone";
-import { useNotifications } from "@mantine/notifications";
+import {
+  showNotification,
+  updateNotification,
+  useNotifications,
+} from "@mantine/notifications";
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useState } from "react";
 import { useFetcher, useParams } from "@remix-run/react";
 import { Check } from "tabler-icons-react";
 
-const DropZoneComp = ({
-  status,
-  file,
-}: {
-  status: DropzoneStatus;
-  file: File | null;
-}) => {
-  return (
-    <>
-      {!status.accepted && <p>Click or drag and drop project here</p>}
-      {status.rejected && (
-        <div>
-          <Text>Click or drag and drop project here</Text>
-          <Text color="red">File not allowed! It must be a zip file.</Text>
-        </div>
-      )}
-
-      {file?.name && (
-        <Text>
-          <Text component="span" weight="bold">
-            Selected:
-          </Text>{" "}
-          {file?.name}{" "}
-        </Text>
-      )}
-    </>
-  );
-};
+// const DropZoneComp = ({
+//   status,
+//   file,
+// }: {
+//   // status: DropzoneStatus;
+//   file: File | null;
+// }) => {
+//   return (
+//     <>
+//       {!status.accepted && }
+//       {status.rejected && (
+//         <div>
+//           <Text>Click or drag and drop project here</Text>
+//           <Text color="red">File not allowed! It must be a zip file.</Text>
+//         </div>
+//       )}
+//
+//       {file?.name && (
+//         <Text>
+//           <Text component="span" weight="bold">
+//             Selected:
+//           </Text>{" "}
+//           {file?.name}{" "}
+//         </Text>
+//       )}
+//     </>
+//   );
+// };
 
 const ImportExportModal = ({
   onClose,
@@ -55,7 +59,8 @@ const ImportExportModal = ({
     await new Promise((resolve) => {
       setTimeout(resolve, 500);
     });
-    notification.updateNotification("importProject", {
+    updateNotification({
+      id: "importProject",
       title: "Import Project",
       message: "Project imported successfully!",
       color: "teal",
@@ -67,7 +72,7 @@ const ImportExportModal = ({
 
   useEffect(() => {
     if (fetcher.type === "actionSubmission" && fetcher.state === "submitting") {
-      notification.showNotification({
+      showNotification({
         id: "importProject",
         title: "Import Project",
         message: "Importing project...",
@@ -107,7 +112,14 @@ const ImportExportModal = ({
             console.log("rejected files ", files);
           }}
         >
-          {(status) => <DropZoneComp status={status} file={file} />}
+          <Dropzone.Idle>
+            <p>Upload File</p>
+          </Dropzone.Idle>
+          <Dropzone.Accept>File: {file?.name}</Dropzone.Accept>
+          <Dropzone.Reject>Invalid file, choose another</Dropzone.Reject>
+          <Text size="sm" color="dimmed" inline mt={7}>
+            Click or drag and drop project here
+          </Text>
         </Dropzone>
 
         <Button

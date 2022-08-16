@@ -76,6 +76,7 @@ export const action: ActionFunction = async ({ request }) => {
 
     return redirect(`/studio/${projectId}/editor/tab/blank`);
   } catch (err) {
+    console.log("hello");
     if (err instanceof Response && err.statusText == "ValidationError") {
       return err;
     }

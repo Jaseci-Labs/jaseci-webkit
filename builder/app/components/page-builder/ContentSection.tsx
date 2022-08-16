@@ -163,7 +163,7 @@ export const CodeInspector = ({
   }, [value]);
 
   return (
-    <Modal opened={opened} onClose={onClose} title="Edit Component">
+    <Modal opened={opened} onClose={onClose} size={"xl"} title="Edit Component">
       <Stack>
         <JsonInput
           autosize

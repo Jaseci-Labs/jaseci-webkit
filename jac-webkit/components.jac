@@ -6,14 +6,39 @@ node Component {
     has loc=null;
     has css = {};
     has props = {};
+    has events = {};
     has sections = {};
-    
-    can get_props {
-        std.out("After: ", here.info["jid"]);
+
+    can set_props {
         for prop in here.context.dict::keys {
-            // std.out(loc["props"]);
             if prop not in ["name", "type", "loc", "css", "props", "sections", "c_type"] {
                 if here.context[prop]: loc["props"][prop] = here.context[prop];
+            }
+        }
+    }
+
+    can set_events {
+        for i in -[event]-> {
+            i::set_action_json;
+
+            if i.edge[0].trigger in loc["events"].dict::keys {
+                loc["events"][i.edge[0].trigger].list::append(i.json);
+            } else {
+                loc["events"][i.edge[0].trigger] = [i.json];
+            }
+        }
+    }
+
+    can set_operations {
+        for i in -[operation]-> {
+            i::set_action_json;
+
+            if i.edge[0].name in loc["operations"].dict::keys {
+                loc["operations"][i.edge[0].name]["run"].list::append(i.json);
+
+                if i.edge[0].args: loc["operations"][i.edge[0].name]["args"] = args;
+            } else {
+                loc["operations"][i.edge[0].name] = {"run": [i.json], "args": i.edge[0].args};
             }
         }
     }
@@ -25,11 +50,15 @@ node Component {
         loc['sections'] = {"children": []};
         loc['css'] = css;
         loc['props'] = {};
-        ::get_props;
+        loc['events'] = {};
+        loc['operations'] = {};
+        ::set_props;
+        ::set_events;
+        ::set_operations;
         
 
 
-        for i in --> {
+        for i in -[section]-> {
              i.loc={};
              i.loc['name'] = i.name;
              i.loc['css'] = i.css;
@@ -37,8 +66,12 @@ node Component {
              i.loc['sections'] = {};
              i.loc['sections']["children"] = [];
              i.loc['props'] = {};
-             std.out("Before: ", i.info["jid"]);
-             i::get_props;
+             i.loc['operations'] = {};
+             i.loc['events'] = {};
+
+             i::set_props;
+             i::set_events;
+             i::set_operations;
 
              loc['sections']["children"].l::append(i.loc);
         }
@@ -59,6 +92,16 @@ node Alert:Component {
     has c_type = "Alert";
     has message;
     has palette;
+}
+
+node AuthForm:Component {
+    has c_type = "AuthForm";
+    has mode; // 'signup' or 'login'
+    has redirectURL;
+    has serverURL;
+    has tokenKey;
+    has requireActivation;
+    has hideNameField;
 }
 
 node Button:Component {
@@ -187,13 +230,13 @@ node Divider:Component {
     has size;
 }
 
-node Drawer {
+node Drawer:Component {
     has c_type = "Drawer";
     has title;
     has open;
 }
 
-node Dropdown {
+node Dropdown:Component {
     has c_type = "Dropdown";
     has label;
     has items;
@@ -208,8 +251,6 @@ node Hero:Component {
     
     can get_props {
         ::Component:get_props;
-        std.out("Should only be hero comp", here.info);
-        std.out(loc["props"]);
         loc["props"].dict::update({"backgroundimage": loc["props"]["background_image"]});
         loc["props"].dict::pop("background_image");
     }
@@ -220,7 +261,7 @@ node Input:Component {
     has c_type = "Input";
     has label;
     has altLabel;
-    has type;
+    // has type;
     has events;
     has fullwidth;
     has placeholder;
@@ -327,12 +368,40 @@ node Text:Component {
     has variant;
 }
 
-node TextBox:Component {
-    has c_type = "TextBox";
-    has label;
-    has altlabel;
-    has palette;
-} 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 node Toggle:Component {
     has c_type = 'Toggle';

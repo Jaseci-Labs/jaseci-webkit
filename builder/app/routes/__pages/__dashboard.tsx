@@ -23,10 +23,7 @@ const DashboardLayout = () => {
 
   return (
     <>
-      <Header
-        tabs={[{ label: "Projects", to: "/projects" }]}
-        user={{ name: user.email, image: "" }}
-      ></Header>
+      <Header links={[{ label: "Projects", to: "/projects" }]}></Header>
       <Paper px={200}>
         <Outlet context={{ user }}></Outlet>
       </Paper>

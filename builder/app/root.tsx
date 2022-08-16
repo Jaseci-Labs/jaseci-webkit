@@ -1,6 +1,4 @@
-import type { ColorScheme } from "@mantine/core";
-import { ColorSchemeProvider, MantineProvider } from "@mantine/core";
-import { NotificationsProvider } from "@mantine/notifications";
+import { ColorScheme } from "@mantine/core";
 import type { CatchBoundaryComponent } from "@remix-run/react/routeModules";
 import { useEffect, useState } from "react";
 import type {
@@ -11,22 +9,13 @@ import type {
 } from "@remix-run/node";
 import { json } from "@remix-run/node";
 
-import {
-  Links,
-  LiveReload,
-  Meta,
-  Outlet,
-  Scripts,
-  ScrollRestoration,
-  useCatch,
-  useTransition,
-} from "@remix-run/react";
+import { Outlet, useCatch, useTransition } from "@remix-run/react";
 
 import NProgress from "nprogress";
 import nProgressStyles from "nprogress/nprogress.css";
 import { PageNotFound } from "./components/PageNotFound";
 import { getUser } from "./session.server";
-import {StylesPlaceholder} from "@mantine/remix";
+import { Document } from "./components/Document";
 
 export const links: LinksFunction = () => {
   return [
@@ -50,7 +39,7 @@ export const links: LinksFunction = () => {
 
 export const meta: MetaFunction = () => ({
   charset: "utf-8",
-  title: "Jaseci Webkit",
+  title: "Jaseci Studio",
   viewport: "width=device-width,initial-scale=1",
 });
 
@@ -75,37 +64,16 @@ export default function App() {
   }, [transition.state]);
 
   return (
-    <html lang="en" className="h-full">
-      <head>
-        <Meta />
-        <Links />
-        <StylesPlaceholder />
-      </head>
-      <body>
-        <MantineTheme>
-          <Outlet />
-        </MantineTheme>
-        <ScrollRestoration />
-        <Scripts />
-        <LiveReload />
-      </body>
-    </html>
+    <MantineTheme>
+      <Outlet />
+    </MantineTheme>
   );
 }
 
 export const ErrorBoundary: ErrorBoundaryComponent = ({ children, error }) => {
   return (
     <>
-      <html lang="en" className="h-full">
-        <head>
-          <Meta />
-          <Links />
-        </head>
-        <body>
-          <MantineTheme>{children}</MantineTheme>
-          {JSON.stringify(error)}
-        </body>
-      </html>
+      <MantineTheme>{children}</MantineTheme>
     </>
   );
 };
@@ -114,17 +82,9 @@ export const CatchBoundary: CatchBoundaryComponent = ({ children }) => {
   const caught = useCatch();
   return (
     <>
-      <html lang="en" className="h-full">
-        <head>
-          <Meta />
-          <Links />
-        </head>
-        <body>
-          <MantineTheme>
-            {caught.status === 404 && <PageNotFound></PageNotFound>}
-          </MantineTheme>
-        </body>
-      </html>
+      <MantineTheme>
+        {caught.status === 404 && <PageNotFound></PageNotFound>}
+      </MantineTheme>
     </>
   );
 };
@@ -134,23 +94,5 @@ function MantineTheme({ children }: { children: React.ReactNode }) {
   const toggleColorScheme = (value?: ColorScheme) =>
     setColorScheme(value || (colorScheme === "dark" ? "light" : "dark"));
 
-  return (
-    <ColorSchemeProvider
-      colorScheme={colorScheme}
-      toggleColorScheme={toggleColorScheme}
-    >
-      <MantineProvider
-        theme={{
-          fontFamily: "'Poppins', sans-serif",
-          headings: { fontFamily: "'Poppins', sans-serif" },
-          primaryColor: "orange",
-          colorScheme,
-        }}
-        withNormalizeCSS
-        withGlobalStyles
-      >
-        <NotificationsProvider>{children}</NotificationsProvider>
-      </MantineProvider>
-    </ColorSchemeProvider>
-  );
+  return <Document>{children}</Document>;
 }

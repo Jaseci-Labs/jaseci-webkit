@@ -1,8 +1,11 @@
-import { assign, nonempty, object, size, string } from "superstruct";
+import { any, Describe } from "superstruct";
+import { array, enums, nonempty, object, size, string } from "superstruct";
 import type { Prisma } from "@prisma/client";
+
 import { prisma } from "~/db.server";
 import { createResolver, message } from "remix-server-kit";
 import { json } from "@remix-run/node";
+import type { Section } from "~/data/sections";
 
 export const toJson = (output: unknown) => {
   return json(output);
@@ -43,6 +46,55 @@ export const getProjects = createResolver({
   },
 });
 
+export const savePageBuilderProject = createResolver({
+  schema: object({
+    projectId: string(),
+    config: object(),
+    pages: array(
+      object({
+        name: string(),
+        pageId: string(),
+        pageSections: any(),
+      })
+    ),
+  }),
+  async resolve({ projectId, pages, config }) {
+    const project = await prisma.project.findFirst({
+      where: { id: projectId },
+      include: { tab: true },
+    });
+    const tabIds = project?.tab.map((tab) => tab.id) || [];
+
+    const newTabs = pages.filter((page) => !tabIds.includes(page.pageId));
+    const oldTabs = pages.filter((page) => tabIds.includes(page.pageId));
+
+    const newTabsData = newTabs.map<Prisma.TabFileCreateManyInput>((tab) => ({
+      projectId,
+      name: tab.name,
+      content: "",
+      type: "View",
+      ext: "json",
+      pageSections: tab?.pageSections,
+    }));
+
+    // update old pages
+    const oldTabUpdatePromises = oldTabs
+      .map<Prisma.TabFileUpdateArgs>((tab) => ({
+        where: { id: tab.pageId },
+        data: {
+          name: tab.name,
+          pageSections: tab.pageSections || [],
+          pageConfig: (config as any) || [],
+        },
+      }))
+      .map((oldTabData) => prisma.tabFile.update(oldTabData));
+
+    await Promise.all(oldTabUpdatePromises);
+
+    return await prisma.tabFile.createMany({ data: newTabsData });
+  },
+});
+
 type GetProjectHomepageInput = {
   projectId: string;
 };
@@ -63,13 +115,19 @@ type DeleteProjectInput = {
   userId: string;
 };
 
-export async function deleteProject({ projectId, userId }: DeleteProjectInput) {
-  return prisma.project.deleteMany({ where: { id: projectId, userId } });
-}
+export const deleteProject = createResolver({
+  schema: object({ projectId: string(), userId: string() }),
+  resolve({ projectId, userId }) {
+    return prisma.project.deleteMany({ where: { id: projectId, userId } });
+  },
+});
 
-export async function getProjectById({ projectId }: { projectId: string }) {
-  return prisma.project.findFirst({ where: { id: projectId } });
-}
+export const getProjectById = createResolver({
+  schema: object({ projectId: string() }),
+  resolve({ projectId }) {
+    return prisma.project.findFirst({ where: { id: projectId } });
+  },
+});
 
 type UpdateProjectInput = Prisma.ProjectUpdateInput;
 

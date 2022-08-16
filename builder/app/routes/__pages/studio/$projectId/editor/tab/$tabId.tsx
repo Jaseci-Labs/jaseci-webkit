@@ -8,6 +8,9 @@ import {
   ActionIcon,
   Anchor,
   Button,
+  Overlay,
+  Card,
+  useMantineTheme,
 } from "@mantine/core";
 import type { Monaco } from "@monaco-editor/react";
 import Editor from "@monaco-editor/react";
@@ -24,17 +27,17 @@ import {
 } from "@remix-run/react";
 import EditorHeader from "~/components/EditorHeader";
 import { schemas } from "~/data/schema";
-import ViewsSidebar from "~/components/ViewsSidebar";
+import ViewsSidebar, { ConvertPageDialog } from "~/components/ViewsSidebar";
 import ExamplesModal from "~/components/playground/ExamplesModal";
 // import invariant from "tiny-invariant";
 import {
+  convertTabFile,
   deleteTabFile,
   getProjectOpenedTabs,
   getTabFile,
   renameTabFile,
   saveTabContent,
   setTabFileOpenDate,
-  updateTabFile,
 } from "~/models/tabFile.server";
 import { createTabFile, getProjectTabFiles } from "~/models/tabFile.server";
 import { requireUserId } from "~/session.server";
@@ -51,6 +54,8 @@ import {
 } from "~/models/project.server";
 import { string, optional } from "superstruct";
 import { createMatcher, validate } from "remix-server-kit";
+import { useTheme } from "@emotion/react";
+import { Section } from "~/data/sections";
 
 const StudioEditor = () => {
   const loaderData = useLoaderData<LoaderData>();
@@ -70,6 +75,7 @@ const StudioEditor = () => {
     tabs: loaderData.tabFiles,
   });
   const [showPreview, setShowPreview] = useState(true);
+  const [showConvertPageDialog, setShowConvertPageDialog] = useState(false);
 
   const [searchParams] = useSearchParams();
   const showViews = searchParams.get("showViews") || "false";
@@ -77,14 +83,15 @@ const StudioEditor = () => {
   const runButtonRef = useRef<HTMLButtonElement>(null);
   const { toggle, ref: fullscreenFef } = useFullscreen();
   const { tabId, projectId } = useParams();
+  const theme = useMantineTheme();
 
   useHotkeys([
-    ["mod+M", () => alert("More actions")],
-    ["mod+F", () => alert("Format")],
-    ["mod+R", () => alert("Run code")],
-    ["mod+S", () => alert("Hide/show sidebar")],
-    ["mod+E", () => alert("Show examples")],
-    ["mod+N", () => alert("Add component")],
+    // ["mod+M", () => alert("More actions")],
+    // ["mod+F", () => alert("Format")],
+    // ["mod+R", () => alert("Run code")],
+    // ["mod+S", () => alert("Hide/show sidebar")],
+    // ["mod+E", () => alert("Show examples")],
+    // ["mod+N", () => alert("Add component")],
   ]);
 
   function handleEditorWillMount(monaco: Monaco) {
@@ -133,7 +140,12 @@ const StudioEditor = () => {
         gutter={0}
       >
         <Grid.Col
-          span={showPreview ? 8 : 12}
+          span={
+            showPreview &&
+            !(loaderData.currentTab?.pageSections as Section[])?.length
+              ? 8
+              : 12
+          }
           sx={{ background: "#1E1E1E", color: "#fff" }}
         >
           <EditorHeader
@@ -154,7 +166,10 @@ const StudioEditor = () => {
                 ></ViewsSidebar>
               )}
             </Grid.Col>
-            <Grid.Col span={showViews !== "true" ? 10 : 12}>
+            <Grid.Col
+              span={showViews !== "true" ? 10 : 12}
+              sx={{ position: "relative" }}
+            >
               <Editor
                 width={"100%"}
                 height="calc(100vh - 40px)"
@@ -188,11 +203,53 @@ const StudioEditor = () => {
                   ></LoadingOverlay>
                 }
               ></Editor>
+
+              {!!(loaderData.currentTab?.pageSections as Section[])?.length && (
+                <>
+                  <Overlay
+                    zIndex={7}
+                    blur={2}
+                    gradient={`linear-gradient(105deg, ${theme.black} 20%, #312f2f 50%, ${theme.colors.gray[4]} 100%)`}
+                  ></Overlay>
+                  <Card
+                    sx={{
+                      position: "absolute",
+                      top: "50%",
+                      left: "50%",
+                      transform: "translate(-50%, -50%)",
+                      zIndex: 10,
+                    }}
+                  >
+                    <Text>
+                      This file was created using the Builder. To modify it you
+                      need to convert it to make it compatible with the editor.
+                    </Text>
+                    <Button
+                      my="md"
+                      onClick={() => setShowConvertPageDialog(true)}
+                    >
+                      Convert File
+                    </Button>
+                  </Card>
+                  <ConvertPageDialog
+                    onClose={() => setShowConvertPageDialog(false)}
+                    opened={showConvertPageDialog}
+                    tabFileId={tabId || ""}
+                  ></ConvertPageDialog>
+                </>
+              )}
             </Grid.Col>
           </Grid>
         </Grid.Col>
 
-        <Grid.Col span={showPreview ? 4 : 0}>
+        <Grid.Col
+          span={
+            showPreview &&
+            !(loaderData.currentTab?.pageSections as Section[])?.length
+              ? 4
+              : 0
+          }
+        >
           <Box
             sx={{
               minHeight: "100%",
@@ -418,6 +475,11 @@ export const action: ActionFunction = async ({ request, params }) => {
       const tabFileId = formData.get("tabFileId");
       await setTabFileOpenDate({ date: null, tabFileId, userId });
       return "tab closed";
+    },
+    async convertTabItemToEditorFormat() {
+      const tabFileId = formData.get("tabFileId");
+      const tabFile = await convertTabFile({ tabFileId, userId });
+      return tabFile;
     },
   });
 

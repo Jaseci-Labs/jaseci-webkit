@@ -28,7 +28,7 @@ const DroppableSection = ({ id }: { id: string }) => {
             textAlign: "center",
           }}
         >
-          Drag an item here
+          Drag an item here {id}
         </Text>
       </Card>
     </div>

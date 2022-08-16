@@ -5,6 +5,7 @@ type Category =
   | "Inputs"
   | "Sections"
   | "Footers";
+
 export type Section = { id: string; category: Category; content: string };
 
 export const sections: Section[] = [

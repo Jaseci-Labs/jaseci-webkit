@@ -1,3 +1,4 @@
+import {*} with "./actions.jac";
 import {*} with "./components.jac";
 import {*} with "./edges.jac";
 
@@ -19,8 +20,40 @@ graph my_site {
             ]
         );
 
+       endpoint = spawn node::call_endpoint(
+                                endpoint="http://localhost:8000/js/walker_run", 
+                                method="POST", 
+                                headers={
+                                    'Authorization': "token 198ab01ffecda8b09c98e2e679257d25644c430690ae0cacd54529bcd83b0b9a",
+                                    "Content-Type": "application/json"
+                            });
+
+        runOp = spawn node::run_operation(
+                                operation="navbar1.sayHello", 
+                                args=["a", "b"]
+                            );
+
+        navbar1-[event(trigger="onClick")]->endpoint;
+        navbar1-[event(trigger="onClick")]->runOp;
+
+
+        navbar1-[operation(name="op1", args=["a", "b"])]->spawn node::call_endpoint(
+                                endpoint="http://localhost:8000/js/walker_run", 
+                                method="POST", 
+                                headers={
+                                    'Authorization': "token 198ab01ffecda8b09c98e2e679257d25644c430690ae0cacd54529bcd83b0b9a",
+                                    "Content-Type": "application/json"
+                            });
+
+
+        navbar1-[operation(name="op1")]->spawn node::show_toast(
+                                message="Congratulations!", 
+                                timeout=300
+                            );
+
+
+        // navbar1::on("click", );
         // navbar1.css.color = "red";
-            
         // alert1 = spawn root-[section(name="right")]->node::Alert(name="alert1", message="Hello", palette="Primary");
 
         // alertBtn = spawn alert1-[section(name="children")]->node::Button(name="alertBtn", label="Click Me")
