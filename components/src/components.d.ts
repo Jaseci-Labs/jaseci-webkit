@@ -517,6 +517,46 @@ export namespace Components {
         "middle": string;
     }
 }
+export interface JscAppCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLJscAppElement;
+}
+export interface JscCheckboxCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLJscCheckboxElement;
+}
+export interface JscInputboxCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLJscInputboxElement;
+}
+export interface JscRadioCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLJscRadioElement;
+}
+export interface JscRadioGroupCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLJscRadioGroupElement;
+}
+export interface JscRangeCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLJscRangeElement;
+}
+export interface JscSelectCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLJscSelectElement;
+}
+export interface JscSpeechInputCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLJscSpeechInputElement;
+}
+export interface JscTextboxCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLJscTextboxElement;
+}
+export interface JscToggleCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLJscToggleElement;
+}
 declare global {
     interface HTMLJscAlertElement extends Components.JscAlert, HTMLStencilElement {
     }
@@ -879,7 +919,7 @@ declare namespace LocalJSX {
     }
     interface JscApp {
         "markup"?: JaseciComponent[];
-        "onOnRender"?: (event: CustomEvent<string>) => void;
+        "onOnRender"?: (event: JscAppCustomEvent<string>) => void;
     }
     interface JscAuthForm {
         "css"?: string;
@@ -971,7 +1011,7 @@ declare namespace LocalJSX {
         "fullwidth"?: string;
         "label"?: string;
         "name"?: string;
-        "onValueChanged"?: (event: CustomEvent<string>) => void;
+        "onValueChanged"?: (event: JscCheckboxCustomEvent<string>) => void;
         "operations"?: string;
         "palette"?: 'primary' | 'secondary' | 'accent';
         "placeholder"?: string;
@@ -1119,7 +1159,7 @@ declare namespace LocalJSX {
         "fullwidth"?: string;
         "label"?: string;
         "name"?: string;
-        "onValueChanged"?: (event: CustomEvent<string>) => void;
+        "onValueChanged"?: (event: JscInputboxCustomEvent<string>) => void;
         "operations"?: string;
         "palette"?: 'primary' | 'secondary' | 'accent' | 'ghost' | 'link' | 'info' | 'success' | 'warning' | 'error';
         "placeholder"?: string;
@@ -1188,7 +1228,7 @@ declare namespace LocalJSX {
         "fullwidth"?: string;
         "label"?: string;
         "name"?: string;
-        "onValueChanged"?: (event: CustomEvent<string>) => void;
+        "onValueChanged"?: (event: JscRadioCustomEvent<string>) => void;
         "operations"?: string;
         "palette"?: 'primary' | 'secondary' | 'accent' | 'ghost' | 'link' | 'info' | 'success' | 'warning' | 'error';
         "placeholder"?: string;
@@ -1201,7 +1241,7 @@ declare namespace LocalJSX {
         "fullwidth"?: string;
         "label"?: string;
         "name"?: string;
-        "onValueChanged"?: (event: CustomEvent<string>) => void;
+        "onValueChanged"?: (event: JscRadioGroupCustomEvent<string>) => void;
         "operations"?: string;
         "options"?: string;
         "palette"?: string;
@@ -1219,7 +1259,7 @@ declare namespace LocalJSX {
         "max"?: string;
         "min"?: string;
         "name"?: string;
-        "onValueChanged"?: (event: CustomEvent<string>) => void;
+        "onValueChanged"?: (event: JscRangeCustomEvent<string>) => void;
         "operations"?: string;
         "palette"?: 'primary' | 'secondary' | 'accent';
         "placeholder"?: string;
@@ -1254,7 +1294,7 @@ declare namespace LocalJSX {
         "fullwidth"?: string;
         "label"?: string;
         "name"?: string;
-        "onValueChanged"?: (event: CustomEvent<string>) => void;
+        "onValueChanged"?: (event: JscSelectCustomEvent<string>) => void;
         "operations"?: string;
         "options"?: string;
         "palette"?: 'primary' | 'secondary' | 'accent' | 'ghost' | 'link' | 'info' | 'success' | 'warning' | 'error';
@@ -1270,7 +1310,7 @@ declare namespace LocalJSX {
         "fullwidth"?: string;
         "label"?: string;
         "name"?: string;
-        "onValueChanged"?: (event: CustomEvent<string>) => void;
+        "onValueChanged"?: (event: JscSpeechInputCustomEvent<string>) => void;
         "operations"?: string;
         "palette"?: 'primary' | 'secondary' | 'accent' | 'ghost' | 'link' | 'info' | 'success' | 'warning' | 'error';
         "placeholder"?: string;
@@ -1315,7 +1355,7 @@ declare namespace LocalJSX {
         "fullwidth"?: string;
         "label"?: string;
         "name"?: string;
-        "onValueChanged"?: (event: CustomEvent<string>) => void;
+        "onValueChanged"?: (event: JscTextboxCustomEvent<string>) => void;
         "operations"?: string;
         "palette"?: 'primary' | 'secondary' | 'accent';
         "placeholder"?: string;
@@ -1334,7 +1374,7 @@ declare namespace LocalJSX {
         "fullwidth"?: string;
         "label"?: string;
         "name"?: string;
-        "onValueChanged"?: (event: CustomEvent<string>) => void;
+        "onValueChanged"?: (event: JscToggleCustomEvent<string>) => void;
         "operations"?: string;
         "palette"?: 'primary' | 'secondary' | 'accent' | 'info' | 'success' | 'warning' | 'error';
         "placeholder"?: string;

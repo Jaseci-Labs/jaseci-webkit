@@ -5,15 +5,18 @@ import { redirect } from "@remix-run/node";
 import { Form, useActionData, useNavigate } from "@remix-run/react";
 import { createProject } from "~/models/project.server";
 import { requireUserId } from "~/session.server";
+import { authenticator } from "~/auth.server";
 
 export const action: ActionFunction = async ({ request }) => {
-  const userId = await requireUserId(request);
+  const user = await authenticator.isAuthenticated(request, {
+    failureRedirect: "/login",
+  });
   const formData = await request.formData();
   const title = formData.get("title");
 
   try {
     // create the project
-    await createProject({ title, userId });
+    await createProject({ title, userId: user.id });
 
     return redirect("/projects");
   } catch (err) {

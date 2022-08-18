@@ -1,11 +1,18 @@
-import { Button, PasswordInput, TextInput } from "@mantine/core";
+import { Button, PasswordInput, Stack, TextInput } from "@mantine/core";
 import * as React from "react";
-import type { ActionFunction, LoaderFunction, MetaFunction } from "@remix-run/node";
+import type {
+  ActionFunction,
+  LoaderFunction,
+  MetaFunction,
+} from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { Form, useActionData, useSearchParams } from "@remix-run/react";
 import { createUser, getUserByEmail } from "~/models/user.server";
 import { createUserSession, getUserId } from "~/session.server";
 import { validateEmail } from "~/utils";
+import { authenticator } from "~/auth.server";
+import { SocialButton } from "./login";
+import { SocialsProvider } from "remix-auth-socials";
 
 export const loader: LoaderFunction = async ({ request }) => {
   const userId = await getUserId(request);
@@ -19,50 +26,16 @@ interface ActionData {
     password?: string;
   };
 }
-
 export const action: ActionFunction = async ({ request }) => {
-  const formData = await request.formData();
-  const email = formData.get("email");
-  const password = formData.get("password");
-  const redirectTo = formData.get("redirectTo");
-
-  if (!validateEmail(email)) {
-    return json<ActionData>(
-      { errors: { email: "Email is invalid" } },
-      { status: 400 }
-    );
+  try {
+    return authenticator.authenticate("user-pass", request, {
+      successRedirect: "/projects",
+    });
+  } catch (err) {
+    console.log(err);
   }
 
-  if (typeof password !== "string") {
-    return json<ActionData>(
-      { errors: { password: "Password is required" } },
-      { status: 400 }
-    );
-  }
-
-  if (password.length < 8) {
-    return json<ActionData>(
-      { errors: { password: "Password is too short" } },
-      { status: 400 }
-    );
-  }
-
-  const existingUser = await getUserByEmail(email);
-  if (existingUser) {
-    return json<ActionData>(
-      { errors: { email: "A user already exists with this email" } },
-      { status: 400 }
-    );
-  }
-
-  const user = await createUser(email, password);
-
-  return createUserSession({
-    request,
-    userId: user.id,
-    remember: false,
-    redirectTo: typeof redirectTo === "string" ? redirectTo : "/",
-  });
+  return null;
 };
 
 export const meta: MetaFunction = () => {
@@ -130,9 +103,23 @@ export default function Join() {
 
       <input type="hidden" name="redirectTo" value={redirectTo} />
 
-      <Button fullWidth mt="xl" size="md" type="submit">
-        Create Account
-      </Button>
+      <Stack spacing={"lg"}>
+        <Button
+          name="_action"
+          value="signup"
+          fullWidth
+          mt="xl"
+          size="md"
+          type="submit"
+        >
+          Create Account
+        </Button>
+
+        <SocialButton
+          provider={SocialsProvider.GOOGLE}
+          label="Create Account with Google"
+        ></SocialButton>
+      </Stack>
     </Form>
   );
 }

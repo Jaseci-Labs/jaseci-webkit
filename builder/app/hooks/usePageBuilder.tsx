@@ -217,6 +217,22 @@ const usePageBuilder = ({
   }
 
   function renameConfig(id: string, newName: string) {
+    pages.forEach((page) => {
+      const oldConfig = config.find((config) => config.id === id);
+
+      if (oldConfig) {
+        page.pageSections.forEach((pageSection) => {
+          const newSectionContent = pageSection.content.replaceAll(
+            `{{config:${oldConfig?.name}}}`,
+            `{{config:${newName}}}`
+          );
+
+          // use content with replaced config references
+          setSectionContent(pageSection.id, newSectionContent);
+        });
+      }
+    });
+
     setConfig((configs) => {
       const index = configs.findIndex((config) => config.id === id);
       const newConfigs: PageConfig[] = [...configs];

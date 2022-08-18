@@ -1,17 +1,26 @@
-import { Button, Checkbox, PasswordInput, TextInput } from "@mantine/core";
+import {
+  Button,
+  Checkbox,
+  PasswordInput,
+  Stack,
+  TextInput,
+} from "@mantine/core";
 import * as React from "react";
-import type { ActionFunction, LoaderFunction, MetaFunction } from "@remix-run/node";
-import { json, redirect } from "@remix-run/node";
+import type {
+  ActionFunction,
+  LoaderFunction,
+  MetaFunction,
+} from "@remix-run/node";
+import { json } from "@remix-run/node";
 import { Form, useActionData, useSearchParams } from "@remix-run/react";
-import { verifyLogin } from "~/models/user.server";
-import { createUserSession, getUserId } from "~/session.server";
-import { validateEmail } from "~/utils";
+import { authenticator } from "~/auth.server";
+import { SocialsProvider } from "remix-auth-socials";
+import { BrandGoogle } from "tabler-icons-react";
 
-export const loader: LoaderFunction = async ({ request }) => {
-  const userId = await getUserId(request);
-  if (userId) return redirect("/");
-  return json({});
-};
+interface SocialButtonProps {
+  provider: SocialsProvider;
+  label: string;
+}
 
 interface ActionData {
   errors?: {
@@ -20,49 +29,31 @@ interface ActionData {
   };
 }
 
-export const action: ActionFunction = async ({ request }) => {
-  const formData = await request.formData();
-  const email = formData.get("email");
-  const password = formData.get("password");
-  const redirectTo = formData.get("redirectTo");
-  const remember = formData.get("remember");
+export const loader: LoaderFunction = async ({ request }) => {
+  const user = await authenticator.isAuthenticated(request, {
+    successRedirect: "/projects",
+  });
 
-  if (!validateEmail(email)) {
-    return json<ActionData>(
-      { errors: { email: "Email is invalid" } },
-      { status: 400 }
-    );
-  }
+  return json({ user });
+};
 
-  if (typeof password !== "string") {
-    return json<ActionData>(
-      { errors: { password: "Password is required" } },
-      { status: 400 }
-    );
-  }
-
-  if (password.length < 8) {
-    return json<ActionData>(
-      { errors: { password: "Password is too short" } },
-      { status: 400 }
-    );
-  }
-
-  const user = await verifyLogin(email, password);
+export const action: ActionFunction = async ({ request, params }) => {
+  const user = await authenticator.authenticate(
+    params.provider || "user-pass",
+    request,
+    {
+      successRedirect: "/projects",
+    }
+  );
 
   if (!user) {
     return json<ActionData>(
-      { errors: { email: "Invalid email or password" } },
+      { errors: { email: "invalid email or password" } },
       { status: 400 }
     );
   }
 
-  return createUserSession({
-    request,
-    userId: user.id,
-    remember: remember === "on" ? true : false,
-    redirectTo: typeof redirectTo === "string" ? redirectTo : "/projects",
-  });
+  return user;
 };
 
 export const meta: MetaFunction = () => {
@@ -70,6 +61,22 @@ export const meta: MetaFunction = () => {
     title: "Login",
   };
 };
+
+export const SocialButton: React.FC<SocialButtonProps> = ({
+  provider,
+  label,
+}) => (
+  <Form action={`/auth/${provider}`} method="post">
+    <Button
+      type="submit"
+      color="blue"
+      fullWidth
+      leftIcon={<BrandGoogle></BrandGoogle>}
+    >
+      {label}
+    </Button>
+  </Form>
+);
 
 export default function LoginPage() {
   const [searchParams] = useSearchParams();
@@ -129,9 +136,24 @@ export default function LoginPage() {
 
       <input type="hidden" name="redirectTo" value={redirectTo} />
 
-      <Button fullWidth mt="xl" color="orange" size="md" type="submit">
-        Log in
-      </Button>
+      <Stack spacing={"lg"}>
+        <Button
+          fullWidth
+          mt="xl"
+          color="orange"
+          size="md"
+          name="_action"
+          value="login"
+          type="submit"
+        >
+          Log in
+        </Button>
+
+        <SocialButton
+          provider={SocialsProvider.GOOGLE}
+          label="Login with Google"
+        ></SocialButton>
+      </Stack>
 
       <Checkbox name="remember" label="Keep me logged in" mt="xl" size="md" />
     </Form>

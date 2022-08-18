@@ -130,6 +130,8 @@ const ContentSection = ({
       )}
 
       <jsc-app ref={jscAppRef}></jsc-app>
+      {JSON.stringify(section.content)}
+      {section.category}
 
       <CodeInspector
         setSectionContent={actions.setSectionContent}

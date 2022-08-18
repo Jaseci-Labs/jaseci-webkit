@@ -1,23 +1,23 @@
-import { Button, Card, Grid, Group, Input, Title } from "@mantine/core";
-import type { ActionFunction, LoaderFunction } from "@remix-run/node";
+import { Button, Grid, Group, Input, Title } from "@mantine/core";
+import type { LoaderFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { Link, Outlet, useLoaderData } from "@remix-run/react";
-import { Hammer, User } from "tabler-icons-react";
-import { ProjectsTable } from "~/components/ProjectsTable";
-import type { ResolverReturnType } from "~/lib/server-kit";
-import { deleteProject, getProjects } from "~/models/project.server";
-import { requireUser, requireUserId } from "~/session.server";
+import { Hammer } from "tabler-icons-react";
+import { getProjects } from "~/models/project.server";
 import { ProjectCard } from "~/components/ProjectCard";
+import { authenticator } from "~/auth.server";
 
 export const loader: LoaderFunction = async ({ request }) => {
-  const userId = await requireUserId(request);
-  const projects = await getProjects({ userId });
+  const user = await authenticator.isAuthenticated(request, {
+    failureRedirect: "/login",
+  });
+  const projects = await getProjects({ userId: user.id });
 
   return json({ projects });
 };
 
 type LoaderData = {
-  projects: Awaited<ResolverReturnType<typeof getProjects>>;
+  projects: Awaited<ReturnType<typeof getProjects>>;
 };
 
 const ProjectsPage = () => {

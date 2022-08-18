@@ -59,6 +59,7 @@ import { getProjectTabFiles } from "~/models/tabFile.server";
 import { getUser, requireUser } from "~/session.server";
 import Section from "~/components/page-builder/Section";
 import { BiRename } from "react-icons/bi";
+import { authenticator } from "~/auth.server";
 
 export const loader: LoaderFunction = async ({ request, params }) => {
   try {
@@ -90,7 +91,9 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 export const action: ActionFunction = async ({ request, params }) => {
   const formData = await request.formData();
   const action = formData.get("_action");
-  const user = await requireUser(request);
+  const user = await authenticator.isAuthenticated(request, {
+    failureRedirect: "/login",
+  });
 
   const { projectId } = params;
 
@@ -511,21 +514,13 @@ const PageBuilder = () => {
                                         ]
                                       );
                                     } else {
-                                      // enable the text input field
+                                      // disable the text input field
                                       setRenameConfigList((renameConfigList) =>
                                         renameConfigList.filter(
                                           (configName) =>
                                             configName !== configObj.id
                                         )
                                       );
-
-                                      // // perform rename actions
-                                      // setConfig((config) => {
-                                      //   const newConfig = { ...config };
-                                      //   newConfig["hello"] = newConfig;
-                                      //   delete newConfig[configObj.id];
-                                      //   return newConfig;
-                                      // });
                                     }
                                   }}
                                 >

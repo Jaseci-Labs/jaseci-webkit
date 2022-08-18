@@ -49,10 +49,10 @@ export default function AuthenticationLayout() {
   const renderGuidanceLink = () => (
     <Text align="center" mt="md">
       {pathname.includes("login") ? (
-        <>{guidanceLinkMessage["login"]}</>
+        <> {guidanceLinkMessage["login"]}</>
       ) : (
         <>{guidanceLinkMessage["signup"]}</>
-      )}{" "}
+      )}
       <Anchor
         to={pathname.includes("login") ? "/join" : "/login"}
         component={Link}
