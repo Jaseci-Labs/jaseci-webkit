@@ -1,4 +1,4 @@
-import type { TabsValue } from "@mantine/core";
+import { Popover, TabsValue } from "@mantine/core";
 import { Divider } from "@mantine/core";
 import {
   ActionIcon,
@@ -56,15 +56,15 @@ import {
 } from "~/models/project.server";
 import { IconDeviceFloppy } from "@tabler/icons";
 import { getProjectTabFiles } from "~/models/tabFile.server";
-import { getUser, requireUser } from "~/session.server";
 import Section from "~/components/page-builder/Section";
-import { BiRename } from "react-icons/bi";
 import { authenticator } from "~/auth.server";
+import { PopoverDropdown } from "@mantine/core/lib/Popover/PopoverDropdown/PopoverDropdown";
+import { PopoverTarget } from "@mantine/core/lib/Popover/PopoverTarget/PopoverTarget";
 
 export const loader: LoaderFunction = async ({ request, params }) => {
   try {
     const { projectId } = params;
-    const user = await getUser(request);
+    const user = await authenticator.isAuthenticated(request);
 
     const project = await getProjectById({ projectId });
     const tabFiles = await getProjectTabFiles({ projectId, userId: user?.id });
@@ -144,6 +144,7 @@ const PageBuilder = () => {
 
   const [name, setName] = useInputState("");
   const [renameConfigList, setRenameConfigList] = useState<string[]>([]);
+  const [newConfigName, setNewConfigName] = useInputState("");
   const [value, setValue] = useInputState("");
   const [debounceRate, setDebounceRate] = useState(200);
   const savePages = useFetcher();
@@ -305,7 +306,7 @@ const PageBuilder = () => {
                       {pages
                         .find((page) => page.pageId === currentPage?.pageId)
                         ?.pageSections?.map((pageSection) => (
-                          <>
+                          <div key={pageSection.id}>
                             <ContentSection
                               selected={selectedSection?.id === pageSection.id}
                               config={config.reduce(
@@ -319,7 +320,7 @@ const PageBuilder = () => {
                               section={pageSection}
                               key={pageSection.id}
                             ></ContentSection>
-                          </>
+                          </div>
                         ))}
 
                       <Space h={"md"}></Space>
@@ -501,35 +502,64 @@ const PageBuilder = () => {
                               label="Name"
                               value={configObj.name}
                               rightSection={
-                                <ActionIcon
-                                  color="orange"
-                                  onClick={() => {
-                                    if (
-                                      !renameConfigList.includes(configObj.id)
-                                    ) {
-                                      setRenameConfigList(
-                                        (renameConfigList) => [
-                                          ...renameConfigList,
-                                          configObj?.id,
-                                        ]
-                                      );
-                                    } else {
-                                      // disable the text input field
-                                      setRenameConfigList((renameConfigList) =>
-                                        renameConfigList.filter(
-                                          (configName) =>
-                                            configName !== configObj.id
-                                        )
-                                      );
-                                    }
-                                  }}
-                                >
-                                  {!renameConfigList.includes(configObj.id) ? (
-                                    <EditCircle size={16}></EditCircle>
-                                  ) : (
-                                    <DeviceFloppy size={16}></DeviceFloppy>
-                                  )}
-                                </ActionIcon>
+                                <Popover width={200} withArrow>
+                                  <Popover.Target>
+                                    <ActionIcon
+                                      color="orange"
+                                      onClick={() => {
+                                        if (
+                                          !renameConfigList.includes(
+                                            configObj.id
+                                          )
+                                        ) {
+                                          setRenameConfigList(
+                                            (renameConfigList) => [
+                                              ...renameConfigList,
+                                              configObj?.id,
+                                            ]
+                                          );
+                                        } else {
+                                          // disable the text input field
+                                          setRenameConfigList(
+                                            (renameConfigList) =>
+                                              renameConfigList.filter(
+                                                (configName) =>
+                                                  configName !== configObj.id
+                                              )
+                                          );
+                                        }
+                                      }}
+                                    >
+                                      <EditCircle size={16}></EditCircle>
+                                    </ActionIcon>
+                                  </Popover.Target>
+                                  <Popover.Dropdown>
+                                    <p>Rename Config</p>
+                                    <TextInput
+                                      label="Config Name"
+                                      onChange={setNewConfigName}
+                                      value={newConfigName}
+                                      rightSection={
+                                        <ActionIcon
+                                          color="orange"
+                                          onClick={() => {
+                                            actions.renameConfig(
+                                              configObj.id,
+                                              newConfigName,
+                                              configObj.name
+                                            );
+
+                                            actions.setSelectedSection(null);
+                                          }}
+                                        >
+                                          <DeviceFloppy
+                                            size={16}
+                                          ></DeviceFloppy>
+                                        </ActionIcon>
+                                      }
+                                    ></TextInput>
+                                  </Popover.Dropdown>
+                                </Popover>
                               }
                               disabled={
                                 !renameConfigList.includes(configObj.id)
@@ -537,7 +567,8 @@ const PageBuilder = () => {
                               onChange={(e) => {
                                 actions.renameConfig(
                                   configObj.id,
-                                  e.target?.value
+                                  e.target?.value,
+                                  configObj.name
                                 );
                               }}
                             ></TextInput>

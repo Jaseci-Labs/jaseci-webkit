@@ -152,6 +152,7 @@ const usePageBuilder = ({
     const selectedPage = pages.find(
       (page) => page.pageId == currentPage?.pageId
     );
+
     if (!selectedPage) return;
 
     const sectionIndex = selectedPage.pageSections.findIndex(
@@ -163,8 +164,6 @@ const usePageBuilder = ({
       { ...selectedPage.pageSections[sectionIndex], content },
       ...selectedPage.pageSections.slice(sectionIndex + 1),
     ];
-
-    console.log({ updatedPageSections });
 
     updatePage(selectedPage.pageId, { pageSections: updatedPageSections });
   }
@@ -216,26 +215,33 @@ const usePageBuilder = ({
     setConfig((config) => [...config, { id: nanoid(), name, value }]);
   }
 
-  function renameConfig(id: string, newName: string) {
-    pages.forEach((page) => {
-      const oldConfig = config.find((config) => config.id === id);
+  function renameConfig(id: string, newName: string, prevConfigName: string) {
+    setConfig((configs) => {
+      const newConfigs: PageConfig[] = [...configs];
+      const index = configs.findIndex((config) => config.id === id);
+      const oldConfig = newConfigs[index];
+
+      console.log({ oldConfig });
 
       if (oldConfig) {
-        page.pageSections.forEach((pageSection) => {
-          const newSectionContent = pageSection.content.replaceAll(
-            `{{config:${oldConfig?.name}}}`,
-            `{{config:${newName}}}`
-          );
+        pages.forEach((page) => {
+          page.pageSections.forEach((pageSection) => {
+            const newSectionContent = pageSection.content.replaceAll(
+              `{{config:${prevConfigName}}}`,
+              `{{config:${newName}}}`
+            );
 
-          // use content with replaced config references
-          setSectionContent(pageSection.id, newSectionContent);
+            const pageSections = [...page.pageSections];
+            pageSections[pageSections.indexOf(pageSection)]["content"] =
+              newSectionContent;
+
+            updatePage(page.pageId, { pageSections });
+          });
         });
       }
-    });
 
-    setConfig((configs) => {
-      const index = configs.findIndex((config) => config.id === id);
-      const newConfigs: PageConfig[] = [...configs];
+      // update the config
+
       newConfigs[index].name = newName;
 
       return newConfigs;

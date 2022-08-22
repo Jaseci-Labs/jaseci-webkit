@@ -56,6 +56,7 @@ import { string, optional } from "superstruct";
 import { createMatcher, validate } from "remix-server-kit";
 import { useTheme } from "@emotion/react";
 import { Section } from "~/data/sections";
+import { authenticator } from "~/auth.server";
 
 const StudioEditor = () => {
   const loaderData = useLoaderData<LoaderData>();
@@ -375,24 +376,26 @@ type LoaderData = {
 };
 
 export const loader: LoaderFunction = async ({ request, params }) => {
-  const userId = await requireUserId(request);
+  const user = await authenticator.isAuthenticated(request, {
+    failureRedirect: "/login",
+  });
   const { projectId, tabId } = params;
   // invariant(typeof projectId === "string");
 
   const tabFiles = await getProjectTabFiles({
     projectId: projectId as string,
-    userId,
+    userId: user.id,
   });
   const openedTabFiles = await getProjectOpenedTabs({
     projectId: projectId as string,
-    userId,
+    userId: user.id,
   });
   const currentTab = openedTabFiles.find((tab) => tab.id === tabId);
   const projectHomepage = await getProjectHomepage({
     projectId: projectId as string,
   });
 
-  const graphs = await graphService.getGraphs({ userId });
+  const graphs = await graphService.getGraphs({ userId: user.id });
 
   return json<LoaderData>({
     tabFiles,
@@ -404,7 +407,10 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 };
 
 export const action: ActionFunction = async ({ request, params }) => {
-  const userId = await requireUserId(request);
+  const user = await authenticator.isAuthenticated(request, {
+    failureRedirect: "/login",
+  });
+  const userId = user.id;
   const formData = await request.formData();
 
   const matcher = createMatcher({

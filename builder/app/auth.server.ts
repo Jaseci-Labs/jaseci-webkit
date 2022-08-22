@@ -18,7 +18,7 @@ authenticator.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID || "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
-      callbackURL: `http://localhost:3001/auth/${SocialsProvider.GOOGLE}/callback`,
+      callbackURL: `http://localhost:3000/auth/${SocialsProvider.GOOGLE}/callback`,
     },
     async ({ profile }) => {
       if (!profile._json.email) throw json({ error: "Unable to authenticate" });
