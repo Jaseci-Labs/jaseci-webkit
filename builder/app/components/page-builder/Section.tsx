@@ -10,8 +10,13 @@ const Section = ({ label }: { label: string }) => {
         background: `#ffffff url("/sections/${label}.png")`,
         backgroundPosition: "center",
         backgroundSize: "324px",
+        backgroundRepeat: "no-repeat",
         minHeight:
-          getCategory(label)?.category === "Hero" ? "110px" : undefined,
+          getCategory(label)?.category === "Hero"
+            ? "110px"
+            : getCategory(label)?.category === "Cards"
+            ? "140px"
+            : undefined,
       }}
     >
       <p></p>

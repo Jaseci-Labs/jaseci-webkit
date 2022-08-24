@@ -4,6 +4,7 @@ type Category =
   | "Cards"
   | "Inputs"
   | "Sections"
+  | "Layout"
   | "Footers";
 
 export type Section = { id: string; category: Category; content: string };
@@ -514,6 +515,49 @@ export const sections: Section[] = [
                       },
                     },
                   ],
+                },
+              },
+            ],
+          },
+        },
+      ],
+    }),
+  },
+  {
+    id: "drawer",
+    category: "Layout",
+    content: JSON.stringify({
+      components: [
+        {
+          name: "myDrawer",
+          component: "Drawer",
+          props: {
+            title: "Simple Drawer",
+            open: "false",
+          },
+          listeners: {
+            openDrawer: {
+              open: "true",
+            },
+            closeDrawer: {
+              $call: [{ method: "closeDrawer" }],
+            },
+          },
+          sections: {
+            contents: [
+              {
+                component: "Text",
+                props: {
+                  value: "Hello",
+                },
+              },
+              {
+                component: "Button",
+                props: {
+                  label: "Close this dialog",
+                },
+                events: {
+                  onClick: [{ fn: "emit", args: ["myDialog.closeDrawer"] }],
                 },
               },
             ],

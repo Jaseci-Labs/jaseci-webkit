@@ -55,6 +55,7 @@
     "@remix-run/node": "^1.6.1",
     "@remix-run/react": "^1.6.1",
     "@remix-run/serve": "^1.6.1",
+    "@xstate/react": "^3.0.1",
     "archiver": "^5.3.1",
     "argon2": "^0.28.7",
     "comment-json": "^4.2.2",
@@ -80,6 +81,7 @@
     "unzipper": "^0.10.11",
     "vis-data": "^7.1.4",
     "vis-network": "^9.1.2",
+    "xstate": "^4.33.2",
     "zod": "^3.17.3"
   },
   "devDependencies": {
