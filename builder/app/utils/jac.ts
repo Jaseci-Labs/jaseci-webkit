@@ -1,6 +1,6 @@
 export const conf = {
   comments: {
-    lineComment: "#",
+    lineComment: "//",
     blockComment: ["'''", "'''"],
   },
   brackets: [
@@ -61,6 +61,8 @@ export const jacLang = {
     "continue",
     "walker",
     "node",
+    "edge",
+    "graph",
     "del",
     "elif",
     "else",
@@ -228,6 +230,8 @@ export const jacLang = {
     "=>",
     "-->",
     "<--",
+    "->",
+    "<-",
   ],
   symbols: /[=><!~?:&|+\-*\/\^%]+/,
 
@@ -256,6 +260,7 @@ export const jacLang = {
     whitespace: [
       [/\s+/, "white"],
       [/(^#.*$)/, "comment"],
+      [/(^\/\/.*$)/, "comment"],
       [/'''/, "string", "@endDocString"],
       [/"""/, "string", "@endDblDocString"],
     ],

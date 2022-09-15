@@ -1,6 +1,7 @@
-import { Button, Card, Grid, Group, TextInput, Title } from "@mantine/core";
+import { Button, Card, Grid, TextInput, Title } from "@mantine/core";
 import { useClipboard } from "@mantine/hooks";
-import { ActionFunction, json, LoaderFunction } from "@remix-run/node";
+import type { ActionFunction, LoaderFunction } from "@remix-run/node";
+import { json } from "@remix-run/node";
 import { useFetcher, useLoaderData } from "@remix-run/react";
 import { getUser, requireUser } from "~/session.server";
 import { Clipboard } from "tabler-icons-react";

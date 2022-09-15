@@ -1,5 +1,7 @@
-import { Popover, TabsValue } from "@mantine/core";
+import type { TabsValue } from "@mantine/core";
+import { Popover } from "@mantine/core";
 import { Divider } from "@mantine/core";
+import { useMachine } from "@xstate/react";
 import {
   ActionIcon,
   Box,
@@ -27,13 +29,12 @@ import { sections } from "~/data/sections";
 import type { PageBuilderPage } from "~/hooks/usePageBuilder";
 import usePageBuilder from "~/hooks/usePageBuilder";
 import ContentSection from "~/components/page-builder/ContentSection";
-import { useDebouncedValue, useInputState } from "@mantine/hooks";
+import { useInputState } from "@mantine/hooks";
 import { PropertyInspector } from "~/components/page-builder/PropertyInspector";
 import {
   ArrowBack,
   DeviceFloppy,
   EditCircle,
-  ExternalLink,
   Link as ILink,
   Note,
   Plus,
@@ -51,6 +52,7 @@ import type { ActionFunction, LoaderFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import {
   getProjectById,
+  saveBuilderContext,
   savePageBuilderProject,
   setProjectHomepage,
 } from "~/models/project.server";
@@ -58,8 +60,11 @@ import { IconDeviceFloppy } from "@tabler/icons";
 import { getProjectTabFiles } from "~/models/tabFile.server";
 import Section from "~/components/page-builder/Section";
 import { authenticator } from "~/auth.server";
-import { PopoverDropdown } from "@mantine/core/lib/Popover/PopoverDropdown/PopoverDropdown";
-import { PopoverTarget } from "@mantine/core/lib/Popover/PopoverTarget/PopoverTarget";
+import type { BuilderMachineContext } from "~/machines/builder.machine";
+import { builderMachine } from "~/machines/builder.machine";
+import { nanoid } from "nanoid";
+import SectionPath from "~/components/page-builder/SectionPath";
+import BuilderLeftSidebarWrapper from "~/components/page-builder/BuilderLeftSidebarWrapper";
 
 export const loader: LoaderFunction = async ({ request, params }) => {
   try {
@@ -76,12 +81,11 @@ export const loader: LoaderFunction = async ({ request, params }) => {
       saved: !!tabFile.createdAt,
     }));
 
-    console.log({ pages });
-
     return json({
       pages,
       projectName: project?.title,
       projectHomepageId: project?.homepage_tabFileId,
+      projectContext: project?.builderContext as BuilderMachineContext,
     });
   } catch (err) {
     console.log(err);
@@ -102,6 +106,11 @@ export const action: ActionFunction = async ({ request, params }) => {
       projectId: projectId,
       pages: JSON.parse(formData.get("pages") || ("{}" as any)),
       config: JSON.parse(formData.get("config") || ("{}" as any)),
+    });
+
+    await saveBuilderContext({
+      projectId,
+      context: JSON.parse(formData.get("context") || ("{}" as any)),
     });
 
     return json({ result });
@@ -125,29 +134,48 @@ const PageBuilder = () => {
     projectName: string;
     pages: (PageBuilderPage & { saved: boolean })[];
     projectHomepageId: string;
+    projectContext: BuilderMachineContext;
   }>();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const { actions, selectedSection, pages, currentPage, config } =
-    usePageBuilder({
-      initialPages: loaderData?.pages.map((page) => {
-        const { saved, ...pageData } = page;
-        return pageData;
-      }),
-    });
+  const { actions } = usePageBuilder({
+    initialPages: loaderData?.pages.map((page) => {
+      const { saved, ...pageData } = page;
+      return pageData;
+    }),
+  });
   const { projectId } = useParams();
-  const { addPageSection, setCurrentPage } = actions;
   const [active, setActive] = useState<Active | null>(null);
-  const [currentTab, setCurrentTab] = useState<TabsValue>(
-    currentPage?.pageId || ""
-  );
+
   const [showAddPageModal, setShowPageModal] = useState(false);
 
   const [name, setName] = useInputState("");
   const [renameConfigList, setRenameConfigList] = useState<string[]>([]);
   const [newConfigName, setNewConfigName] = useInputState("");
   const [value, setValue] = useInputState("");
-  const [debounceRate, setDebounceRate] = useState(200);
+  const [setDebounceRate] = useState(200);
   const savePages = useFetcher();
+
+  const [current, send] = useMachine(builderMachine, {
+    context: {
+      pageSectionMapping: loaderData?.projectContext?.pageSectionMapping || {},
+      pages: loaderData?.pages.map((page) => {
+        const { saved, ...pageData } = page;
+        return pageData;
+      }),
+      config: [
+        { id: "theme", name: "theme", value: "nexus" },
+        ...(loaderData?.projectContext?.config || []),
+      ],
+    },
+  });
+
+  const currentPage = current.context.pages.find(
+    (page) => page.pageId === current.context.path?.[0]?.id
+  );
+
+  const [currentTab, setCurrentTab] = useState<TabsValue>(
+    currentPage?.pageId || ""
+  );
 
   // const [debouncedConfig] = useDebouncedValue(config, debounceRate);
 
@@ -164,17 +192,11 @@ const PageBuilder = () => {
 
   return (
     <Box sx={{ width: "100%" }}>
+      {/*{JSON.stringify(current.context)}*/}
       <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         <Grid columns={12} sx={{ margin: 0, height: "100%" }}>
           <Grid.Col span={3}>
-            <Card
-              sx={{
-                background: theme.colors["dark"]["6"],
-                height: "100%",
-              }}
-              py="md"
-              px="md"
-            >
+            <BuilderLeftSidebarWrapper>
               <Stack>
                 <Group position="apart">
                   <ActionIcon
@@ -214,11 +236,11 @@ const PageBuilder = () => {
                       ></DraggableSection>
                     ))}
               </Stack>
-            </Card>
+            </BuilderLeftSidebarWrapper>
           </Grid.Col>
 
           <Grid.Col span={6}>
-            {!!pages.length && (
+            {!!current.context.pages.length && (
               <Group position={"apart"} color={"green"} align="center">
                 <Title order={3}>{loaderData.projectName}</Title>
                 <Group>
@@ -227,14 +249,22 @@ const PageBuilder = () => {
                       name={"pages"}
                       hidden
                       readOnly
-                      value={JSON.stringify(pages)}
+                      value={JSON.stringify(current.context.pages)}
                     />
+
+                    <input
+                      name={"context"}
+                      hidden
+                      readOnly
+                      value={JSON.stringify(current.context)}
+                    />
+
                     <input
                       name={"config"}
                       hidden
                       readOnly
                       value={JSON.stringify(
-                        config.reduce(
+                        current.context.config.reduce(
                           (prev, current) => ({
                             ...prev,
                             [current.name]: current.value,
@@ -273,18 +303,17 @@ const PageBuilder = () => {
 
             <Divider my="lg"></Divider>
 
-            {pages.length ? (
+            {current.context.pages.length ? (
               <Tabs
                 defaultValue={currentPage?.pageId}
                 value={currentTab}
                 onTabChange={(value) => {
                   setCurrentTab(value);
-                  const page = pages.find((page) => page.pageId === value);
-                  setCurrentPage(() => page || null);
+                  send({ type: "SELECT_PAGE", pageId: value as string });
                 }}
               >
                 <Tabs.List>
-                  {pages.map((page) => (
+                  {current.context.pages.map((page) => (
                     <Tabs.Tab
                       value={page.pageId}
                       key={page.pageId}
@@ -300,40 +329,85 @@ const PageBuilder = () => {
                   {/*</Tabs.Tab>*/}
                 </Tabs.List>
 
-                {pages.map((page) => (
-                  <Tabs.Panel key={page.pageId} value={page.pageId}>
-                    <Box py="md" sx={{ width: "100%" }}>
-                      {pages
-                        .find((page) => page.pageId === currentPage?.pageId)
-                        ?.pageSections?.map((pageSection) => (
-                          <div key={pageSection.id}>
-                            <ContentSection
-                              selected={selectedSection?.id === pageSection.id}
-                              config={config.reduce(
-                                (prev, current) => ({
-                                  ...prev,
-                                  [current.name]: current.value,
-                                }),
-                                {}
-                              )}
-                              actions={actions}
-                              section={pageSection}
-                              key={pageSection.id}
-                            ></ContentSection>
-                          </div>
-                        ))}
+                <Box py={"md"}>
+                  <SectionPath
+                    path={current.context.path}
+                    onClickPath={(pathId) =>
+                      send({ type: "SWITCH_PATH", pathId })
+                    }
+                  ></SectionPath>
+                </Box>
 
-                      <Space h={"md"}></Space>
-                    </Box>
+                {current.context.pages.map((page) => (
+                  <Tabs.Panel key={page.pageId} value={page.pageId}>
+                    {currentPage && (
+                      <DroppableSection
+                        key={page.pageId}
+                        id={"starting-" + page.pageId}
+                      >
+                        <Box py="md" sx={{ width: "100%" }}>
+                          {current.context.visibleSections?.map(
+                            (pageSection) => (
+                              <div key={pageSection.id}>
+                                <ContentSection
+                                  selected={
+                                    current.context.selectedSectionId ===
+                                    pageSection.id
+                                  }
+                                  config={current.context.config.reduce(
+                                    (prev, current) => ({
+                                      ...prev,
+                                      [current.name]: current.value,
+                                    }),
+                                    {}
+                                  )}
+                                  onDeleteSection={(sectionId) => {
+                                    send({
+                                      type: "DELETE_SECTION",
+                                      sectionId: sectionId,
+                                    });
+                                  }}
+                                  onMoveUp={(sectionId) => {
+                                    send({
+                                      type: "MOVE_UP",
+                                      sectionId: sectionId,
+                                    });
+                                  }}
+                                  onMoveDown={(sectionId) => {
+                                    send({
+                                      type: "MOVE_DOWN",
+                                      sectionId: sectionId,
+                                    });
+                                  }}
+                                  onSetSectionContent={(id, content) => {
+                                    send({
+                                      type: "SET_SECTION_CONTENT",
+                                      sectionId: id,
+                                      content,
+                                    });
+                                  }}
+                                  onSetSelectedSection={(sectionId) => {
+                                    send({
+                                      type: "SET_SELECTED_SECTION",
+                                      sectionId: sectionId,
+                                    });
+                                  }}
+                                  onEditSection={(sectionId) => {
+                                    send({ type: "EDIT_SECTION", sectionId });
+                                  }}
+                                  section={pageSection}
+                                  key={pageSection.id}
+                                ></ContentSection>
+                              </div>
+                            )
+                          )}
+
+                          <Space h={"md"}></Space>
+                        </Box>
+                      </DroppableSection>
+                    )}
                   </Tabs.Panel>
                 ))}
-
-                {currentPage && (
-                  <DroppableSection
-                    key={currentPage.pageId}
-                    id={"starting"}
-                  ></DroppableSection>
-                )}
               </Tabs>
             ) : (
               <Card>
@@ -355,9 +429,13 @@ const PageBuilder = () => {
               opened={showAddPageModal}
               onClose={() => setShowPageModal(false)}
               onAddPage={(name) => {
-                let page = actions.addPage(name);
-                setCurrentTab(page.pageId);
-                setCurrentPage(page);
+                send({ type: "ADD_PAGE", name });
+                send({
+                  type: "SELECT_PAGE",
+                  pageId:
+                    current.context.pages[current.context.pages?.length - 1]
+                      .pageId,
+                });
               }}
             ></AddPageModal>
           </Grid.Col>
@@ -378,25 +456,39 @@ const PageBuilder = () => {
                   <Stack>
                     <TextInput
                       disabled={!currentPage}
-                      value={
-                        pages.find(
-                          (page) => page.pageId === currentPage?.pageId
-                        )?.name
-                      }
+                      value={currentPage?.name}
                       label={"Name"}
                       onChange={(e) =>
                         currentPage &&
-                        actions.updatePage(currentPage.pageId, {
-                          name: e.currentTarget.value,
+                        send({
+                          type: "UPDATE_PAGE",
+                          pageId: currentPage.pageId,
+                          data: { name: e.currentTarget.value },
                         })
                       }
                     ></TextInput>
                     <Group>
                       <Button
                         color={"red"}
-                        onClick={() =>
-                          currentPage && actions.deletePage(currentPage?.pageId)
-                        }
+                        onClick={() => {
+                          if (currentPage) {
+                            send({
+                              type: "DELETE_PAGE",
+                              pageId: currentPage.pageId,
+                            });
+
+                            send({ type: "RESET" });
+
+                            if (current.context.pages.length) {
+                              const pageId = current.context.pages[0].pageId;
+                              send({
+                                type: "SELECT_PAGE",
+                                pageId,
+                              });
+                              setCurrentTab(pageId);
+                            }
+                          }
+                        }}
                         disabled={!currentPage}
                       >
                         Delete
@@ -420,10 +512,6 @@ const PageBuilder = () => {
                           type="submit"
                           name="_action"
                           value="setProjectHomepage"
-                          onClick={() =>
-                            currentPage &&
-                            actions.deletePage(currentPage?.pageId)
-                          }
                           disabled={
                             !currentPage ||
                             currentPage?.pageId ===
@@ -448,8 +536,9 @@ const PageBuilder = () => {
                         actions.setConfigValueByName("theme", value || "");
                       }}
                       value={
-                        config.find((configObj) => configObj.name === "theme")
-                          ?.value
+                        current.context.config.find(
+                          (configObj) => configObj.name === "theme"
+                        )?.value
                       }
                       label="Theme"
                       onClick={(e) => setDebounceRate(200)}
@@ -493,7 +582,7 @@ const PageBuilder = () => {
                       ]}
                     ></Select>
 
-                    {config
+                    {current.context.config
                       .filter((configObj) => configObj.name !== "theme")
                       .map((configObj) => (
                         <Grid key={configObj.id} columns={2}>
@@ -543,13 +632,14 @@ const PageBuilder = () => {
                                         <ActionIcon
                                           color="orange"
                                           onClick={() => {
-                                            actions.renameConfig(
-                                              configObj.id,
+                                            send({
                                               newConfigName,
-                                              configObj.name
-                                            );
+                                              type: "RENAME_CONFIG",
+                                              configId: configObj.id,
+                                              prevConfigName: configObj.name,
+                                            });
 
-                                            actions.setSelectedSection(null);
+                                            // actions.setSelectedSection(null);
                                           }}
                                         >
                                           <DeviceFloppy
@@ -582,10 +672,11 @@ const PageBuilder = () => {
                               }}
                               onChange={(e) => {
                                 // prevent site from being updated on every keystroke
-                                actions.setConfigValue(
-                                  configObj.id,
-                                  e.target?.value
-                                );
+                                send({
+                                  type: "SET_CONFIG_VALUE",
+                                  configId: configObj.id,
+                                  value: e.target?.value,
+                                });
                               }}
                             ></TextInput>
                           </Grid.Col>
@@ -610,7 +701,7 @@ const PageBuilder = () => {
                     </Grid>
                     <Button
                       onClick={() => {
-                        actions.addConfig(name, value);
+                        send({ type: "ADD_CONFIG", name, value });
                         setName("");
                         setValue("");
                       }}
@@ -620,12 +711,14 @@ const PageBuilder = () => {
                   </Stack>
                 </Card>
 
-                {selectedSection && (
+                {current.context.selectedSection && (
                   <PropertyInspector
-                    key={selectedSection.id}
-                    setSectionContent={actions.setSectionContent}
-                    section={selectedSection}
-                    config={config.reduce(
+                    key={current.context.selectedSection.id}
+                    onSetSectionContent={(sectionId, content) => {
+                      send({ type: "SET_SECTION_CONTENT", sectionId, content });
+                    }}
+                    section={current.context.selectedSection}
+                    config={current.context.config.reduce(
                       (prev, current) => ({
                         ...prev,
                         [current.name]: current.value,
@@ -653,11 +746,17 @@ const PageBuilder = () => {
   function handleDragEnd({ over, active }: DragEndEvent) {
     setActive(null);
 
-    if (active?.data?.current?.content && over?.id === "starting") {
+    if (
+      active?.data?.current?.content &&
+      (over?.id as string)?.startsWith("starting")
+    ) {
       const section = sections.find((section) => section.id === active?.id);
 
       if (section) {
-        addPageSection(section);
+        send({
+          type: "ADD_PAGE_SECTION",
+          section: { ...section, id: nanoid() },
+        });
       }
     }
   }

@@ -172,6 +172,7 @@ const usePageBuilder = ({
     const selectedPage = pages.find(
       (page) => page.pageId == currentPage?.pageId
     );
+
     if (!selectedPage) return;
 
     const newSections = [...selectedPage.pageSections];

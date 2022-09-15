@@ -4,7 +4,6 @@ import {
   Box,
   Group,
   Modal,
-  TextInput,
   JsonInput,
   Button,
 } from "@mantine/core";
@@ -17,17 +16,26 @@ import type usePageBuilder from "~/hooks/usePageBuilder";
 const ContentSection = ({
   section,
   config,
-  actions,
+  onSetSelectedSection,
+  onSetSectionContent,
+  onDeleteSection,
+  onMoveDown,
+  onMoveUp,
   selected,
+  onEditSection,
 }: {
   selected: boolean;
-  actions: ReturnType<typeof usePageBuilder>["actions"];
+  onSetSelectedSection: (section: string) => void;
+  onDeleteSection: (sectionId: string) => void;
+  onSetSectionContent: (id: string, content: string) => void;
+  onMoveUp: (sectionId: string) => void;
+  onMoveDown: (sectionId: string) => void;
   section: Section;
   config: Record<string, any>;
+  onEditSection: (sectionId: string) => void;
 }) => {
   const { hovered, ref } = useHover();
   const jscAppRef = useRef<any>();
-  const [showPropertyInspector, setShowPropertyInspector] = useState(false);
   const [showCodeInspector, setShowCodeInspector] = useState(false);
 
   useEffect(() => {
@@ -42,7 +50,7 @@ const ContentSection = ({
 
   return (
     <Box
-      onClick={() => actions.setSelectedSection(section)}
+      onClick={() => onSetSelectedSection(section.id)}
       sx={{
         "&:hover": {
           outline: "2px solid yellow",
@@ -66,7 +74,7 @@ const ContentSection = ({
               <ActionIcon
                 onClick={(e: React.MouseEvent) => {
                   e.stopPropagation();
-                  actions.moveUp(section.id);
+                  onMoveUp(section.id);
                 }}
                 variant="filled"
                 color="orange"
@@ -78,7 +86,7 @@ const ContentSection = ({
               <ActionIcon
                 onClick={(e: React.MouseEvent) => {
                   e.stopPropagation();
-                  actions.moveDown(section.id);
+                  onMoveDown(section.id);
                 }}
                 variant="filled"
                 color="orange"
@@ -92,7 +100,8 @@ const ContentSection = ({
               <ActionIcon
                 onClick={(e: React.MouseEvent) => {
                   e.stopPropagation();
-                  setShowPropertyInspector(true);
+                  onEditSection(section.id);
+                  // setShowPropertyInspector(true);
                 }}
                 variant="filled"
                 color="blue"
@@ -119,7 +128,7 @@ const ContentSection = ({
                 size="sm"
                 onClick={(e: React.MouseEvent) => {
                   e.stopPropagation();
-                  actions.deleteSection(section.id);
+                  onDeleteSection(section.id);
                 }}
               >
                 <Trash size={14}></Trash>
@@ -133,7 +142,7 @@ const ContentSection = ({
       {/* {JSON.stringify(section.content)} */}
 
       <CodeInspector
-        setSectionContent={actions.setSectionContent}
+        setSectionContent={onSetSectionContent}
         section={section}
         opened={showCodeInspector}
         onClose={() => {

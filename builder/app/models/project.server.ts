@@ -1,15 +1,8 @@
-import { any, Describe } from "superstruct";
-import { array, enums, nonempty, object, size, string } from "superstruct";
+import { any, array, nonempty, object, size, string } from "superstruct";
 import type { Prisma } from "@prisma/client";
 
 import { prisma } from "~/db.server";
 import { createResolver, message } from "remix-server-kit";
-import { json } from "@remix-run/node";
-import type { Section } from "~/data/sections";
-
-export const toJson = (output: unknown) => {
-  return json(output);
-};
 
 export const createProject = createResolver({
   schema: object({
@@ -25,14 +18,12 @@ export const createProject = createResolver({
     ),
   }),
   async resolve({ userId, title }) {
-    const project = await prisma.project.create({
+    return await prisma.project.create({
       data: {
         userId,
         title,
       },
     });
-
-    return project;
   },
 });
 
@@ -42,6 +33,18 @@ export const getProjects = createResolver({
     return prisma.project.findMany({
       where: { userId },
       orderBy: { id: "desc" },
+    });
+  },
+});
+
+export const saveBuilderContext = createResolver({
+  schema: object({ context: object(), projectId: string() }),
+  async resolve({ context, projectId }) {
+    await prisma.project.update({
+      where: { id: projectId },
+      data: {
+        builderContext: context as Prisma.InputJsonValue,
+      },
     });
   },
 });
@@ -110,14 +113,10 @@ export async function getProjectHomepage({
   return project?.homepage;
 }
 
-type DeleteProjectInput = {
-  projectId: string;
-  userId: string;
-};
-
 export const deleteProject = createResolver({
   schema: object({ projectId: string(), userId: string() }),
   resolve({ projectId, userId }) {
+    console.log("delete project", projectId, userId);
     return prisma.project.deleteMany({ where: { id: projectId, userId } });
   },
 });
@@ -129,31 +128,24 @@ export const getProjectById = createResolver({
   },
 });
 
-type UpdateProjectInput = Prisma.ProjectUpdateInput;
+export const updateProject = createResolver({
+  schema: object({ projectId: string(), userId: string(), input: object() }),
+  async resolve({ projectId, userId, input }) {
+    const project = await prisma.project.findFirst({
+      where: {
+        id: projectId,
+        userId,
+      },
+    });
 
-export async function updateProject({
-  projectId,
-  userId,
-  input,
-}: {
-  projectId: string;
-  userId: string;
-  input: UpdateProjectInput;
-}) {
-  const project = await prisma.project.findFirst({
-    where: {
-      id: projectId,
-      userId,
-    },
-  });
+    if (!project) throw new Error("Project not found.");
 
-  if (!project) throw new Error("Project not found.");
-
-  return prisma.project.update({
-    where: { id: projectId },
-    data: { ...input },
-  });
-}
+    return prisma.project.update({
+      where: { id: projectId },
+      data: { ...input },
+    });
+  },
+});
 
 export const setProjectHomepage = createResolver({
   schema: object({
@@ -162,11 +154,10 @@ export const setProjectHomepage = createResolver({
     tabId: nonempty(string()),
   }),
   async resolve({ tabId, projectId, userId }) {
-    const project = await updateProject({
+    return await updateProject({
       projectId,
       input: { homepage: { connect: { id: tabId } } },
       userId,
     });
-    return project;
   },
 });

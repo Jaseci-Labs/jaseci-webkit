@@ -1,13 +1,22 @@
 import { useDroppable } from "@dnd-kit/core";
 import { Text, Card, useMantineTheme } from "@mantine/core";
+import type { ReactNode } from "react";
 import React from "react";
 
-const DroppableSection = ({ id }: { id: string }) => {
+const DroppableSection = ({
+  id,
+  children,
+}: {
+  id: string;
+  children: ReactNode;
+}) => {
   const theme = useMantineTheme();
-  const { setNodeRef, isOver, over } = useDroppable({ id });
+  const { setNodeRef, isOver } = useDroppable({ id });
 
   return (
-    <div ref={setNodeRef}>
+    <div key={id} ref={setNodeRef}>
+      {children}
+
       <Card
         withBorder
         sx={{
@@ -28,7 +37,7 @@ const DroppableSection = ({ id }: { id: string }) => {
             textAlign: "center",
           }}
         >
-          Drag an item here {id}
+          Drag an item here
         </Text>
       </Card>
     </div>

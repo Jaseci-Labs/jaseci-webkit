@@ -3,17 +3,14 @@ import React from "react";
 import type { ActionFunction } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
 import { Form, Link, useNavigate } from "@remix-run/react";
-// import invariant from 'tiny-invariant';
 import { deleteProject } from "~/models/project.server";
-import { requireUserId } from "~/session.server";
+import { authenticator } from "~/auth.server";
 
 export const action: ActionFunction = async ({ request, params }) => {
-  const userId = await requireUserId(request);
+  const user = await authenticator.isAuthenticated(request);
   const { projectId } = params;
 
-  // invariant(typeof projectId === "string", "projectId must be a string")
-
-  await deleteProject({ projectId: projectId as string, userId });
+  await deleteProject({ projectId: projectId as string, userId: user?.id });
 
   return redirect("/projects");
 };

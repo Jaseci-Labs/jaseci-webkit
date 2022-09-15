@@ -12,27 +12,20 @@ import {
   Title,
   Tooltip,
 } from "@mantine/core";
-import { useDebouncedValue, useDisclosure, useHotkeys } from "@mantine/hooks";
-import React, { Ref, useEffect, useRef, useState } from "react";
+import { useDebouncedValue } from "@mantine/hooks";
+import React, { useEffect, useState } from "react";
 import type { Section } from "~/data/sections";
-import type usePageBuilder from "~/hooks/usePageBuilder";
-import { HTMLInputElement } from "happy-dom";
 import { BiPlus } from "react-icons/bi";
 
 export const PropertyInspector = ({
-  setSectionContent,
+  onSetSectionContent,
   section,
   config,
 }: {
-  setSectionContent: ReturnType<
-    typeof usePageBuilder
-  >["actions"]["setSectionContent"];
+  onSetSectionContent: (sectionId: string, content: string) => void;
   section: Section;
   config: Record<string, string>;
 }) => {
-  const [configRefs, setConfigRefs] = useState<
-    Record<string, Ref<HTMLInputElement>>
-  >({});
   const [content, setContent] = useState<Record<string, any>>(
     JSON.parse(section.content)
   );
@@ -41,17 +34,14 @@ export const PropertyInspector = ({
   const [showConfigHints, setShowConfigHints] = useState(false);
 
   useEffect(() => {
-    setSectionContent(section.id, JSON.stringify(debouncedContent));
+    // update the section content
+    onSetSectionContent(section.id, JSON.stringify(debouncedContent));
   }, [debouncedContent, section.id]);
-
-  // useHotkeys([
-  // ['ctrl+enter', () => alert('GO!')],
-  // ]);
 
   return (
     <Card>
       <Title order={6}>Property Inspector</Title>
-      {JSON.stringify(config)}
+      {/* {JSON.stringify(config)} */}
       <Stack>
         {Object.keys(
           (JSON.parse(section.content)?.props as string[]) || {}

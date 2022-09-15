@@ -52,8 +52,9 @@ model Project {
 
   sites ProjectSite[]
 
-  tab    TabFile[]
-  graphs Graph[]
+  tab            TabFile[]
+  graphs         Graph[]
+  builderContext Json      @default("{}")
 
   homepage           TabFile? @relation("project_homepage", fields: [homepage_tabFileId], references: [id])
   homepage_tabFileId String?  @unique

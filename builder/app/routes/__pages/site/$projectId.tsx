@@ -1,5 +1,4 @@
-import { parse } from "comment-json";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import type { LoaderFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useLoaderData, useParams } from "@remix-run/react";
@@ -35,26 +34,9 @@ export const loader: LoaderFunction = async ({ params }) => {
 const SitePage = () => {
   const { projectId } = useParams();
   const loaderData = useLoaderData<LoaderData>();
-  const { runCode, showPreviewText, jscAppRef } = useViewer({
+  const { runCode, jscAppRef } = useViewer({
     projectId: projectId as string,
   });
-
-  // useEffect(() => {
-  //   const onRender = () => {
-  //     runCode(loaderData.page?.content || "");
-  //   };
-
-  //   if (jscAppRef.current) {
-  //     alert("rendered");
-  //     jscAppRef.current?.addEventListener("loaded", onRender);
-  //   }
-
-  //   return () => {
-  //     if (jscAppRef.current) {
-  //       jscAppRef.current?.removeEventListener("loaded", onRender);
-  //     }
-  //   };
-  // }, [jscAppRef?.current, loaderData?.page?.content, runCode]);
 
   useEffect(() => {
     let content = loaderData.page?.content;
@@ -70,8 +52,8 @@ const SitePage = () => {
     }
 
     customElements.whenDefined("jsc-app").then(() => {
-      runCode(content || "");
       if (pageConfig) jscAppRef.current?.setGlobalConfig(pageConfig);
+      runCode(content || "");
     });
   }, []);
 

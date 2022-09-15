@@ -5,7 +5,7 @@ import { json, redirect } from "@remix-run/node";
 import { Form, useLoaderData, useNavigate } from "@remix-run/react";
 // import invariant from "tiny-invariant";
 import { getProjectById, updateProject } from "~/models/project.server";
-import { requireUserId } from "~/session.server";
+import { authenticator } from "~/auth.server";
 
 const EditProjectPage = () => {
   const loaderData = useLoaderData<LoaderData>();
@@ -39,14 +39,14 @@ const EditProjectPage = () => {
 export const action: ActionFunction = async ({ request, params }) => {
   const { projectId } = params;
   if (!projectId) throw redirect("/projects");
-  const userId = await requireUserId(request);
+  const user = await authenticator.isAuthenticated(request);
   const formData = await request.formData();
 
   const title = (formData.get("title") as string) || undefined;
 
   await updateProject({
     projectId,
-    userId,
+    userId: user?.id,
     input: { title },
   });
 
@@ -57,7 +57,7 @@ type LoaderData = {
   project: Awaited<ReturnType<typeof getProjectById>>;
 };
 
-export const loader: LoaderFunction = async ({ request, params }) => {
+export const loader: LoaderFunction = async ({ params }) => {
   const { projectId } = params;
   // invariant(typeof projectId === "string", "projectId must be a string");
   const project = await getProjectById({ projectId: projectId as string });

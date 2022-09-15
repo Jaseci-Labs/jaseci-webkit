@@ -9,7 +9,7 @@ import {
   ThemeIcon,
 } from "@mantine/core";
 import { IconBriefcase, IconMenu2 } from "@tabler/icons";
-import { Project } from "@prisma/client";
+import type { Project } from "@prisma/client";
 import { Link } from "@remix-run/react";
 
 const useStyles = createStyles((theme) => ({
@@ -44,6 +44,7 @@ const useStyles = createStyles((theme) => ({
 
 export function ProjectCard({ project }: { project: Partial<Project> }) {
   const { classes } = useStyles();
+
   return (
     <Paper withBorder radius="md" className={classes.card}>
       <Group position="right">

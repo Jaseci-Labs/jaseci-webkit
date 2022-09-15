@@ -1,5 +1,4 @@
 import { createResolver } from "remix-server-kit";
-import type { Prisma } from "@prisma/client";
 import { TabFileType } from "@prisma/client";
 import { prisma } from "~/db.server";
 import {
@@ -13,7 +12,6 @@ import {
 } from "superstruct";
 import { message } from "remix-server-kit";
 import type { Section } from "~/data/sections";
-import { drawBar } from "vis-network/declarations/DOMutil";
 
 export const createTabFile = createResolver({
   schema: object({

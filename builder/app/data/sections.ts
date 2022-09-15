@@ -5,11 +5,68 @@ type Category =
   | "Inputs"
   | "Sections"
   | "Layout"
+  | "Basic"
   | "Footers";
 
 export type Section = { id: string; category: Category; content: string };
 
 export const sections: Section[] = [
+  {
+    id: "button-1",
+    category: "Basic",
+    content: JSON.stringify({
+      component: "Button",
+      props: { label: "Button" },
+    }),
+  },
+  {
+    id: "dropdown-1",
+    category: "Basic",
+    content: JSON.stringify({
+      component: "Dropdown",
+      props: {
+        label: "My Dropdown",
+        items: [
+          { href: "#", label: "Hello" },
+          { href: "#", label: "World" },
+        ],
+        buttonProps: {
+          size: "sm",
+        },
+      },
+    }),
+  },
+  {
+    id: "badge-1",
+    category: "Basic",
+    content: JSON.stringify({
+      component: "Badge",
+      props: { label: "Badge" },
+    }),
+  },
+  {
+    id: "avatar-1",
+    category: "Basic",
+    content: JSON.stringify({
+      component: "Avatar",
+      props: {
+        src: "https://placeimg.com/192/192/nature",
+        placeholder: "GD",
+        variant: "circle",
+      },
+    }),
+  },
+  {
+    id: "progress-1",
+    category: "Basic",
+    content: JSON.stringify({
+      component: "Progress",
+      props: {
+        palette: "primary",
+        value: "20",
+      },
+    }),
+  },
   {
     id: "navbar-1",
     category: "Navbars",
@@ -73,7 +130,7 @@ export const sections: Section[] = [
   },
   {
     id: "stats-1",
-    category: "Navbars",
+    category: "Sections",
     content: JSON.stringify({
       component: "Stat",
       props: {
@@ -494,76 +551,146 @@ export const sections: Section[] = [
     category: "Cards",
   },
   {
-    id: "simple-footer",
+    id: "footer-1",
     category: "Footers",
     content: JSON.stringify({
-      id: "simple-footer",
-      name: "simple-footer",
-      components: [
-        {
-          component: "Card",
-          sections: {
-            children: [
+      id: "footer-1",
+      name: "footer-1",
+      component: "Card",
+      sections: {
+        children: [
+          {
+            component: "Row",
+            sections: {
+              children: [
+                {
+                  component: "Text",
+                  props: {
+                    value: "Copyright © 2022 - Jaseci Studio",
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    }),
+  },
+  {
+    id: "row1",
+    category: "Layout",
+    content: JSON.stringify({
+      name: "row1",
+      component: "Row",
+      props: { justify: "between", items: "center" },
+      sections: {
+        children: [
+          {
+            component: "Button",
+            props: { label: "Left" },
+          },
+          {
+            component: "Button",
+            props: { label: "Right" },
+          },
+        ],
+      },
+    }),
+  },
+  {
+    id: "column1",
+    category: "Layout",
+    content: JSON.stringify({
+      name: "column1",
+      component: "Column",
+      props: { justify: "between", items: "center" },
+      sections: {
+        children: [
+          {
+            component: "Button",
+            props: { label: "Top" },
+          },
+          {
+            component: "Button",
+            props: { label: "Bottom" },
+          },
+        ],
+      },
+      css: {
+        gap: "10px",
+      },
+    }),
+  },
+  {
+    id: "datagrid-1",
+    category: "Layout",
+    content: JSON.stringify({
+      name: "logsDataGrid",
+      component: "Datagrid",
+      props: {
+        server: "http://localhost:8000",
+        walker: "list_log",
+        token:
+          "198ab01ffecda8b09c98e2e679257d25644c430690ae0cacd54529bcd83b0b9a",
+        snt: "urn:uuid:ae422d32-27eb-4ee8-9d91-b1a6b4189caf",
+        variant: "striped",
+        itemsPerPage: 3,
+        headings: [
+          { label: "Subject", accessor: "subject" },
+          { label: "Message", accessor: "body" },
+          {
+            label: "Date",
+            accessor: "timestamp",
+            formatter: "date",
+            format: "Do MMM, YYYY h:mm a",
+            render: [
               {
-                component: "Row",
-                sections: {
-                  children: [
+                component: "Text",
+                props: { value: "{{value}}" },
+                css: { color: "#006ADC", fontWeight: "bold" },
+              },
+            ],
+          },
+          {
+            label: "Actions",
+            accessor: "jid",
+            render: [
+              {
+                component: "Button",
+                props: { label: "Delete" },
+                events: {
+                  // call delete endpoint
+                  onClick: [
                     {
-                      component: "Text",
-                      props: {
-                        value: "Copyright © 2022 - Jaseci Studio",
+                      fn: "callEndpoint",
+                      endpoint: "http://localhost:8000/js/walker_run",
+                      onCompleted: {
+                        fn: "refreshDatagrid",
+                        args: ["logsDataGrid"],
                       },
+                      args: [
+                        "POST",
+                        {
+                          name: "delete_log",
+                          snt: "urn:uuid:ae422d32-27eb-4ee8-9d91-b1a6b4189caf",
+                          ctx: {
+                            id: "{{value}}",
+                          },
+                        },
+                        {
+                          Authorization:
+                            "token 198ab01ffecda8b09c98e2e679257d25644c430690ae0cacd54529bcd83b0b9a",
+                          "Content-Type": "application/json",
+                        },
+                      ],
                     },
                   ],
                 },
               },
             ],
           },
-        },
-      ],
-    }),
-  },
-  {
-    id: "drawer",
-    category: "Layout",
-    content: JSON.stringify({
-      components: [
-        {
-          name: "myDrawer",
-          component: "Drawer",
-          props: {
-            title: "Simple Drawer",
-            open: "false",
-          },
-          listeners: {
-            openDrawer: {
-              open: "true",
-            },
-            closeDrawer: {
-              $call: [{ method: "closeDrawer" }],
-            },
-          },
-          sections: {
-            contents: [
-              {
-                component: "Text",
-                props: {
-                  value: "Hello",
-                },
-              },
-              {
-                component: "Button",
-                props: {
-                  label: "Close this dialog",
-                },
-                events: {
-                  onClick: [{ fn: "emit", args: ["myDialog.closeDrawer"] }],
-                },
-              },
-            ],
-          },
-        },
-      ],
+        ],
+      },
     }),
   },
 ];
